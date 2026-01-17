@@ -1,8 +1,12 @@
-- P0: Scaffold baseline project layout with `src/` and `src/lib/` plus CLI entrypoint (for example `src/cli.ts`) since no runtime code exists yet
-- P0: Add Bun + TypeScript setup (`package.json`, `bunfig.toml`, `tsconfig.json`) and ensure `bun run typecheck` is available
-- P0: Implement CLI argument parsing to expose exactly `run`, `step`, `inspect`, `init`, with required positional mode `plan|build` for `run` and `step`
-- P0: Implement help/usage output so `ralphctl --help` lists only the four commands and includes mode guidance
-- P1: Add clear error messaging for invalid or missing mode arguments, including usage guidance
-- P1: Wire command handlers registry with no extra commands beyond the core set
-- P1: Add `bun:test` coverage for command parsing and help output acceptance criteria
-- P2: Add brief CLI usage reference in existing docs (optional) once help text is finalized
+- [x] P0: Research and select a good zod-based typesafe CLI library (e.g., `clerc`, `zod-cli`, or similar) that integrates well with Bun/TypeScript
+- [x] P0: Add Bun + TypeScript setup (`package.json`, `bunfig.toml`, `tsconfig.json`) and ensure `bun run typecheck` is available
+- [x] P0: Scaffold baseline project layout with `src/`, `src/lib/` (standard library), `src/domain/` (business logic), and CLI entrypoint (`src/cli.ts`)
+- [x] P0: Define domain models in `src/domain/` for CLI commands and modes (Command enum: `run`, `step`, `inspect`, `init`; Mode enum: `plan`, `build`)
+- [x] P0: Configure the chosen CLI library to expose exactly four core commands: `run`, `step`, `inspect`, `init`
+- [x] P0: Configure `run` and `step` to require positional mode argument (`plan` or `build`), keeping parsing logic in library layer and validation in domain layer
+- [x] P0: Configure `inspect` and `init` to not require a mode argument
+- [x] P0: Implement help/usage output so `ralphctl --help` and `rctl --help` list only the four core commands with mode guidance
+- [x] P1: Add clear error messaging for invalid/missing mode arguments, including usage guidance (domain layer validation)
+- [ ] P1: Wire command handler registry (stubs) in `src/lib/commands/*` with no extra commands beyond the core set
+- [ ] P1: Ensure business logic is decoupled from CLI library - main file (`src/cli.ts`) should use domain types, not library-specific types
+- [ ] P2: Add brief CLI usage reference in existing docs (optional) once help text is finalized

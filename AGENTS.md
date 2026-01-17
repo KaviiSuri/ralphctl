@@ -12,6 +12,10 @@ when finalising a change, pre-commit, get a review from the kai-impersonator age
 
 for writing tests, use bun:test.
 
+## Search and Research
+
+to lookup things in detail like looking up general guidance from docs etc, we should use subagents to explore and find ideas. you can look up direclty in codebase or web if it's a specific lookup that's asking a specific question and not wider.
+
 ## package manager
 we use bun as the package manager here. do not try to change that.
 

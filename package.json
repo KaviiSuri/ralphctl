@@ -1,0 +1,23 @@
+{
+  "name": "ralphctl",
+  "version": "0.0.0",
+  "description": "A CLI controller for OpenCode Ralph loops",
+  "bin": {
+    "ralphctl": "./src/cli.ts",
+    "rctl": "./src/cli.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "type": "module",
+  "dependencies": {
+    "@clerc/core": "latest",
+    "clerc": "^1.2.1",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
+  }
+}
