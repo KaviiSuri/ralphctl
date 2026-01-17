@@ -18,3 +18,7 @@ export interface RunOptions {
 export interface CliContext {
   cwd: string;
 }
+
+export interface InitOptions {
+  force?: boolean;
+}

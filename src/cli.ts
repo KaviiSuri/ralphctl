@@ -1,5 +1,5 @@
 import { Cli, Types, friendlyErrorPlugin, notFoundPlugin } from "clerc";
-import { Mode } from "./domain/types.js";
+import { Mode, type InitOptions } from "./domain/types.js";
 import { runHandler } from "./lib/commands/run.js";
 import { stepHandler } from "./lib/commands/step.js";
 import { inspectHandler } from "./lib/commands/inspect.js";
@@ -72,8 +72,16 @@ const cli = Cli()
   .on("inspect", async () => {
     await inspectHandler();
   })
-  .command("init", "Initialize default prompt templates")
-  .on("init", async () => {
-    await initHandler();
+  .command("init", "Initialize default prompt templates", {
+    flags: {
+      force: {
+        type: Boolean,
+        description: "Force overwrite existing prompt files",
+        default: false,
+      },
+    },
+  })
+  .on("init", async (ctx) => {
+    await initHandler({ force: ctx.flags.force as boolean });
   })
   .parse();

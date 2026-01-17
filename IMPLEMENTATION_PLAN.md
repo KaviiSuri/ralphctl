@@ -25,5 +25,33 @@
   - Graceful handling of max iterations and manual interruption
   - Tests for completion, max iterations, and multiple iterations
 - [x] P1: Implement `step` prompt overrides per jbtd-007-spec-001/002 (mode-aware prompt arguments)
-- [ ] P1: Add permissions posture handling and log effective posture before first iteration (jbtd-003-spec-001/002)
+- [x] P1: Add permissions posture handling and log effective posture before first iteration (jbtd-003-spec-001/002)
 - [ ] P2: Validate command expectations and `rctl` alias behaviors against jbtd-001-spec-001/003
+
+---
+
+## JBTD-004: Initialize Default Prompt Templates [COMPLETED]
+
+- [x] P0: Create shared template constants in src/lib/templates/ for PROMPT_plan.md and PROMPT_build.md content (verbatim from jbtd-002-spec-002)
+- [x] P0: Create shared file utility under `src/lib/files/` for safe file operations (writeFile, fileExists)
+- [x] P0: Create shared user interaction utility under `src/lib/io/` for confirmation prompts (confirmOverwrite with y/N)
+- [x] P0: Add `--force` flag to `init` command in CLI configuration (src/cli.ts:75-78)
+- [x] P0: Implement `initHandler` in src/lib/commands/init.ts with full logic:
+  - Use template constants from src/lib/templates/
+  - Write PROMPT_plan.md using PLAN_TEMPLATE constant
+  - Write PROMPT_build.md using BUILD_TEMPLATE constant
+  - Check if files exist before writing
+  - Prompt with y/N confirmation when files exist (unless --force)
+  - Handle confirmation response (abort on non-y input)
+- [x] P1: Add comprehensive tests for initHandler in tests/handlers.spec.ts:
+  - Test writing both files to new directory (files created with correct content)
+  - Test prompting for confirmation when files exist (mock user input)
+  - Test --force flag bypassing confirmation (overwrites existing files)
+  - Test user declining confirmation (no files written, clean abort)
+  - Test idempotent behavior when files not overwritten (existing content preserved)
+  - Test partial write failure handling (atomic writes, no corruption)
+- [x] P1: Test edge cases for file utilities:
+  - Permission denied errors (handled gracefully with error message)
+  - File system errors during write (rollback behavior)
+  - Concurrent writes (last write wins, but atomic per file)
+- [x] P2: Add domain type for InitOptions (force flag) in src/domain/types.ts

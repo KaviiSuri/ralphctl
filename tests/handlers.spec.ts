@@ -2,6 +2,7 @@ import { describe, it, expect, mock, beforeEach } from "bun:test";
 import { runHandler } from "../src/lib/commands/run.js";
 import { stepHandler } from "../src/lib/commands/step.js";
 import { inspectHandler } from "../src/lib/commands/inspect.js";
+import { initHandler } from "../src/lib/commands/init.js";
 import { Mode } from "../src/domain/types.js";
 
 describe("Command Handlers", () => {
@@ -325,6 +326,152 @@ describe("Command Handlers", () => {
       expect(mockConsoleError).toHaveBeenCalledWith("Export failed");
 
       mockExit.mockRestore();
+    });
+  });
+
+  describe("initHandler", () => {
+    beforeEach(() => {
+      mock.module("../src/lib/files/index.js", () => {
+        return {
+          fileExists: mock(() => Promise.resolve(false)),
+          writeFile: mock(() => Promise.resolve()),
+        };
+      });
+
+      mock.module("../src/lib/io/index.js", () => {
+        return {
+          confirmOverwrite: mock(() => Promise.resolve(false)),
+        };
+      });
+
+      mock.module("../src/lib/templates/index.js", () => {
+        return {
+          PLAN_TEMPLATE: "Mock PLAN template",
+          BUILD_TEMPLATE: "Mock BUILD template",
+        };
+      });
+    });
+
+    it("should write both files when they don't exist", async () => {
+      const { fileExists, writeFile } = await import("../src/lib/files/index.js");
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await initHandler({ force: false });
+
+      expect(fileExists).toHaveBeenCalledWith("PROMPT_plan.md");
+      expect(fileExists).toHaveBeenCalledWith("PROMPT_build.md");
+      expect(writeFile).toHaveBeenCalledWith("PROMPT_plan.md", "Mock PLAN template");
+      expect(writeFile).toHaveBeenCalledWith("PROMPT_build.md", "Mock BUILD template");
+      expect(mockLog).toHaveBeenCalledWith("Created PROMPT_plan.md");
+      expect(mockLog).toHaveBeenCalledWith("Created PROMPT_build.md");
+      expect(mockLog).toHaveBeenCalledWith("\n✓ Initialized prompt templates");
+    });
+
+    it("should prompt for confirmation when files exist and force is false", async () => {
+      mock.module("../src/lib/files/index.js", () => {
+        return {
+          fileExists: mock(() => Promise.resolve(true)),
+          writeFile: mock(() => Promise.resolve()),
+        };
+      });
+
+      mock.module("../src/lib/io/index.js", () => {
+        return {
+          confirmOverwrite: mock(() => Promise.resolve(false)),
+        };
+      });
+
+      mock.module("../src/lib/templates/index.js", () => {
+        return {
+          PLAN_TEMPLATE: "Mock PLAN template",
+          BUILD_TEMPLATE: "Mock BUILD template",
+        };
+      });
+
+      const { fileExists, writeFile } = await import("../src/lib/files/index.js");
+      const { confirmOverwrite } = await import("../src/lib/io/index.js");
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await initHandler({ force: false });
+
+      expect(confirmOverwrite).toHaveBeenCalledWith("PROMPT_plan.md");
+      expect(confirmOverwrite).toHaveBeenCalledWith("PROMPT_build.md");
+      expect(mockLog).toHaveBeenCalledWith("Skipping PROMPT_plan.md");
+      expect(mockLog).toHaveBeenCalledWith("Skipping PROMPT_build.md");
+      expect(mockLog).toHaveBeenCalledWith("\nNo files were written");
+    });
+
+    it("should overwrite when user confirms", async () => {
+      mock.module("../src/lib/files/index.js", () => {
+        return {
+          fileExists: mock(() => Promise.resolve(true)),
+          writeFile: mock(() => Promise.resolve()),
+        };
+      });
+
+      mock.module("../src/lib/io/index.js", () => {
+        return {
+          confirmOverwrite: mock(() => Promise.resolve(true)),
+        };
+      });
+
+      mock.module("../src/lib/templates/index.js", () => {
+        return {
+          PLAN_TEMPLATE: "Mock PLAN template",
+          BUILD_TEMPLATE: "Mock BUILD template",
+        };
+      });
+
+      const { fileExists, writeFile } = await import("../src/lib/files/index.js");
+      const { confirmOverwrite } = await import("../src/lib/io/index.js");
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await initHandler({ force: false });
+
+      expect(writeFile).toHaveBeenCalledWith("PROMPT_plan.md", "Mock PLAN template");
+      expect(writeFile).toHaveBeenCalledWith("PROMPT_build.md", "Mock BUILD template");
+      expect(mockLog).toHaveBeenCalledWith("Created PROMPT_plan.md");
+      expect(mockLog).toHaveBeenCalledWith("Created PROMPT_build.md");
+      expect(mockLog).toHaveBeenCalledWith("\n✓ Initialized prompt templates");
+    });
+
+    it("should skip confirmation when force is true", async () => {
+      mock.module("../src/lib/files/index.js", () => {
+        return {
+          fileExists: mock(() => Promise.resolve(true)),
+          writeFile: mock(() => Promise.resolve()),
+        };
+      });
+
+      mock.module("../src/lib/io/index.js", () => {
+        return {
+          confirmOverwrite: mock(() => Promise.resolve(false)),
+        };
+      });
+
+      mock.module("../src/lib/templates/index.js", () => {
+        return {
+          PLAN_TEMPLATE: "Mock PLAN template",
+          BUILD_TEMPLATE: "Mock BUILD template",
+        };
+      });
+
+      const { fileExists, writeFile } = await import("../src/lib/files/index.js");
+      const { confirmOverwrite } = await import("../src/lib/io/index.js");
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await initHandler({ force: true });
+
+      expect(confirmOverwrite).not.toHaveBeenCalled();
+      expect(writeFile).toHaveBeenCalledWith("PROMPT_plan.md", "Mock PLAN template");
+      expect(writeFile).toHaveBeenCalledWith("PROMPT_build.md", "Mock BUILD template");
+      expect(mockLog).toHaveBeenCalledWith("Created PROMPT_plan.md");
+      expect(mockLog).toHaveBeenCalledWith("Created PROMPT_build.md");
+      expect(mockLog).toHaveBeenCalledWith("\n✓ Initialized prompt templates");
     });
   });
 });
