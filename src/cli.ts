@@ -1,5 +1,9 @@
 import { Cli, Types, friendlyErrorPlugin, notFoundPlugin } from "clerc";
 import { Mode } from "./domain/types.js";
+import { runHandler } from "./lib/commands/run.js";
+import { stepHandler } from "./lib/commands/step.js";
+import { inspectHandler } from "./lib/commands/inspect.js";
+import { initHandler } from "./lib/commands/init.js";
 
 const cli = Cli()
   .scriptName("ralphctl")
@@ -18,8 +22,7 @@ const cli = Cli()
     ],
   })
   .on("run", async (ctx) => {
-    const mode = ctx.parameters.mode;
-    console.log(`Running ${mode} mode (not yet implemented)`);
+    await runHandler({ mode: ctx.parameters.mode });
   })
   .command("step", "Run a single interactive iteration", {
     parameters: [
@@ -31,15 +34,14 @@ const cli = Cli()
     ],
   })
   .on("step", async (ctx) => {
-    const mode = ctx.parameters.mode;
-    console.log(`Stepping in ${mode} mode (not yet implemented)`);
+    await stepHandler({ mode: ctx.parameters.mode });
   })
   .command("inspect", "Inspect run exports")
   .on("inspect", async () => {
-    console.log("Inspect command (not yet implemented)");
+    await inspectHandler();
   })
   .command("init", "Initialize default prompt templates")
   .on("init", async () => {
-    console.log("Init command (not yet implemented)");
+    await initHandler();
   })
   .parse();

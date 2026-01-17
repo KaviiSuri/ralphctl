@@ -7,6 +7,6 @@
 - [x] P0: Configure `inspect` and `init` to not require a mode argument
 - [x] P0: Implement help/usage output so `ralphctl --help` and `rctl --help` list only the four core commands with mode guidance
 - [x] P1: Add clear error messaging for invalid/missing mode arguments, including usage guidance (domain layer validation)
-- [ ] P1: Wire command handler registry (stubs) in `src/lib/commands/*` with no extra commands beyond the core set
-- [ ] P1: Ensure business logic is decoupled from CLI library - main file (`src/cli.ts`) should use domain types, not library-specific types
-- [ ] P2: Add brief CLI usage reference in existing docs (optional) once help text is finalized
+- [x] P1: Wire command handler registry (stubs) in `src/lib/commands/*` with no extra commands beyond the core set
+- [x] P1: Ensure business logic is decoupled from CLI library - main file (`src/cli.ts`) should use domain types, not library-specific types
+- [x] P2: Add brief CLI usage reference in existing docs (optional) once help text is finalized

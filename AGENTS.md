@@ -25,4 +25,8 @@ we want our code to be simple, not over-complicated and maintainable. at the sam
 to do this, we dont want over-engineering, we just wwant good engineering that writes the main logic code / business logic in the domain that's relecant to the application, and not inline implementation detial logic. the code must read like prose.
 
 keep your business logic decoupled from the entrypoints and specific external libraries, and the main file should use your 'domain' instead
-# Learnings {this is where your learnings go}
+
+# Learnings 
+Keep Learnings up to date as you find new facts about the requirements, the codebase and new learnings. add them in this section after you are done with each step.
+
+{this is where your learnings go}
