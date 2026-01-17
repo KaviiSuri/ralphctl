@@ -20,9 +20,16 @@ const cli = Cli()
         description: "Plan or build mode",
       },
     ],
+    flags: {
+      "max-iterations": {
+        type: Number,
+        description: "Maximum number of iterations before stopping",
+        default: 10,
+      },
+    },
   })
   .on("run", async (ctx) => {
-    await runHandler({ mode: ctx.parameters.mode });
+    await runHandler({ mode: ctx.parameters.mode, maxIterations: ctx.flags["max-iterations"] });
   })
   .command("step", "Run a single interactive iteration", {
     parameters: [

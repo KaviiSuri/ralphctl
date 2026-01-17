@@ -16,7 +16,20 @@ describe("Command Handlers", () => {
                 version: "1.0.0",
               })
             );
+
+            run = mock(() =>
+              Promise.resolve({
+                success: true,
+                output: "Iteration output <promise>COMPLETE</promise>",
+              })
+            );
           },
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
         };
       });
     });
@@ -37,7 +50,20 @@ describe("Command Handlers", () => {
                 error: "OpenCode not found",
               })
             );
+
+            run = mock(() =>
+              Promise.resolve({
+                success: true,
+                output: "",
+              })
+            );
           },
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
         };
       });
 
@@ -55,18 +81,83 @@ describe("Command Handlers", () => {
       mockExit.mockRestore();
     });
 
-    it("should not fail when opencode is available", async () => {
-      const mockExit = mock(() => {
-        throw new Error("process.exit");
+    it("should stop at max iterations without completion", async () => {
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            checkAvailability = mock(() =>
+              Promise.resolve({
+                available: true,
+                version: "1.0.0",
+              })
+            );
+
+            run = mock(() =>
+              Promise.resolve({
+                success: true,
+                output: "Iteration output without completion",
+              })
+            );
+          },
+        };
       });
 
-      global.process.exit = mockExit;
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+        };
+      });
 
-      await runHandler({ mode: Mode.Build });
+      const mockLog = mock();
+      global.console.log = mockLog;
 
-      expect(mockExit).not.toHaveBeenCalled();
+      await runHandler({ mode: Mode.Plan, maxIterations: 3 });
 
-      mockExit.mockRestore();
+      expect(mockLog).toHaveBeenCalledWith("\n⚠ Stopped at maximum iterations (3) without completion");
+    });
+
+    it("should run multiple iterations until completion", async () => {
+      let callCount = 0;
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            checkAvailability = mock(() =>
+              Promise.resolve({
+                available: true,
+                version: "1.0.0",
+              })
+            );
+
+            run = mock(() => {
+              callCount++;
+              if (callCount < 2) {
+                return Promise.resolve({
+                  success: true,
+                  output: "Still working...",
+                });
+              }
+              return Promise.resolve({
+                success: true,
+                output: "Done! <promise>COMPLETE</promise>",
+              });
+            });
+          },
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+        };
+      });
+
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await runHandler({ mode: Mode.Plan, maxIterations: 5 });
+
+      expect(mockLog).toHaveBeenCalledWith("\n✓ Completed in 2 iteration(s)");
+      expect(callCount).toBe(2);
     });
   });
 
