@@ -55,3 +55,77 @@
   - File system errors during write (rollback behavior)
   - Concurrent writes (last write wins, but atomic per file)
 - [x] P2: Add domain type for InitOptions (force flag) in src/domain/types.ts
+
+---
+
+## JBTD-005: Session Management and State Capture [COMPLETED]
+
+- [x] P0: Add session tracking infrastructure to domain types
+  - [x] P0: Add `SessionState` interface to src/domain/types.ts with fields: iteration, sessionId, startedAt, mode, prompt
+  - [x] P0: Add `SessionsFile` interface for .ralphctl/ralph-sessions.json structure with sessions array and metadata
+  - [x] P0: Add `sessionId` field to `OpenCodeRunResult` interface in src/lib/opencode/adapter.ts
+
+- [x] P0: Extract session IDs from OpenCode CLI output
+  - [x] P0: Implement session ID extraction logic in src/lib/opencode/adapter.ts:run() method
+  - [x] P0: Parse OpenCode CLI output for session ID (investigate output format, likely in headers or structured metadata)
+  - [x] P0: Set sessionId field on returned OpenCodeRunResult object
+  - [x] P0: Make extraction resilient to output format variations (use multiple regex patterns if needed)
+
+- [x] P0: Create session state persistence utilities
+  - [x] P0: Create `ensureRalphctlDir()` utility to ensure .ralphctl directory exists
+  - [x] P0: Create `writeSessionsFile(sessions: SessionState[])` utility in src/lib/state/index.ts
+  - [x] P0: Create `readSessionsFile()` utility to read existing session data
+  - [x] P0: Use writeFile from src/lib/files/index.ts for atomic writes
+
+- [x] P0: Integrate state capture into iteration loop
+  - [x] P0: Create SessionState object after each iteration in src/lib/commands/run.ts
+  - [x] P0: Include iteration number, sessionId, startedAt timestamp, mode, and prompt
+  - [x] P0: Append new session to existing sessions array
+  - [x] P0: Write to .ralphctl/ralph-sessions.json after each iteration completes
+  - [x] P0: Handle file read/write errors gracefully with clear error messages
+
+- [x] P0: Add end iteration markers with session IDs
+  - [x] P0: Add end marker after each iteration in src/lib/commands/run.ts iteration loop
+  - [x] P0: End marker format: `--- Iteration X/Y Complete (Session: {sessionId}) ---`
+  - [x] P0: Ensure end marker appears after OpenCode run completes but before state capture
+
+- [x] P1: Update start markers to include session IDs
+  - [x] P1: Update existing start marker in src/lib/commands/run.ts:39 to include session ID
+  - [x] P1: Format: `--- Iteration X/Y (Session: {sessionId}) ---`
+  - [x] P1: Ensure session ID is available before start marker (extract after OpenCode starts, or get from previous run for first iteration)
+
+- [x] P1: Add tests for session tracking
+  - [x] P1: Test session ID extraction in adapter.ts with various output formats
+  - [x] P1: Test session file writing utility (create, append, read)
+  - [x] P1: Test iteration markers include session IDs
+  - [x] P1: Test .ralphctl directory creation
+  - [x] P1: Test state capture integration in run loop
+  - [x] P1: Test file format is valid JSON and readable by tooling
+
+- [x] P2: Verify session isolation
+  - [x] P2: Add validation that each iteration uses unique session ID
+  - [x] P2: Log session ID mapping for debugging purposes
+  - [x] P2: Add test to verify no --continue or --session flags are passed implicitly
+
+- [x] P2: Update inspect handler integration
+  - [x] P2: Replace hardcoded sessionId placeholder in src/lib/commands/inspect.ts with session reading logic
+  - [x] P2: Read from .ralphctl/ralph-sessions.json to get session history
+  - [x] P2: Export session data matching JBTD-006 specs (separate spec)
+
+### Summary
+
+Implemented complete session management and state capture infrastructure for ralphctl:
+
+1. **Domain Types**: Added `SessionState` and `SessionsFile` interfaces in src/domain/types.ts, plus `sessionId` field to `OpenCodeRunResult`
+
+2. **Session ID Extraction**: Implemented robust extraction from OpenCode CLI output using regex patterns in src/lib/opencode/adapter.ts
+
+3. **State Persistence**: Created src/lib/state/index.ts with utilities for managing `.ralphctl/ralph-sessions.json` - directory creation, reading, and atomic writing of session data
+
+4. **Iteration Loop Integration**: Modified src/lib/commands/run.ts to capture session state after each iteration, persisting iteration count, session ID, timestamp, mode, and prompt
+
+5. **Markers**: Updated both start and end iteration markers to include session IDs for clear progress visibility
+
+6. **Testing**: Comprehensive test coverage including session ID extraction, file utilities, marker formatting, and run loop integration
+
+7. **Inspect Handler**: Updated to read session history from the sessions file for export functionality

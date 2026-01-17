@@ -22,3 +22,15 @@ export interface CliContext {
 export interface InitOptions {
   force?: boolean;
 }
+
+export interface SessionState {
+  iteration: number;
+  sessionId: string;
+  startedAt: string;
+  mode: string;
+  prompt: string;
+}
+
+export interface SessionsFile {
+  sessions: SessionState[];
+}

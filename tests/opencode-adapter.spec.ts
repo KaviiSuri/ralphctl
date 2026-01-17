@@ -14,6 +14,25 @@ class TestableOpenCodeAdapter {
     this.env = env;
   }
 
+  private extractSessionId(output: string): string | undefined {
+    const patterns = [
+      /id=ses_[a-zA-Z0-9]+/,
+      /"id":"ses_[a-zA-Z0-9]+"/,
+      /sessionId=ses_[a-zA-Z0-9]+/,
+      /sessionID=ses_[a-zA-Z0-9]+/,
+    ];
+
+    for (const pattern of patterns) {
+      const match = output.match(pattern);
+      if (match) {
+        const sessionMatch = match[0].match(/ses_[a-zA-Z0-9]+/);
+        return sessionMatch ? sessionMatch[0] : undefined;
+      }
+    }
+
+    return undefined;
+  }
+
   async checkAvailability() {
     const result = await this.mockRunner({
       command: ["opencode", "--version"],
@@ -40,7 +59,8 @@ class TestableOpenCodeAdapter {
     });
 
     if (result.success) {
-      return { success: true, output: result.stdout };
+      const sessionId = this.extractSessionId(result.stdout);
+      return { success: true, output: result.stdout, sessionId };
     }
 
     return {
@@ -134,6 +154,81 @@ describe("OpenCodeAdapter", () => {
 
       expect(result.success).toBe(true);
       expect(result.output).toBe("OpenCode executed successfully");
+    });
+
+    it("should extract session ID from stdout with id= pattern", async () => {
+      const mockRunner = async () => ({
+        exitCode: 0,
+        stdout: "INFO id=ses_123abc Session created",
+        stderr: "",
+        success: true,
+      });
+
+      const adapter = new TestableOpenCodeAdapter(mockRunner);
+      const result = await adapter.run("test prompt");
+
+      expect(result.success).toBe(true);
+      expect(result.sessionId).toBe("ses_123abc");
+    });
+
+    it("should extract session ID from stdout with JSON pattern", async () => {
+      const mockRunner = async () => ({
+        exitCode: 0,
+        stdout: '{"id":"ses_xyz789","status":"active"}',
+        stderr: "",
+        success: true,
+      });
+
+      const adapter = new TestableOpenCodeAdapter(mockRunner);
+      const result = await adapter.run("test prompt");
+
+      expect(result.success).toBe(true);
+      expect(result.sessionId).toBe("ses_xyz789");
+    });
+
+    it("should extract session ID from stdout with sessionId= pattern", async () => {
+      const mockRunner = async () => ({
+        exitCode: 0,
+        stdout: "INFO sessionId=ses_def456 Session started",
+        stderr: "",
+        success: true,
+      });
+
+      const adapter = new TestableOpenCodeAdapter(mockRunner);
+      const result = await adapter.run("test prompt");
+
+      expect(result.success).toBe(true);
+      expect(result.sessionId).toBe("ses_def456");
+    });
+
+    it("should extract session ID from stdout with sessionID= pattern", async () => {
+      const mockRunner = async () => ({
+        exitCode: 0,
+        stdout: "INFO sessionID=ses_ghi123 Session started",
+        stderr: "",
+        success: true,
+      });
+
+      const adapter = new TestableOpenCodeAdapter(mockRunner);
+      const result = await adapter.run("test prompt");
+
+      expect(result.success).toBe(true);
+      expect(result.sessionId).toBe("ses_ghi123");
+    });
+
+    it("should return undefined sessionId when not found in output", async () => {
+      const mockRunner = async () => ({
+        exitCode: 0,
+        stdout: "OpenCode executed successfully",
+        stderr: "",
+        success: true,
+      });
+
+      const adapter = new TestableOpenCodeAdapter(mockRunner);
+      const result = await adapter.run("test prompt");
+
+      expect(result.success).toBe(true);
+      expect(result.sessionId).toBeUndefined();
     });
   });
 

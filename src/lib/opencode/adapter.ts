@@ -15,6 +15,7 @@ export interface OpenCodeRunResult {
   success: boolean;
   output: string;
   error?: string;
+  sessionId?: string;
 }
 
 export interface OpenCodeRunInteractiveResult {
@@ -39,6 +40,25 @@ export class OpenCodeAdapter {
     return runProcess(options);
   }
 
+  private extractSessionId(output: string): string | undefined {
+    const patterns = [
+      /id=ses_[a-zA-Z0-9]+/,
+      /"id":"ses_[a-zA-Z0-9]+"/,
+      /sessionId=ses_[a-zA-Z0-9]+/,
+      /sessionID=ses_[a-zA-Z0-9]+/,
+    ];
+
+    for (const pattern of patterns) {
+      const match = output.match(pattern);
+      if (match) {
+        const sessionMatch = match[0].match(/ses_[a-zA-Z0-9]+/);
+        return sessionMatch ? sessionMatch[0] : undefined;
+      }
+    }
+
+    return undefined;
+  }
+
   async checkAvailability(): Promise<OpenCodeAvailabilityResult> {
     const result = await this.executeCommand(["opencode", "--version"]);
 
@@ -57,7 +77,8 @@ export class OpenCodeAdapter {
     const result = await this.executeCommand(["opencode", "run", prompt]);
 
     if (result.success) {
-      return { success: true, output: result.stdout };
+      const sessionId = this.extractSessionId(result.stdout);
+      return { success: true, output: result.stdout, sessionId };
     }
 
     return {
