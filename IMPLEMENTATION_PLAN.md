@@ -1,0 +1,8 @@
+- P0: Scaffold baseline project layout with `src/` and `src/lib/` plus CLI entrypoint (for example `src/cli.ts`) since no runtime code exists yet
+- P0: Add Bun + TypeScript setup (`package.json`, `bunfig.toml`, `tsconfig.json`) and ensure `bun run typecheck` is available
+- P0: Implement CLI argument parsing to expose exactly `run`, `step`, `inspect`, `init`, with required positional mode `plan|build` for `run` and `step`
+- P0: Implement help/usage output so `ralphctl --help` lists only the four commands and includes mode guidance
+- P1: Add clear error messaging for invalid or missing mode arguments, including usage guidance
+- P1: Wire command handlers registry with no extra commands beyond the core set
+- P1: Add `bun:test` coverage for command parsing and help output acceptance criteria
+- P2: Add brief CLI usage reference in existing docs (optional) once help text is finalized
