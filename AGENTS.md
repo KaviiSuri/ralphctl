@@ -29,4 +29,6 @@ keep your business logic decoupled from the entrypoints and specific external li
 # Learnings 
 Keep Learnings up to date as you find new facts about the requirements, the codebase and new learnings. add them in this section after you are done with each step.
 
-{this is where your learnings go}
+- Using Bun.spawn for CLI execution provides better control and visibility than SDK
+- Decoupling business logic from CLI library enables swapping CLIs easily
+- Mock-based testing of handlers validates correct adapter usage without external deps

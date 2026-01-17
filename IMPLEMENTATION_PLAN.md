@@ -1,18 +1,19 @@
-## Completed Work
-
-All initial implementation tasks have been completed:
-- CLI library setup with clerc (zod-based typesafe CLI)
-- Project scaffolding with Bun + TypeScript
-- Domain models for commands (run, step, inspect, init) and modes (plan, build)
-- Command handler registry with proper decoupling
-- Help/usage output and error messaging
-- Process runner (Bun.spawn-based) with stdout/stderr capture
-- OpenCode CLI adapter (CLI-based, never SDK)
-- Availability check for opencode --version
-- Wired run/step/inspect handlers to invoke opencode CLI commands
-- Tests asserting handlers call OpenCode CLI adapter
-
-## Learnings
-- Using Bun.spawn for CLI execution provides better control and visibility than SDK
-- Decoupling business logic from CLI library enables swapping CLIs easily
-- Mock-based testing of handlers validates correct adapter usage without external deps
+- [x] P0: Research and select a good zod-based typesafe CLI library (e.g., `clerc`, `zod-cli`, or similar) that integrates well with Bun/TypeScript
+- [x] P0: Add Bun + TypeScript setup (`package.json`, `bunfig.toml`, `tsconfig.json`) and ensure `bun run typecheck` is available
+- [x] P0: Scaffold baseline project layout with `src/`, `src/lib/` (standard library), `src/domain/` (business logic), and CLI entrypoint (`src/cli.ts`)
+- [x] P0: Define domain models in `src/domain/` for CLI commands and modes (Command enum: `run`, `step`, `inspect`, `init`; Mode enum: `plan`, `build`)
+- [x] P0: Configure the chosen CLI library to expose exactly four core commands: `run`, `step`, `inspect`, `init`
+- [x] P0: Configure `run` and `step` to require positional mode argument (`plan` or `build`), keeping parsing logic in library layer and validation in domain layer
+- [x] P0: Configure `inspect` and `init` to not require a mode argument
+- [x] P0: Implement help/usage output so `ralphctl --help` and `rctl --help` list only the four core commands with mode guidance
+- [x] P1: Add clear error messaging for invalid/missing mode arguments, including usage guidance (domain layer validation)
+- [x] P1: Wire command handler registry (stubs) in `src/lib/commands/*` with no extra commands beyond the core set
+- [x] P1: Ensure business logic is decoupled from CLI library - main file (`src/cli.ts`) should use domain types, not library-specific types
+- [x] P2: Add brief CLI usage reference in existing docs (optional) once help text is finalized
+- [x] P0: Create a shared process runner under `src/lib/process/` (Bun.spawn-based) for CLI execution with consistent stdout/stderr capture
+- [x] P0: Create a shared OpenCode CLI adapter under `src/lib/opencode/` that uses the process runner and never the SDK
+- [x] P0: Add `opencode --version` availability check for `run` and `step` (fail early if unavailable)
+- [x] P0: Wire `run` handler to invoke `opencode run` via the adapter (still stub logic, but CLI-based)
+- [x] P0: Wire `step` handler to invoke `opencode --prompt` via the adapter (CLI-based)
+- [x] P1: Add `inspect` handler implementation that uses `opencode export` through the adapter (session IDs can be stubbed for now)
+- [x] P1: Add tests to assert handlers call the OpenCode CLI adapter (mocked process runner)
