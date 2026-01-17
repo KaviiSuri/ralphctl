@@ -1,8 +1,10 @@
 import { Mode } from "../../domain/types.js";
 import { OpenCodeAdapter } from "../opencode/adapter.js";
+import { resolvePrompt } from "../prompts/resolver.js";
 
 export interface StepHandlerOptions {
   mode: Mode;
+  customPrompt?: string;
 }
 
 export async function stepHandler(options: StepHandlerOptions): Promise<void> {
@@ -14,7 +16,9 @@ export async function stepHandler(options: StepHandlerOptions): Promise<void> {
     process.exit(1);
   }
 
-  const prompt = "TODO: implement prompt resolution";
+  console.log(`Running ${options.mode} mode step`);
+
+  const prompt = await resolvePrompt({ mode: options.mode, customPrompt: options.customPrompt });
   const result = await adapter.runWithPrompt(prompt);
   
   if (result.success) {

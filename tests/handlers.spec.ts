@@ -91,6 +91,12 @@ describe("Command Handlers", () => {
           },
         };
       });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+        };
+      });
     });
 
     it("should check opencode availability and use runWithPrompt", async () => {
@@ -99,6 +105,7 @@ describe("Command Handlers", () => {
 
       await stepHandler({ mode: Mode.Plan });
 
+      expect(mockLog).toHaveBeenCalledWith("Running plan mode step");
       expect(mockLog).toHaveBeenCalledWith("Step executed");
     });
 

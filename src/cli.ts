@@ -31,10 +31,15 @@ const cli = Cli()
         type: Types.Enum(Mode.Plan, Mode.Build),
         description: "Plan or build mode",
       },
+      {
+        key: "[prompt]",
+        type: String,
+        description: "Custom prompt (overrides default template)",
+      },
     ],
   })
   .on("step", async (ctx) => {
-    await stepHandler({ mode: ctx.parameters.mode });
+    await stepHandler({ mode: ctx.parameters.mode, customPrompt: ctx.parameters.prompt });
   })
   .command("inspect", "Inspect run exports")
   .on("inspect", async () => {

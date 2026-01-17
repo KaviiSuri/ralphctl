@@ -17,3 +17,8 @@
 - [x] P0: Wire `step` handler to invoke `opencode --prompt` via the adapter (CLI-based)
 - [x] P1: Add `inspect` handler implementation that uses `opencode export` through the adapter (session IDs can be stubbed for now)
 - [x] P1: Add tests to assert handlers call the OpenCode CLI adapter (mocked process runner)
+- [x] P0: Implement prompt resolution for `step` and add mode-aware logging to match `run` (jbtd-002-spec-002, jbtd-002-spec-001)
+- [ ] P0: Define and enforce loop termination behavior in `run` per jbtd-002-spec-003 (run handler is a stub)
+- [ ] P1: Implement `step` prompt overrides per jbtd-007-spec-001/002 (mode-aware prompt arguments)
+- [ ] P1: Add permissions posture handling and log effective posture before first iteration (jbtd-003-spec-001/002)
+- [ ] P2: Validate command expectations and `rctl` alias behaviors against jbtd-001-spec-001/003
