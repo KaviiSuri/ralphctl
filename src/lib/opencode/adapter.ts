@@ -1,4 +1,4 @@
-import { runProcess, type ProcessRunnerResult, type ProcessRunnerOptions } from "../process/runner.js";
+import { runProcess, runProcessInteractive, type ProcessRunnerResult, type ProcessRunnerOptions } from "../process/runner.js";
 
 export interface OpenCodeAdapterOptions {
   cwd?: string;
@@ -14,6 +14,11 @@ export interface OpenCodeAvailabilityResult {
 export interface OpenCodeRunResult {
   success: boolean;
   output: string;
+  error?: string;
+}
+
+export interface OpenCodeRunInteractiveResult {
+  success: boolean;
   error?: string;
 }
 
@@ -73,6 +78,25 @@ export class OpenCodeAdapter {
       success: false,
       output: result.stdout,
       error: result.stderr || "Failed to run OpenCode with prompt",
+    };
+  }
+
+  async runWithPromptInteractive(prompt: string): Promise<OpenCodeRunInteractiveResult> {
+    const options: ProcessRunnerOptions = {
+      command: ["opencode", "--prompt", prompt],
+      cwd: this.options.cwd,
+      env: this.options.env,
+    };
+
+    const result = await runProcessInteractive(options);
+
+    if (result.success) {
+      return { success: true };
+    }
+
+    return {
+      success: false,
+      error: `Failed to run OpenCode with prompt (exit code: ${result.exitCode})`,
     };
   }
 

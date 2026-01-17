@@ -26,10 +26,19 @@ const cli = Cli()
         description: "Maximum number of iterations before stopping",
         default: 10,
       },
+      "permission-posture": {
+        type: Types.Enum("allow-all", "ask"),
+        description: "Permission posture for file operations",
+        default: "allow-all",
+      },
     },
   })
   .on("run", async (ctx) => {
-    await runHandler({ mode: ctx.parameters.mode, maxIterations: ctx.flags["max-iterations"] });
+    await runHandler({ 
+      mode: ctx.parameters.mode, 
+      maxIterations: ctx.flags["max-iterations"],
+      permissionPosture: ctx.flags["permission-posture"] as "allow-all" | "ask"
+    });
   })
   .command("step", "Run a single interactive iteration", {
     parameters: [
@@ -44,9 +53,20 @@ const cli = Cli()
         description: "Custom prompt (overrides default template)",
       },
     ],
+    flags: {
+      "permission-posture": {
+        type: Types.Enum("allow-all", "ask"),
+        description: "Permission posture for file operations",
+        default: "allow-all",
+      },
+    },
   })
   .on("step", async (ctx) => {
-    await stepHandler({ mode: ctx.parameters.mode, customPrompt: ctx.parameters.prompt });
+    await stepHandler({ 
+      mode: ctx.parameters.mode, 
+      customPrompt: ctx.parameters.prompt,
+      permissionPosture: ctx.flags["permission-posture"] as "allow-all" | "ask"
+    });
   })
   .command("inspect", "Inspect run exports")
   .on("inspect", async () => {

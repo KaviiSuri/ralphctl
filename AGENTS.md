@@ -32,3 +32,9 @@ Keep Learnings up to date as you find new facts about the requirements, the code
 - Using Bun.spawn for CLI execution provides better control and visibility than SDK
 - Decoupling business logic from CLI library enables swapping CLIs easily
 - Mock-based testing of handlers validates correct adapter usage without external deps
+- Loop termination uses <promise>COMPLETE</promise> marker from OpenCode
+- Testing loop handler requires mocking adapter methods and prompt resolver
+- Default max-iterations of 10 balances protection and utility
+- Iteration markers (--- Iteration N/M ---) provide clear progress visibility
+- Manual interruption handling requires catching AbortError specifically
+- Testing multiple iterations uses closure-based counters in mocks

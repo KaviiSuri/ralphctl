@@ -156,8 +156,45 @@ describe("Command Handlers", () => {
 
       await runHandler({ mode: Mode.Plan, maxIterations: 5 });
 
+      expect(mockLog).toHaveBeenCalledWith("Running plan mode");
+      expect(mockLog).toHaveBeenCalledWith("Permissions: allow-all");
       expect(mockLog).toHaveBeenCalledWith("\n✓ Completed in 2 iteration(s)");
       expect(callCount).toBe(2);
+    });
+
+    it("should use custom permission posture", async () => {
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            checkAvailability = mock(() =>
+              Promise.resolve({
+                available: true,
+                version: "1.0.0",
+              })
+            );
+
+            run = mock(() =>
+              Promise.resolve({
+                success: true,
+                output: "Output <promise>COMPLETE</promise>",
+              })
+            );
+          },
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+        };
+      });
+
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await runHandler({ mode: Mode.Plan, permissionPosture: "ask" });
+
+      expect(mockLog).toHaveBeenCalledWith("Permissions: ask");
     });
   });
 
@@ -173,10 +210,9 @@ describe("Command Handlers", () => {
               })
             );
 
-            runWithPrompt = mock(() =>
+            runWithPromptInteractive = mock(() =>
               Promise.resolve({
                 success: true,
-                output: "Step executed",
               })
             );
           },
@@ -190,14 +226,14 @@ describe("Command Handlers", () => {
       });
     });
 
-    it("should check opencode availability and use runWithPrompt", async () => {
+    it("should check opencode availability and use runWithPromptInteractive", async () => {
       const mockLog = mock();
       global.console.log = mockLog;
 
       await stepHandler({ mode: Mode.Plan });
 
       expect(mockLog).toHaveBeenCalledWith("Running plan mode step");
-      expect(mockLog).toHaveBeenCalledWith("Step executed");
+      expect(mockLog).toHaveBeenCalledWith("Permissions: allow-all");
     });
 
     it("should fail if opencode is unavailable", async () => {

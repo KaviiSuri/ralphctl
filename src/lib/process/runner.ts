@@ -11,6 +11,11 @@ export interface ProcessRunnerResult {
   success: boolean;
 }
 
+export interface ProcessRunnerInteractiveResult {
+  exitCode: number | null;
+  success: boolean;
+}
+
 export async function runProcess(
   options: ProcessRunnerOptions
 ): Promise<ProcessRunnerResult> {
@@ -34,6 +39,24 @@ export async function runProcess(
     exitCode,
     stdout,
     stderr,
+    success: exitCode === 0,
+  };
+}
+
+export async function runProcessInteractive(
+  options: ProcessRunnerOptions
+): Promise<ProcessRunnerInteractiveResult> {
+  const { command, cwd, env } = options;
+
+  const process = Bun.spawn(command, {
+    cwd,
+    env,
+  });
+
+  const exitCode = await process.exited;
+
+  return {
+    exitCode,
     success: exitCode === 0,
   };
 }

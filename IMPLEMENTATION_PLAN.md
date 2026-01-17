@@ -24,6 +24,6 @@
   - Added iteration markers showing progress
   - Graceful handling of max iterations and manual interruption
   - Tests for completion, max iterations, and multiple iterations
-- [ ] P1: Implement `step` prompt overrides per jbtd-007-spec-001/002 (mode-aware prompt arguments)
+- [x] P1: Implement `step` prompt overrides per jbtd-007-spec-001/002 (mode-aware prompt arguments)
 - [ ] P1: Add permissions posture handling and log effective posture before first iteration (jbtd-003-spec-001/002)
 - [ ] P2: Validate command expectations and `rctl` alias behaviors against jbtd-001-spec-001/003

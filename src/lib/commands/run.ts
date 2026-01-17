@@ -4,14 +4,23 @@ import { resolvePrompt } from "../prompts/resolver.js";
 
 const COMPLETION_PROMISE = "<promise>COMPLETE</promise>";
 
+export type PermissionPosture = "allow-all" | "ask";
+
 export interface RunHandlerOptions {
   mode: Mode;
   maxIterations?: number;
+  permissionPosture?: PermissionPosture;
 }
 
 export async function runHandler(options: RunHandlerOptions): Promise<void> {
-  const adapter = new OpenCodeAdapter();
-  const { mode, maxIterations = 10 } = options;
+  const { mode, maxIterations = 10, permissionPosture = "allow-all" } = options;
+  
+  const adapter = new OpenCodeAdapter({ 
+    env: { 
+      ...process.env,
+      OPENCODE_PERMISSION: permissionPosture === "allow-all" ? '{"*":"allow"}' : "ask"
+    } 
+  });
   
   const availability = await adapter.checkAvailability();
   if (!availability.available) {
@@ -20,6 +29,7 @@ export async function runHandler(options: RunHandlerOptions): Promise<void> {
   }
 
   console.log(`Running ${mode} mode`);
+  console.log(`Permissions: ${permissionPosture}`);
 
   let iteration = 1;
   let completed = false;
