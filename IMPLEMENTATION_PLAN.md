@@ -107,25 +107,124 @@
   - [x] P2: Log session ID mapping for debugging purposes
   - [x] P2: Add test to verify no --continue or --session flags are passed implicitly
 
-- [x] P2: Update inspect handler integration
-  - [x] P2: Replace hardcoded sessionId placeholder in src/lib/commands/inspect.ts with session reading logic
-  - [x] P2: Read from .ralphctl/ralph-sessions.json to get session history
-  - [x] P2: Export session data matching JBTD-006 specs (separate spec)
+ - [x] P2: Update inspect handler integration
+    - [x] P2: Replace hardcoded sessionId placeholder in src/lib/commands/inspect.ts with session reading logic
+    - [x] P2: Read from .ralphctl/ralph-sessions.json to get session history
+    - [x] P0: Export session data matching JBTD-006 specs (see JBTD-006 section below)
 
-### Summary
+---
 
-Implemented complete session management and state capture infrastructure for ralphctl:
+## JBTD-006: Inspect Artifact Generation [COMPLETED]
 
-1. **Domain Types**: Added `SessionState` and `SessionsFile` interfaces in src/domain/types.ts, plus `sessionId` field to `OpenCodeRunResult`
+### Existing Infrastructure
+- `OpenCodeAdapter.export()` already returns raw stdout from `opencode export` (✅ satisfies jbtd-006-spec-001)
+- `readSessionsFile()` returns SessionState[] ordered by iteration
+- `writeFile()` utility available via `src/lib/files/index.ts`
+- SessionState interface has iteration, sessionId, startedAt, mode, prompt fields
 
-2. **Session ID Extraction**: Implemented robust extraction from OpenCode CLI output using regex patterns in src/lib/opencode/adapter.ts
+### P0: Core Inspect Functionality
 
-3. **State Persistence**: Created src/lib/state/index.ts with utilities for managing `.ralphctl/ralph-sessions.json` - directory creation, reading, and atomic writing of session data
+- [x] P0: Add InspectEntry interface to src/domain/types.ts for output schema
+  - [x] P0: Define fields: sessionId, iteration, startedAt, export (required per jbtd-006-spec-003)
+  - [x] P0: Export field type: string (raw JSON from opencode export command)
 
-4. **Iteration Loop Integration**: Modified src/lib/commands/run.ts to capture session state after each iteration, persisting iteration count, session ID, timestamp, mode, and prompt
+- [x] P0: Implement core inspect logic in src/lib/commands/inspect.ts
+  - [x] P0: Import readSessionsFile from src/lib/state/index.ts
+  - [x] P0: Import writeFile from src/lib/files/index.ts
+  - [x] P0: Read all sessions from `.ralphctl/ralph-sessions.json`
+  - [x] P0: Loop through sessions array (already ordered by iteration)
+  - [x] P0: For each session, call adapter.export(sessionId) via existing OpenCodeAdapter
+  - [x] P0: Build InspectEntry object: { sessionId, iteration, startedAt, export: result.output }
+  - [x] P0: Validate required fields (jbtd-006-spec-003) - error if any missing
+  - [x] P0: Write output array to JSON file (see output file decision below)
 
-5. **Markers**: Updated both start and end iteration markers to include session IDs for clear progress visibility
+- [x] P0: Determine output file naming and location
+  - [x] P0: File must be valid JSON readable by jq (jbtd-006-spec-002)
+  - [x] P0: Consider options: `inspect.json`, `.ralphctl/inspect.json`, or timestamped `inspect-<timestamp>.json`
+  - [x] P0: Use JSON.stringify(..., null, 2) for consistency with sessions file
 
-6. **Testing**: Comprehensive test coverage including session ID extraction, file utilities, marker formatting, and run loop integration
+- [x] P0: Remove TODO comment from inspect.ts:6 after implementation
 
-7. **Inspect Handler**: Updated to read session history from the sessions file for export functionality
+### P1: Error Handling and Edge Cases
+
+- [x] P1: Handle export failures for individual sessions
+  - [x] P1: When adapter.export() returns success=false, skip session with warning
+  - [x] P1: Log skipped session info (sessionId, iteration) to console.error
+  - [x] P1: Continue processing remaining sessions instead of aborting entire inspect
+
+- [x] P1: Handle empty sessions array
+  - [x] P1: When readSessionsFile() returns [], output empty JSON array `[]`
+  - [x] P1: Log informational message: "No sessions found in .ralphctl/ralph-sessions.json"
+
+- [x] P1: Handle file write errors
+  - [x] P1: Catch writeFile() errors and report to console.error
+  - [x] P1: Use process.exit(1) on write failure for consistency with other handlers
+  - [x] P1: Include error message from writeFile error in output
+
+- [x] P1: Validate session data integrity
+  - [x] P1: Check for null/undefined required fields before creating InspectEntry
+  - [x] P1: Skip corrupted session entries with warning log
+  - [x] P1: Validate iteration field is a number
+  - [x] P1: Validate sessionId is a non-empty string
+
+- [x] P1: Add progress reporting
+  - [x] P1: Log "Exporting session {sessionId} (iteration {iteration}/{total})" before each export
+  - [x] P1: Log final message: "Exported {count} session(s) to {filename}"
+
+### P2: Enhancements and Testing
+
+- [x] P2: Add comprehensive tests for inspectHandler in tests/handlers.spec.ts
+  - [x] P2: Test basic flow: read sessions, export all, write JSON file
+  - [x] P2: Test empty sessions array outputs `[]`
+  - [x] P2: Test export failure skips session and continues
+  - [x] P2: Test missing required fields cause validation error
+  - [x] P2: Test output file format is valid JSON
+  - [x] P2: Test array length matches session count (jbtd-006-spec-002)
+  - [x] P2: Test export field contains raw output from adapter
+
+- [ ] P2: Consider adding output file path parameter
+  - [ ] P2: Allow user to specify output file via CLI flag: `--output inspect.json`
+  - [ ] P2: Default to `inspect.json` in current working directory
+
+- [ ] P2: Add JSON parsing validation for export data
+  - [ ] P2: Verify export output is parseable JSON before writing
+  - [ ] P2: Warn if export is invalid JSON but still include raw output
+  - [ ] P2: This ensures jq compatibility (jbtd-006-spec-002) without modifying raw output
+
+- [ ] P2: Consider file naming convention with mode filtering
+  - [ ] P2: Could add `--mode plan|build` flag to filter sessions by mode
+  - [ ] P2: Would require adding mode field to InspectEntry schema
+  - [ ] P2: Keep for future enhancement if needed
+
+### P0: Output File Decision (COMPLETED)
+
+Spec does not specify output file name/location. Options:
+1. `inspect.json` in CWD - simple, discoverable ✓ CHOSEN
+2. `.ralphctl/inspect.json` - keeps artifacts internal, cleaner CWD
+3. `inspect-<timestamp>.json` - preserves history, but clutter
+
+**Decision:** Use `inspect.json` in CWD for discoverability, similar to how `PROMPT_*.md` files are in CWD.
+
+---
+
+## Implementation Notes
+
+### Cross-Spec Dependencies
+- jbtd-006-spec-001 (Export Fidelity): ✅ Already satisfied by OpenCodeAdapter.export() returning raw stdout
+- jbtd-006-spec-002 (Run Artifact Packaging): Requires P0 tasks for JSON file output
+- jbtd-006-spec-003 (Inspect Schema): Requires P0 tasks for validation
+
+### Existing Code Patterns to Follow
+- File writing: `JSON.stringify(data, null, 2)` pattern from src/lib/state/index.ts:23
+- Error handling: `console.error(message)` + `process.exit(1)` from inspect.ts:12-13
+- Testing: mock.module() pattern from handlers.spec.ts with beforeEach()
+- State reading: `readSessionsFile()` from src/lib/state/index.ts:26
+
+### Learnings to Add
+- Inspect output goes to JSON file in CWD (not console)
+- Export failures skip individual sessions, continue processing
+- Empty sessions output empty array `[]`
+- Progress logging via console for user feedback
+- Validation errors abort inspect generation with clear message
+- InspectEntry interface defines output schema with 4 required fields: sessionId, iteration, startedAt, export
+- Field validation happens before export call to fail fast on corrupted data

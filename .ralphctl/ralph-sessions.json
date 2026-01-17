@@ -1,0 +1,88 @@
+{
+  "sessions": [
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-17T17:56:31.641Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 2,
+      "sessionId": "unknown-2",
+      "startedAt": "2026-01-17T17:56:31.645Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 3,
+      "sessionId": "unknown-3",
+      "startedAt": "2026-01-17T17:56:31.645Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-17T17:56:31.646Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 2,
+      "sessionId": "unknown-2",
+      "startedAt": "2026-01-17T17:56:31.646Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-17T17:56:31.647Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-17T17:56:33.117Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 2,
+      "sessionId": "unknown-2",
+      "startedAt": "2026-01-17T17:56:33.118Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 3,
+      "sessionId": "unknown-3",
+      "startedAt": "2026-01-17T17:56:33.118Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-17T17:56:33.119Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 2,
+      "sessionId": "unknown-2",
+      "startedAt": "2026-01-17T17:56:33.119Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-17T17:56:33.120Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    }
+  ]
+}

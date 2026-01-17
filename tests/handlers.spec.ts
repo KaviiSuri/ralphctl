@@ -274,6 +274,204 @@ describe("Command Handlers", () => {
 
   describe("inspectHandler", () => {
     beforeEach(() => {
+      mock.module("../src/lib/files/index.js", () => {
+        return {
+          fileExists: mock(() => Promise.resolve(false)),
+          writeFile: mock(() => Promise.resolve()),
+        };
+      });
+    });
+
+    it("should read sessions, export all, and write JSON file", async () => {
+      const mockSessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_test1",
+          startedAt: "2024-01-01T00:00:00Z",
+          mode: "plan",
+          prompt: "Test prompt",
+        },
+        {
+          iteration: 2,
+          sessionId: "ses_test2",
+          startedAt: "2024-01-01T00:01:00Z",
+          mode: "plan",
+          prompt: "Test prompt",
+        },
+      ];
+
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          writeSessionsFile: mock(() => Promise.resolve()),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
+      let exportCallCount = 0;
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            export = mock(() => {
+              exportCallCount++;
+              return Promise.resolve({
+                success: true,
+                output: `Exported data ${exportCallCount}`,
+              });
+            });
+          },
+        };
+      });
+
+      const { writeFile } = await import("../src/lib/files/index.js");
+      const mockLog = mock();
+      const mockError = mock();
+      global.console.log = mockLog;
+      global.console.error = mockError;
+
+      await inspectHandler();
+
+      expect(exportCallCount).toBe(2);
+      expect(writeFile).toHaveBeenCalledWith(
+        "inspect.json",
+        JSON.stringify(
+          [
+            {
+              sessionId: "ses_test1",
+              iteration: 1,
+              startedAt: "2024-01-01T00:00:00Z",
+              export: "Exported data 1",
+            },
+            {
+              sessionId: "ses_test2",
+              iteration: 2,
+              startedAt: "2024-01-01T00:01:00Z",
+              export: "Exported data 2",
+            },
+          ],
+          null,
+          2
+        )
+      );
+      expect(mockLog).toHaveBeenCalledWith("Exported 2 session(s) to inspect.json");
+    });
+
+    it("should output empty array for empty sessions", async () => {
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve([])),
+          writeSessionsFile: mock(() => Promise.resolve()),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
+      const { writeFile } = await import("../src/lib/files/index.js");
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await inspectHandler();
+
+      expect(writeFile).toHaveBeenCalledWith("inspect.json", "[]");
+      expect(mockLog).toHaveBeenCalledWith("No sessions found in .ralphctl/ralph-sessions.json");
+    });
+
+    it("should skip session and continue when export fails", async () => {
+      const mockSessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_test1",
+          startedAt: "2024-01-01T00:00:00Z",
+          mode: "plan",
+          prompt: "Test prompt",
+        },
+        {
+          iteration: 2,
+          sessionId: "ses_test2",
+          startedAt: "2024-01-01T00:01:00Z",
+          mode: "plan",
+          prompt: "Test prompt",
+        },
+      ];
+
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          writeSessionsFile: mock(() => Promise.resolve()),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
+      let exportCallCount = 0;
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            export = mock(() => {
+              exportCallCount++;
+              if (exportCallCount === 1) {
+                return Promise.resolve({
+                  success: false,
+                  output: "",
+                  error: "Export failed",
+                });
+              }
+              return Promise.resolve({
+                success: true,
+                output: "Exported data",
+              });
+            });
+          },
+        };
+      });
+
+      const { writeFile } = await import("../src/lib/files/index.js");
+      const mockLog = mock();
+      const mockError = mock();
+      global.console.log = mockLog;
+      global.console.error = mockError;
+
+      await inspectHandler();
+
+      expect(exportCallCount).toBe(2);
+      expect(mockError).toHaveBeenCalledWith(
+        "Warning: Failed to export session ses_test1 (iteration 1): Export failed"
+      );
+      expect(writeFile).toHaveBeenCalledWith(
+        "inspect.json",
+        JSON.stringify(
+          [
+            {
+              sessionId: "ses_test2",
+              iteration: 2,
+              startedAt: "2024-01-01T00:01:00Z",
+              export: "Exported data",
+            },
+          ],
+          null,
+          2
+        )
+      );
+      expect(mockLog).toHaveBeenCalledWith("Exported 1 session(s) to inspect.json");
+    });
+
+    it("should error when sessionId is missing", async () => {
+      const mockSessions = [
+        {
+          iteration: 1,
+          sessionId: "",
+          startedAt: "2024-01-01T00:00:00Z",
+          mode: "plan",
+          prompt: "Test prompt",
+        },
+      ];
+
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          writeSessionsFile: mock(() => Promise.resolve()),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
@@ -286,44 +484,172 @@ describe("Command Handlers", () => {
           },
         };
       });
-    });
 
-    it("should use the export() method from adapter", async () => {
-      const mockLog = mock();
-      global.console.log = mockLog;
-
-      await inspectHandler();
-
-      expect(mockLog).toHaveBeenCalledWith("Exported data");
-    });
-
-    it("should fail if export fails", async () => {
       const mockExit = mock((code: number) => {
         throw new Error(`process.exit(${code})`);
       });
-
       global.process.exit = mockExit;
+
+      const mockError = mock();
+      global.console.error = mockError;
+
+      await expect(inspectHandler()).rejects.toThrow("process.exit(1)");
+
+      expect(mockError).toHaveBeenCalledWith(
+        "Error: Missing sessionId for iteration 1"
+      );
+
+      mockExit.mockRestore();
+    });
+
+    it("should error when startedAt is missing", async () => {
+      const mockSessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_test1",
+          startedAt: "",
+          mode: "plan",
+          prompt: "Test prompt",
+        },
+      ];
+
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          writeSessionsFile: mock(() => Promise.resolve()),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
 
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
             export = mock(() =>
               Promise.resolve({
-                success: false,
-                output: "",
-                error: "Export failed",
+                success: true,
+                output: "Exported data",
               })
             );
           },
         };
       });
 
-      const mockConsoleError = mock();
-      global.console.error = mockConsoleError;
+      const mockExit = mock((code: number) => {
+        throw new Error(`process.exit(${code})`);
+      });
+      global.process.exit = mockExit;
+
+      const mockError = mock();
+      global.console.error = mockError;
 
       await expect(inspectHandler()).rejects.toThrow("process.exit(1)");
 
-      expect(mockConsoleError).toHaveBeenCalledWith("Export failed");
+      expect(mockError).toHaveBeenCalledWith(
+        "Error: Missing startedAt for session ses_test1"
+      );
+
+      mockExit.mockRestore();
+    });
+
+    it("should error when iteration is invalid", async () => {
+      const mockSessions = [
+        {
+          iteration: 0,
+          sessionId: "ses_test1",
+          startedAt: "2024-01-01T00:00:00Z",
+          mode: "plan",
+          prompt: "Test prompt",
+        },
+      ];
+
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          writeSessionsFile: mock(() => Promise.resolve()),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            export = mock(() =>
+              Promise.resolve({
+                success: true,
+                output: "Exported data",
+              })
+            );
+          },
+        };
+      });
+
+      const mockExit = mock((code: number) => {
+        throw new Error(`process.exit(${code})`);
+      });
+      global.process.exit = mockExit;
+
+      const mockError = mock();
+      global.console.error = mockError;
+
+      await expect(inspectHandler()).rejects.toThrow("process.exit(1)");
+
+      expect(mockError).toHaveBeenCalledWith(
+        "Error: Invalid iteration number 0 for session ses_test1"
+      );
+
+      mockExit.mockRestore();
+    });
+
+    it("should error when writeFile fails", async () => {
+      const mockSessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_test1",
+          startedAt: "2024-01-01T00:00:00Z",
+          mode: "plan",
+          prompt: "Test prompt",
+        },
+      ];
+
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          writeSessionsFile: mock(() => Promise.resolve()),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            export = mock(() =>
+              Promise.resolve({
+                success: true,
+                output: "Exported data",
+              })
+            );
+          },
+        };
+      });
+
+      mock.module("../src/lib/files/index.js", () => {
+        return {
+          fileExists: mock(() => Promise.resolve(false)),
+          writeFile: mock(() => Promise.reject(new Error("Write failed"))),
+        };
+      });
+
+      const mockExit = mock((code: number) => {
+        throw new Error(`process.exit(${code})`);
+      });
+      global.process.exit = mockExit;
+
+      const mockError = mock();
+      global.console.error = mockError;
+
+      await expect(inspectHandler()).rejects.toThrow("process.exit(1)");
+
+      expect(mockError).toHaveBeenCalledWith("Failed to write inspect file: Error: Write failed");
 
       mockExit.mockRestore();
     });

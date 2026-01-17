@@ -34,3 +34,10 @@ export interface SessionState {
 export interface SessionsFile {
   sessions: SessionState[];
 }
+
+export interface InspectEntry {
+  sessionId: string;
+  iteration: number;
+  startedAt: string;
+  export: string;
+}
