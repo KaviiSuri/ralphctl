@@ -28,7 +28,7 @@
    - ✅ COMPLETED: Model overrides fully implemented for both run and step
    - See JBTD-007 section below for implementation details
 - [x] P1: Add permissions posture handling and log effective posture before first iteration (jbtd-003-spec-001/002)
-- [ ] P2: Validate command expectations and `rctl` alias behaviors against jbtd-001-spec-001/003
+ - [x] P2: Validate command expectations and `rctl` alias behaviors against jbtd-001-spec-001/003
 
 ---
 

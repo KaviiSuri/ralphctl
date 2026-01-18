@@ -5,8 +5,12 @@ import { stepHandler } from "./lib/commands/step.js";
 import { inspectHandler } from "./lib/commands/inspect.js";
 import { initHandler } from "./lib/commands/init.js";
 
+const getCommandName = () => {
+  return process.argv[1] ? process.argv[1].split("/").pop() as string : "ralphctl";
+};
+
 const cli = Cli()
-  .scriptName("ralphctl")
+  .scriptName(getCommandName())
   .name("ralphctl")
   .version("0.0.0")
   .description("A CLI controller for OpenCode Ralph loops")

@@ -32,6 +32,56 @@ describe("Command Surface", () => {
     expect(commands.get("init")?.description).toBe("Initialize default prompt templates");
   });
 
+  it("should support rctl alias", async () => {
+    const originalArgv = process.argv[1];
+
+    process.argv[1] = "/usr/local/bin/rctl";
+
+    const cli = Cli()
+      .scriptName(process.argv[1] ? process.argv[1].split("/").pop() as string : "ralphctl")
+      .version("0.0.0")
+      .description("A CLI controller for OpenCode Ralph loops")
+      .use(friendlyErrorPlugin())
+      .use(notFoundPlugin())
+      .command("run", "Run a Ralph loop")
+      .on("run", () => {})
+      .command("step", "Run a single interactive iteration")
+      .on("step", () => {})
+      .command("inspect", "Inspect run exports")
+      .on("inspect", () => {})
+      .command("init", "Initialize default prompt templates")
+      .on("init", () => {});
+
+    expect(cli._scriptName).toBe("rctl");
+
+    process.argv[1] = originalArgv;
+  });
+
+  it("should support ralphctl command name", async () => {
+    const originalArgv = process.argv[1];
+
+    process.argv[1] = "/usr/local/bin/ralphctl";
+
+    const cli = Cli()
+      .scriptName(process.argv[1] ? process.argv[1].split("/").pop() as string : "ralphctl")
+      .version("0.0.0")
+      .description("A CLI controller for OpenCode Ralph loops")
+      .use(friendlyErrorPlugin())
+      .use(notFoundPlugin())
+      .command("run", "Run a Ralph loop")
+      .on("run", () => {})
+      .command("step", "Run a single interactive iteration")
+      .on("step", () => {})
+      .command("inspect", "Inspect run exports")
+      .on("inspect", () => {})
+      .command("init", "Initialize default prompt templates")
+      .on("init", () => {});
+
+    expect(cli._scriptName).toBe("ralphctl");
+
+    process.argv[1] = originalArgv;
+  });
+
   it("should require positional mode argument for run", async () => {
     const cli = Cli()
       .scriptName("ralphctl")
