@@ -73,8 +73,12 @@ export class OpenCodeAdapter {
     };
   }
 
-  async run(prompt: string): Promise<OpenCodeRunResult> {
-    const result = await this.executeCommand(["opencode", "run", prompt]);
+  async run(prompt: string, model?: string): Promise<OpenCodeRunResult> {
+    const command = model
+      ? ["opencode", "run", "--model", model, prompt]
+      : ["opencode", "run", prompt];
+    
+    const result = await this.executeCommand(command);
 
     if (result.success) {
       const sessionId = this.extractSessionId(result.stdout);
@@ -102,9 +106,13 @@ export class OpenCodeAdapter {
     };
   }
 
-  async runWithPromptInteractive(prompt: string): Promise<OpenCodeRunInteractiveResult> {
+  async runWithPromptInteractive(prompt: string, model?: string): Promise<OpenCodeRunInteractiveResult> {
+    const command = model
+      ? ["opencode", "--prompt", prompt, "--model", model]
+      : ["opencode", "--prompt", prompt];
+      
     const options: ProcessRunnerOptions = {
-      command: ["opencode", "--prompt", prompt],
+      command,
       cwd: this.options.cwd,
       env: this.options.env,
     };

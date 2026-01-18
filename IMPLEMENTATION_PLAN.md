@@ -25,6 +25,8 @@
   - Graceful handling of max iterations and manual interruption
   - Tests for completion, max iterations, and multiple iterations
 - [x] P1: Implement `step` prompt overrides per jbtd-007-spec-001/002 (mode-aware prompt arguments)
+   - ✅ COMPLETED: Model overrides fully implemented for both run and step
+   - See JBTD-007 section below for implementation details
 - [x] P1: Add permissions posture handling and log effective posture before first iteration (jbtd-003-spec-001/002)
 - [ ] P2: Validate command expectations and `rctl` alias behaviors against jbtd-001-spec-001/003
 
@@ -183,18 +185,90 @@
   - [x] P2: Test export field contains raw output from adapter
 
 - [ ] P2: Consider adding output file path parameter
-  - [ ] P2: Allow user to specify output file via CLI flag: `--output inspect.json`
-  - [ ] P2: Default to `inspect.json` in current working directory
+   - [ ] P2: Allow user to specify output file via CLI flag: `--output inspect.json`
+   - [ ] P2: Default to `inspect.json` in current working directory
 
 - [ ] P2: Add JSON parsing validation for export data
-  - [ ] P2: Verify export output is parseable JSON before writing
-  - [ ] P2: Warn if export is invalid JSON but still include raw output
-  - [ ] P2: This ensures jq compatibility (jbtd-006-spec-002) without modifying raw output
+   - [ ] P2: Verify export output is parseable JSON before writing
+   - [ ] P2: Warn if export is invalid JSON but still include raw output
+   - [ ] P2: This ensures jq compatibility (jbtd-006-spec-002) without modifying raw output
 
 - [ ] P2: Consider file naming convention with mode filtering
-  - [ ] P2: Could add `--mode plan|build` flag to filter sessions by mode
-  - [ ] P2: Would require adding mode field to InspectEntry schema
-  - [ ] P2: Keep for future enhancement if needed
+   - [ ] P2: Could add `--mode plan|build` flag to filter sessions by mode
+   - [ ] P2: Would require adding mode field to InspectEntry schema
+   - [ ] P2: Keep for future enhancement if needed
+
+---
+
+## JBTD-007: Step Command Model Override Completeness [COMPLETED]
+
+### Status Overview
+- jbtd-007-spec-001 (Interactive Step with TUI): ✅ Complete
+- jbtd-007-spec-002 (Shared Args - model overrides): ✅ Complete
+- jbtd-002-spec-004 (Model Defaults): ✅ Complete
+
+### Implementation Summary
+
+**P0: Domain Model and Types**
+- ✅ Added ModelRole enum to src/domain/types.ts (Smart = "smart", Fast = "fast")
+- ✅ Added ModelConfig interface to src/domain/types.ts (smart: string, fast: string)
+- ✅ Added default model constants to src/domain/types.ts
+  - DEFAULT_SMART_MODEL = "openai/gpt-5.2-codex"
+  - DEFAULT_FAST_MODEL = "zai-coding-plan/glm-4.7"
+- ✅ Created createModelConfig utility function to merge overrides with defaults
+- ✅ Extended RunHandlerOptions and StepHandlerOptions with smartModel and fastModel fields
+
+**P0: CLI Flags for Model Overrides**
+- ✅ Added --smart-model flag to run command (src/cli.ts)
+- ✅ Added --fast-model flag to run command (src/cli.ts)
+- ✅ Added --smart-model flag to step command (src/cli.ts)
+- ✅ Added --fast-model flag to step command (src/cli.ts)
+- ✅ Passed model flags from CLI to runHandler and stepHandler
+
+**P0: Model Placeholder Resolution**
+- ✅ Created model placeholder resolver in src/lib/models/resolver.ts
+  - Exported ResolveModelOptions interface
+  - Exported resolveModelPlaceholders function
+  - Uses global replace for {smart} and {fast} placeholders
+- ✅ Integrated model resolver into run command
+  - Calls resolveModelPlaceholders after resolvePrompt
+  - Passes resolved prompt to adapter.run()
+- ✅ Integrated model resolver into step command
+  - Calls resolveModelPlaceholders after resolvePrompt
+  - Passes resolved prompt to adapter.runWithPromptInteractive()
+
+**P0: OpenCodeAdapter Model Support**
+- ✅ Updated run() signature to accept optional model parameter
+- ✅ Updated runWithPromptInteractive() signature to accept optional model parameter
+- ✅ Conditional command building to pass --model flag to OpenCode CLI when provided
+- ✅ Both methods respect model parameter or omit it when undefined
+
+**P1: Test Coverage for Step Command**
+- ✅ Added tests for customPrompt in stepHandler
+- ✅ Added tests for permissionPosture variations
+- ✅ Added tests for model override flags (--smart-model, --fast-model)
+- ✅ Added tests for model placeholder resolution ({smart}, {fast} replacements)
+- ✅ Added tests for runWithPromptInteractive failure handling
+
+**P1: Test Coverage for Run Command Model Overrides**
+- ✅ Added tests for model override flags in run
+- ✅ Added tests for model placeholder resolution in run loop
+- ✅ All tests passing
+
+### Cross-Spec Dependencies
+- jbtd-002-spec-004 defines model defaults: ✅ Complete
+- jbtd-007-spec-001 (TUI with --prompt): ✅ Complete
+- jbtd-007-spec-002 (mode-aware args, model overrides): ✅ Complete
+- JBTD-007-spec-002 "model overrides applied consistently with run": ✅ Complete (both run and step have identical model support)
+
+### Key Implementation Details
+- Model overrides work identically in both run and step commands
+- Model placeholders in prompts are resolved before passing to OpenCode CLI
+- Default models are used when no override is provided
+- OpenCodeAdapter passes --model flag to CLI only when model is specified
+- All tests cover success and failure scenarios
+
+---
 
 ### P0: Output File Decision (COMPLETED)
 
@@ -228,3 +302,7 @@ Spec does not specify output file name/location. Options:
 - Validation errors abort inspect generation with clear message
 - InspectEntry interface defines output schema with 4 required fields: sessionId, iteration, startedAt, export
 - Field validation happens before export call to fail fast on corrupted data
+- Model defaults from jbtd-002-spec-004: {smart}→openai/gpt-5.2-codex, {fast}→zai-coding-plan/glm-4.7
+- Model placeholder resolver replaces {smart} and {fast} with actual model IDs before passing to OpenCode CLI
+- OpenCodeAdapter accepts optional model parameter and conditionally adds --model flag to CLI commands
+- Model overrides work identically in both run and step commands for consistency per jbtd-007-spec-002

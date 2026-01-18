@@ -68,6 +68,12 @@ describe("Command Handlers", () => {
         };
       });
 
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) => prompt),
+        };
+      });
+
       const mockConsoleError = mock();
       global.console.error = mockConsoleError;
 
@@ -106,6 +112,12 @@ describe("Command Handlers", () => {
       mock.module("../src/lib/prompts/resolver.js", () => {
         return {
           resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) => prompt),
         };
       });
 
@@ -152,6 +164,12 @@ describe("Command Handlers", () => {
         };
       });
 
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) => prompt),
+        };
+      });
+
       const mockLog = mock();
       global.console.log = mockLog;
 
@@ -190,12 +208,254 @@ describe("Command Handlers", () => {
         };
       });
 
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) => prompt),
+        };
+      });
+
       const mockLog = mock();
       global.console.log = mockLog;
 
       await runHandler({ mode: Mode.Plan, permissionPosture: "ask" });
 
       expect(mockLog).toHaveBeenCalledWith("Permissions: ask");
+    });
+
+    it("should use custom smart model override", async () => {
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            checkAvailability = mock(() =>
+              Promise.resolve({
+                available: true,
+                version: "1.0.0",
+              })
+            );
+
+            run = mock(() =>
+              Promise.resolve({
+                success: true,
+                output: "Output <promise>COMPLETE</promise>",
+              })
+            );
+          },
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Use {smart} for this")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) =>
+            prompt.replace("{smart}", "custom/smart-model")
+          ),
+        };
+      });
+
+      await runHandler({ mode: Mode.Plan, smartModel: "custom/smart-model" });
+
+      const { resolveModelPlaceholders } = await import("../src/lib/models/resolver.js");
+      expect(resolveModelPlaceholders).toHaveBeenCalledWith(
+        "Use {smart} for this",
+        { smart: "custom/smart-model", fast: "zai-coding-plan/glm-4.7" }
+      );
+    });
+
+    it("should use custom fast model override", async () => {
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            checkAvailability = mock(() =>
+              Promise.resolve({
+                available: true,
+                version: "1.0.0",
+              })
+            );
+
+            run = mock(() =>
+              Promise.resolve({
+                success: true,
+                output: "Output <promise>COMPLETE</promise>",
+              })
+            );
+          },
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Use {fast} for this")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) =>
+            prompt.replace("{fast}", "custom/fast-model")
+          ),
+        };
+      });
+
+      await runHandler({ mode: Mode.Plan, fastModel: "custom/fast-model" });
+
+      const { resolveModelPlaceholders } = await import("../src/lib/models/resolver.js");
+      expect(resolveModelPlaceholders).toHaveBeenCalledWith(
+        "Use {fast} for this",
+        { smart: "openai/gpt-5.2-codex", fast: "custom/fast-model" }
+      );
+    });
+
+    it("should use both model overrides together", async () => {
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            checkAvailability = mock(() =>
+              Promise.resolve({
+                available: true,
+                version: "1.0.0",
+              })
+            );
+
+            run = mock(() =>
+              Promise.resolve({
+                success: true,
+                output: "Output <promise>COMPLETE</promise>",
+              })
+            );
+          },
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Use {smart} and {fast}")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) =>
+            prompt
+              .replace("{smart}", "custom/smart-model")
+              .replace("{fast}", "custom/fast-model")
+          ),
+        };
+      });
+
+      await runHandler({
+        mode: Mode.Plan,
+        smartModel: "custom/smart-model",
+        fastModel: "custom/fast-model",
+      });
+
+      const { resolveModelPlaceholders } = await import("../src/lib/models/resolver.js");
+      expect(resolveModelPlaceholders).toHaveBeenCalledWith(
+        "Use {smart} and {fast}",
+        { smart: "custom/smart-model", fast: "custom/fast-model" }
+      );
+    });
+
+    it("should use default models when no overrides provided", async () => {
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            checkAvailability = mock(() =>
+              Promise.resolve({
+                available: true,
+                version: "1.0.0",
+              })
+            );
+
+            run = mock(() =>
+              Promise.resolve({
+                success: true,
+                output: "Output <promise>COMPLETE</promise>",
+              })
+            );
+          },
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Use {smart} and {fast}")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) =>
+            prompt
+              .replace("{smart}", "openai/gpt-5.2-codex")
+              .replace("{fast}", "zai-coding-plan/glm-4.7")
+          ),
+        };
+      });
+
+      await runHandler({ mode: Mode.Plan });
+
+      const { resolveModelPlaceholders } = await import("../src/lib/models/resolver.js");
+      expect(resolveModelPlaceholders).toHaveBeenCalledWith(
+        "Use {smart} and {fast}",
+        { smart: "openai/gpt-5.2-codex", fast: "zai-coding-plan/glm-4.7" }
+      );
+    });
+
+    it("should resolve model placeholders in run loop", async () => {
+      let capturedRunCall: any;
+
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            checkAvailability = mock(() =>
+              Promise.resolve({
+                available: true,
+                version: "1.0.0",
+              })
+            );
+
+            run = mock((prompt: string, model?: string) => {
+              capturedRunCall = { prompt, model };
+              return Promise.resolve({
+                success: true,
+                output: "Output with smart model and fast model <promise>COMPLETE</promise>",
+              });
+            });
+          },
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Use {smart} and {fast}")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) =>
+            prompt
+              .replace("{smart}", "openai/gpt-5.2-codex")
+              .replace("{fast}", "zai-coding-plan/glm-4.7")
+          ),
+        };
+      });
+
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await runHandler({ mode: Mode.Plan });
+
+      const { resolveModelPlaceholders } = await import("../src/lib/models/resolver.js");
+
+      expect(resolveModelPlaceholders).toHaveBeenCalled();
+      expect(capturedRunCall.prompt).toBe("Use openai/gpt-5.2-codex and zai-coding-plan/glm-4.7");
+      expect(capturedRunCall.model).toBe("openai/gpt-5.2-codex");
     });
   });
 
@@ -223,6 +483,12 @@ describe("Command Handlers", () => {
       mock.module("../src/lib/prompts/resolver.js", () => {
         return {
           resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) => prompt),
         };
       });
     });
@@ -257,6 +523,18 @@ describe("Command Handlers", () => {
         };
       });
 
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) => prompt),
+        };
+      });
+
       const mockConsoleError = mock();
       global.console.error = mockConsoleError;
 
@@ -269,6 +547,330 @@ describe("Command Handlers", () => {
       );
 
       mockExit.mockRestore();
+    });
+
+    it("should use custom prompt when provided", async () => {
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock((options) =>
+            Promise.resolve(options.customPrompt || "Default prompt")
+          ),
+        };
+      });
+
+      let capturedPrompt: any;
+
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            checkAvailability = mock(() =>
+              Promise.resolve({
+                available: true,
+                version: "1.0.0",
+              })
+            );
+
+            runWithPromptInteractive = mock((prompt: string) => {
+              capturedPrompt = prompt;
+              return Promise.resolve({ success: true });
+            });
+          },
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) => prompt),
+        };
+      });
+
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await stepHandler({ mode: Mode.Plan, customPrompt: "My custom prompt" });
+
+      const { resolvePrompt } = await import("../src/lib/prompts/resolver.js");
+      expect(resolvePrompt).toHaveBeenCalledWith({
+        mode: Mode.Plan,
+        customPrompt: "My custom prompt",
+      });
+      expect(capturedPrompt).toContain("My custom prompt");
+    });
+
+    it("should use ask permission posture", async () => {
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            checkAvailability = mock(() =>
+              Promise.resolve({
+                available: true,
+                version: "1.0.0",
+              })
+            );
+
+            runWithPromptInteractive = mock(() =>
+              Promise.resolve({
+                success: true,
+              })
+            );
+          },
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) => prompt),
+        };
+      });
+
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await stepHandler({ mode: Mode.Plan, permissionPosture: "ask" });
+
+      expect(mockLog).toHaveBeenCalledWith("Permissions: ask");
+    });
+
+    it("should use custom smart model override", async () => {
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            checkAvailability = mock(() =>
+              Promise.resolve({
+                available: true,
+                version: "1.0.0",
+              })
+            );
+
+            runWithPromptInteractive = mock(() =>
+              Promise.resolve({
+                success: true,
+              })
+            );
+          },
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Use {smart} for this")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) =>
+            prompt.replace("{smart}", "custom/smart-model")
+          ),
+        };
+      });
+
+      await stepHandler({ mode: Mode.Plan, smartModel: "custom/smart-model" });
+
+      const { resolveModelPlaceholders } = await import("../src/lib/models/resolver.js");
+      expect(resolveModelPlaceholders).toHaveBeenCalledWith(
+        "Use {smart} for this",
+        { smart: "custom/smart-model", fast: "zai-coding-plan/glm-4.7" }
+      );
+    });
+
+    it("should use custom fast model override", async () => {
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            checkAvailability = mock(() =>
+              Promise.resolve({
+                available: true,
+                version: "1.0.0",
+              })
+            );
+
+            runWithPromptInteractive = mock(() =>
+              Promise.resolve({
+                success: true,
+              })
+            );
+          },
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Use {fast} for this")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) =>
+            prompt.replace("{fast}", "custom/fast-model")
+          ),
+        };
+      });
+
+      await stepHandler({ mode: Mode.Plan, fastModel: "custom/fast-model" });
+
+      const { resolveModelPlaceholders } = await import("../src/lib/models/resolver.js");
+      expect(resolveModelPlaceholders).toHaveBeenCalledWith(
+        "Use {fast} for this",
+        { smart: "openai/gpt-5.2-codex", fast: "custom/fast-model" }
+      );
+    });
+
+    it("should use both model overrides together", async () => {
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            checkAvailability = mock(() =>
+              Promise.resolve({
+                available: true,
+                version: "1.0.0",
+              })
+            );
+
+            runWithPromptInteractive = mock(() =>
+              Promise.resolve({
+                success: true,
+              })
+            );
+          },
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Use {smart} and {fast}")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) =>
+            prompt
+              .replace("{smart}", "custom/smart-model")
+              .replace("{fast}", "custom/fast-model")
+          ),
+        };
+      });
+
+      await stepHandler({
+        mode: Mode.Plan,
+        smartModel: "custom/smart-model",
+        fastModel: "custom/fast-model",
+      });
+
+      const { resolveModelPlaceholders } = await import("../src/lib/models/resolver.js");
+      expect(resolveModelPlaceholders).toHaveBeenCalledWith(
+        "Use {smart} and {fast}",
+        { smart: "custom/smart-model", fast: "custom/fast-model" }
+      );
+    });
+
+    it("should fail if runWithPromptInteractive fails", async () => {
+      const mockExit = mock((code: number) => {
+        throw new Error(`process.exit(${code})`);
+      });
+
+      global.process.exit = mockExit;
+
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            checkAvailability = mock(() =>
+              Promise.resolve({
+                available: true,
+                version: "1.0.0",
+              })
+            );
+
+            runWithPromptInteractive = mock(() =>
+              Promise.resolve({
+                success: false,
+                error: "Interactive run failed",
+              })
+            );
+          },
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) => prompt),
+        };
+      });
+
+      const mockConsoleError = mock();
+      global.console.error = mockConsoleError;
+
+      await expect(stepHandler({ mode: Mode.Build })).rejects.toThrow(
+        "process.exit(1)"
+      );
+
+      expect(mockConsoleError).toHaveBeenCalledWith("Interactive run failed");
+
+      mockExit.mockRestore();
+    });
+
+    it("should resolve model placeholders and pass to interactive run", async () => {
+      let capturedRunCall: any;
+
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            checkAvailability = mock(() =>
+              Promise.resolve({
+                available: true,
+                version: "1.0.0",
+              })
+            );
+
+            runWithPromptInteractive = mock((prompt: string, model?: string) => {
+              capturedRunCall = { prompt, model };
+              return Promise.resolve({ success: true });
+            });
+          },
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Use {smart} and {fast}")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) =>
+            prompt
+              .replace("{smart}", "custom/smart-model")
+              .replace("{fast}", "custom/fast-model")
+          ),
+        };
+      });
+
+      await stepHandler({
+        mode: Mode.Plan,
+        smartModel: "custom/smart-model",
+        fastModel: "custom/fast-model",
+      });
+
+      const { resolveModelPlaceholders } = await import("../src/lib/models/resolver.js");
+
+      expect(resolveModelPlaceholders).toHaveBeenCalled();
+      expect(capturedRunCall.prompt).toBe("Use custom/smart-model and custom/fast-model");
+      expect(capturedRunCall.model).toBe("custom/smart-model");
     });
   });
 

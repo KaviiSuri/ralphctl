@@ -1,6 +1,7 @@
-import { Mode, type SessionState } from "../../domain/types.js";
+import { Mode, type SessionState, createModelConfig } from "../../domain/types.js";
 import { OpenCodeAdapter } from "../opencode/adapter.js";
 import { resolvePrompt } from "../prompts/resolver.js";
+import { resolveModelPlaceholders } from "../models/resolver.js";
 import { readSessionsFile, writeSessionsFile } from "../state/index.js";
 
 const COMPLETION_PROMISE = "<promise>COMPLETE</promise>";
@@ -11,11 +12,15 @@ export interface RunHandlerOptions {
   mode: Mode;
   maxIterations?: number;
   permissionPosture?: PermissionPosture;
+  smartModel?: string;
+  fastModel?: string;
 }
 
 export async function runHandler(options: RunHandlerOptions): Promise<void> {
-  const { mode, maxIterations = 10, permissionPosture = "allow-all" } = options;
-  
+  const { mode, maxIterations = 10, permissionPosture = "allow-all", smartModel, fastModel } = options;
+   
+  const modelConfig = createModelConfig(smartModel, fastModel);
+   
   const adapter = new OpenCodeAdapter({ 
     env: { 
       ...process.env,
@@ -39,7 +44,8 @@ export async function runHandler(options: RunHandlerOptions): Promise<void> {
   try {
     while (iteration <= maxIterations && !completed) {
       const prompt = await resolvePrompt({ mode });
-      const result = await adapter.run(prompt);
+      const resolvedPrompt = resolveModelPlaceholders(prompt, modelConfig);
+      const result = await adapter.run(resolvedPrompt, modelConfig.smart);
       
       if (!result.success) {
         console.error(result.error || "Failed to run iteration");

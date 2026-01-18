@@ -31,13 +31,23 @@ const cli = Cli()
         description: "Permission posture for file operations",
         default: "allow-all",
       },
+      "smart-model": {
+        type: String,
+        description: "Override smart model (default: openai/gpt-5.2-codex)",
+      },
+      "fast-model": {
+        type: String,
+        description: "Override fast model (default: zai-coding-plan/glm-4.7)",
+      },
     },
   })
   .on("run", async (ctx) => {
-    await runHandler({ 
-      mode: ctx.parameters.mode, 
+    await runHandler({
+      mode: ctx.parameters.mode,
       maxIterations: ctx.flags["max-iterations"],
-      permissionPosture: ctx.flags["permission-posture"] as "allow-all" | "ask"
+      permissionPosture: ctx.flags["permission-posture"] as "allow-all" | "ask",
+      smartModel: ctx.flags["smart-model"],
+      fastModel: ctx.flags["fast-model"],
     });
   })
   .command("step", "Run a single interactive iteration", {
@@ -59,13 +69,23 @@ const cli = Cli()
         description: "Permission posture for file operations",
         default: "allow-all",
       },
+      "smart-model": {
+        type: String,
+        description: "Override smart model (default: openai/gpt-5.2-codex)",
+      },
+      "fast-model": {
+        type: String,
+        description: "Override fast model (default: zai-coding-plan/glm-4.7)",
+      },
     },
   })
   .on("step", async (ctx) => {
-    await stepHandler({ 
-      mode: ctx.parameters.mode, 
+    await stepHandler({
+      mode: ctx.parameters.mode,
       customPrompt: ctx.parameters.prompt,
-      permissionPosture: ctx.flags["permission-posture"] as "allow-all" | "ask"
+      permissionPosture: ctx.flags["permission-posture"] as "allow-all" | "ask",
+      smartModel: ctx.flags["smart-model"],
+      fastModel: ctx.flags["fast-model"],
     });
   })
   .command("inspect", "Inspect run exports")
