@@ -664,6 +664,237 @@
       "startedAt": "2026-01-18T08:14:52.971Z",
       "mode": "plan",
       "prompt": "Use {smart} and {fast}"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:48:51.871Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 2,
+      "sessionId": "unknown-2",
+      "startedAt": "2026-01-18T13:48:51.871Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 3,
+      "sessionId": "unknown-3",
+      "startedAt": "2026-01-18T13:48:51.872Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:48:51.872Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 2,
+      "sessionId": "unknown-2",
+      "startedAt": "2026-01-18T13:48:51.872Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:48:51.873Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:48:51.874Z",
+      "mode": "plan",
+      "prompt": "Use {smart} for this"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:48:51.874Z",
+      "mode": "plan",
+      "prompt": "Use {fast} for this"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:48:51.875Z",
+      "mode": "plan",
+      "prompt": "Use {smart} and {fast}"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:48:51.875Z",
+      "mode": "plan",
+      "prompt": "Use {smart} and {fast}"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:48:51.876Z",
+      "mode": "plan",
+      "prompt": "Use {smart} and {fast}"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:50:38.385Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 2,
+      "sessionId": "unknown-2",
+      "startedAt": "2026-01-18T13:50:38.385Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 3,
+      "sessionId": "unknown-3",
+      "startedAt": "2026-01-18T13:50:38.385Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:50:38.386Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 2,
+      "sessionId": "unknown-2",
+      "startedAt": "2026-01-18T13:50:38.386Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:50:38.387Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:50:38.387Z",
+      "mode": "plan",
+      "prompt": "Use {smart} for this"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:50:38.389Z",
+      "mode": "plan",
+      "prompt": "Use {fast} for this"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:50:38.390Z",
+      "mode": "plan",
+      "prompt": "Use {smart} and {fast}"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:50:38.390Z",
+      "mode": "plan",
+      "prompt": "Use {smart} and {fast}"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:50:38.391Z",
+      "mode": "plan",
+      "prompt": "Use {smart} and {fast}"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:51:38.480Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 2,
+      "sessionId": "unknown-2",
+      "startedAt": "2026-01-18T13:51:38.480Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 3,
+      "sessionId": "unknown-3",
+      "startedAt": "2026-01-18T13:51:38.481Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:51:38.481Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 2,
+      "sessionId": "unknown-2",
+      "startedAt": "2026-01-18T13:51:38.482Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:51:38.482Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:51:38.483Z",
+      "mode": "plan",
+      "prompt": "Use {smart} for this"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:51:38.484Z",
+      "mode": "plan",
+      "prompt": "Use {fast} for this"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:51:38.484Z",
+      "mode": "plan",
+      "prompt": "Use {smart} and {fast}"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:51:38.485Z",
+      "mode": "plan",
+      "prompt": "Use {smart} and {fast}"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T13:51:38.485Z",
+      "mode": "plan",
+      "prompt": "Use {smart} and {fast}"
     }
   ]
 }

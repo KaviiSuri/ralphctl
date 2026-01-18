@@ -1,12 +1,16 @@
 import { Cli, Types, friendlyErrorPlugin, notFoundPlugin } from "clerc";
+import path from "path";
 import { Mode, type InitOptions } from "./domain/types.js";
 import { runHandler } from "./lib/commands/run.js";
 import { stepHandler } from "./lib/commands/step.js";
 import { inspectHandler } from "./lib/commands/inspect.js";
 import { initHandler } from "./lib/commands/init.js";
 
-const getCommandName = () => {
-  return process.argv[1] ? process.argv[1].split("/").pop() as string : "ralphctl";
+const getCommandName = (): string => {
+  if (!process.argv[1]) return "ralphctl";
+  
+  const name = path.basename(process.argv[1]);
+  return name || "ralphctl";
 };
 
 const cli = Cli()
