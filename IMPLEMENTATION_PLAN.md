@@ -306,3 +306,6 @@ Spec does not specify output file name/location. Options:
 - Model placeholder resolver replaces {smart} and {fast} with actual model IDs before passing to OpenCode CLI
 - OpenCodeAdapter accepts optional model parameter and conditionally adds --model flag to CLI commands
 - Model overrides work identically in both run and step commands for consistency per jbtd-007-spec-002
+- clerc's scriptName is hardcoded, not auto-detected; use process.argv[1].split("/").pop() to detect actual command name
+- Dynamic command name detection allows both 'ralphctl' and 'rctl' aliases to display correct help text
+- package.json bin section supports multiple aliases pointing to same entrypoint file
