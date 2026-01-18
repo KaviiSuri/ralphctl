@@ -4,16 +4,18 @@ import { writeFile } from "../files/index.js";
 import type { InspectEntry } from "../../domain/types.js";
 import type { SessionState } from "../../domain/types.js";
 
-const INSPECT_OUTPUT_FILE = "inspect.json";
+const DEFAULT_OUTPUT_FILE = "inspect.json";
 
-export async function inspectHandler(): Promise<void> {
+export async function inspectHandler(options?: { output?: string }): Promise<void> {
   const adapter = new OpenCodeAdapter();
+  
+  const outputFile = options?.output ?? DEFAULT_OUTPUT_FILE;
   
   const sessions = await readSessionsFile();
   
   if (sessions.length === 0) {
     console.log("No sessions found in .ralphctl/ralph-sessions.json");
-    await writeFile(INSPECT_OUTPUT_FILE, JSON.stringify([], null, 2));
+    await writeFile(outputFile, JSON.stringify([], null, 2));
     return;
   }
   
@@ -55,8 +57,8 @@ export async function inspectHandler(): Promise<void> {
   }
   
   try {
-    await writeFile(INSPECT_OUTPUT_FILE, JSON.stringify(entries, null, 2));
-    console.log(`Exported ${entries.length} session(s) to ${INSPECT_OUTPUT_FILE}`);
+    await writeFile(outputFile, JSON.stringify(entries, null, 2));
+    console.log(`Exported ${entries.length} session(s) to ${outputFile}`);
   } catch (error) {
     console.error(`Failed to write inspect file: ${error}`);
     process.exit(1);

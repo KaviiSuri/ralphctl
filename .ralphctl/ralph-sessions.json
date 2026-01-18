@@ -895,6 +895,83 @@
       "startedAt": "2026-01-18T13:51:38.485Z",
       "mode": "plan",
       "prompt": "Use {smart} and {fast}"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T14:20:04.342Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 2,
+      "sessionId": "unknown-2",
+      "startedAt": "2026-01-18T14:20:04.343Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 3,
+      "sessionId": "unknown-3",
+      "startedAt": "2026-01-18T14:20:04.343Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T14:20:04.344Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 2,
+      "sessionId": "unknown-2",
+      "startedAt": "2026-01-18T14:20:04.344Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T14:20:04.344Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T14:20:04.346Z",
+      "mode": "plan",
+      "prompt": "Use {smart} for this"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T14:20:04.346Z",
+      "mode": "plan",
+      "prompt": "Use {fast} for this"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T14:20:04.347Z",
+      "mode": "plan",
+      "prompt": "Use {smart} and {fast}"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T14:20:04.347Z",
+      "mode": "plan",
+      "prompt": "Use {smart} and {fast}"
+    },
+    {
+      "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-18T14:20:04.348Z",
+      "mode": "plan",
+      "prompt": "Use {smart} and {fast}"
     }
   ]
 }

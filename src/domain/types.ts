@@ -23,6 +23,10 @@ export interface InitOptions {
   force?: boolean;
 }
 
+export interface InspectOptions {
+  output?: string;
+}
+
 export interface SessionState {
   iteration: number;
   sessionId: string;

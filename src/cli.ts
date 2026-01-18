@@ -96,9 +96,16 @@ const cli = Cli()
       fastModel: ctx.flags["fast-model"],
     });
   })
-  .command("inspect", "Inspect run exports")
-  .on("inspect", async () => {
-    await inspectHandler();
+  .command("inspect", "Inspect run exports", {
+    flags: {
+      output: {
+        type: String,
+        description: "Output file path (default: inspect.json)",
+      },
+    },
+  })
+  .on("inspect", async (ctx) => {
+    await inspectHandler({ output: ctx.flags.output as string });
   })
   .command("init", "Initialize default prompt templates", {
     flags: {

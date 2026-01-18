@@ -178,25 +178,20 @@
 - [x] P2: Add comprehensive tests for inspectHandler in tests/handlers.spec.ts
   - [x] P2: Test basic flow: read sessions, export all, write JSON file
   - [x] P2: Test empty sessions array outputs `[]`
-  - [x] P2: Test export failure skips session and continues
-  - [x] P2: Test missing required fields cause validation error
-  - [x] P2: Test output file format is valid JSON
-  - [x] P2: Test array length matches session count (jbtd-006-spec-002)
-  - [x] P2: Test export field contains raw output from adapter
+ - [x] P2: Test export failure skips session and continues
+ - [x] P2: Test missing required fields cause validation error
+ - [x] P2: Test output file format is valid JSON
+ - [x] P2: Test array length matches session count (jbtd-006-spec-002)
+ - [x] P2: Test export field contains raw output from adapter
 
-- [ ] P2: Consider adding output file path parameter
-   - [ ] P2: Allow user to specify output file via CLI flag: `--output inspect.json`
-   - [ ] P2: Default to `inspect.json` in current working directory
-
-- [ ] P2: Add JSON parsing validation for export data
-   - [ ] P2: Verify export output is parseable JSON before writing
-   - [ ] P2: Warn if export is invalid JSON but still include raw output
-   - [ ] P2: This ensures jq compatibility (jbtd-006-spec-002) without modifying raw output
-
-- [ ] P2: Consider file naming convention with mode filtering
-   - [ ] P2: Could add `--mode plan|build` flag to filter sessions by mode
-   - [ ] P2: Would require adding mode field to InspectEntry schema
-   - [ ] P2: Keep for future enhancement if needed
+- [x] P2: Add output file path parameter
+   - [x] P2: Allow user to specify output file via CLI flag: `--output inspect.json`
+   - [x] P2: Default to `inspect.json` in current working directory
+   - [x] P2: Add InspectOptions interface to domain types
+   - [x] P2: Update inspectHandler to accept options parameter
+   - [x] P2: Add --output flag to inspect command in CLI
+   - [x] P2: Add tests for default and custom output paths
+   - [x] P2: All tests passing (58 total)
 
 ---
 

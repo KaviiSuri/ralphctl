@@ -1255,6 +1255,141 @@ describe("Command Handlers", () => {
 
       mockExit.mockRestore();
     });
+
+    it("should use default output file when no output option provided", async () => {
+      const mockSessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_test1",
+          startedAt: "2024-01-01T00:00:00Z",
+          mode: "plan",
+          prompt: "Test prompt",
+        },
+      ];
+
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          writeSessionsFile: mock(() => Promise.resolve()),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            export = mock(() =>
+              Promise.resolve({
+                success: true,
+                output: "Exported data",
+              })
+            );
+          },
+        };
+      });
+
+      const { writeFile } = await import("../src/lib/files/index.js");
+      const mockLog = mock();
+      const mockError = mock();
+      global.console.log = mockLog;
+      global.console.error = mockError;
+
+      await inspectHandler();
+
+      expect(writeFile).toHaveBeenCalledWith(
+        "inspect.json",
+        JSON.stringify(
+          [
+            {
+              sessionId: "ses_test1",
+              iteration: 1,
+              startedAt: "2024-01-01T00:00:00Z",
+              export: "Exported data",
+            },
+          ],
+          null,
+          2
+        )
+      );
+      expect(mockLog).toHaveBeenCalledWith("Exported 1 session(s) to inspect.json");
+    });
+
+    it("should use custom output file when output option provided", async () => {
+      const mockSessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_test1",
+          startedAt: "2024-01-01T00:00:00Z",
+          mode: "plan",
+          prompt: "Test prompt",
+        },
+      ];
+
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          writeSessionsFile: mock(() => Promise.resolve()),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
+      mock.module("../src/lib/opencode/adapter.js", () => {
+        return {
+          OpenCodeAdapter: class {
+            export = mock(() =>
+              Promise.resolve({
+                success: true,
+                output: "Exported data",
+              })
+            );
+          },
+        };
+      });
+
+      const { writeFile } = await import("../src/lib/files/index.js");
+      const mockLog = mock();
+      const mockError = mock();
+      global.console.log = mockLog;
+      global.console.error = mockError;
+
+      await inspectHandler({ output: "custom-output.json" });
+
+      expect(writeFile).toHaveBeenCalledWith(
+        "custom-output.json",
+        JSON.stringify(
+          [
+            {
+              sessionId: "ses_test1",
+              iteration: 1,
+              startedAt: "2024-01-01T00:00:00Z",
+              export: "Exported data",
+            },
+          ],
+          null,
+          2
+        )
+      );
+      expect(mockLog).toHaveBeenCalledWith("Exported 1 session(s) to custom-output.json");
+    });
+
+    it("should use custom output file for empty sessions", async () => {
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve([])),
+          writeSessionsFile: mock(() => Promise.resolve()),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
+      const { writeFile } = await import("../src/lib/files/index.js");
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await inspectHandler({ output: "custom-empty.json" });
+
+      expect(writeFile).toHaveBeenCalledWith("custom-empty.json", "[]");
+      expect(mockLog).toHaveBeenCalledWith("No sessions found in .ralphctl/ralph-sessions.json");
+    });
   });
 
   describe("initHandler", () => {
