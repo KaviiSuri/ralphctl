@@ -75,7 +75,7 @@ export class OpenCodeAdapter {
 
   async run(prompt: string, model?: string): Promise<OpenCodeRunResult> {
     const command = model
-      ? ["opencode", "run", "--model", model, prompt]
+      ? ["opencode", "run", "--model", model, "--agent", "build", prompt]
       : ["opencode", "run", prompt];
     
     const result = await this.executeCommand(command);
