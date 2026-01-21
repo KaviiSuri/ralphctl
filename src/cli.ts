@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 import { Cli, Types, friendlyErrorPlugin, notFoundPlugin } from "clerc";
 import path from "path";
 import { Mode, type InitOptions } from "./domain/types.js";

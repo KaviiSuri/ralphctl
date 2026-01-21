@@ -56,7 +56,7 @@ export interface ModelConfig {
   fast: string;
 }
 
-export const DEFAULT_SMART_MODEL = "openai/gpt-5.2-codex";
+export const DEFAULT_SMART_MODEL = "zai-coding-plan/glm-4.7";
 export const DEFAULT_FAST_MODEL = "zai-coding-plan/glm-4.7";
 
 export function createModelConfig(smartOverride?: string, fastOverride?: string): ModelConfig {
