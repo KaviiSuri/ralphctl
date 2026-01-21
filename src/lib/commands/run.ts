@@ -4,14 +4,10 @@ import { resolvePrompt } from "../prompts/resolver.js";
 import { resolveModelPlaceholders } from "../models/resolver.js";
 import { readSessionsFile, writeSessionsFile } from "../state/index.js";
 
-const COMPLETION_PROMISE = "<promise>COMPLETE</promise>";
-
-export type PermissionPosture = "allow-all" | "ask";
-
 export interface RunHandlerOptions {
   mode: Mode;
   maxIterations?: number;
-  permissionPosture?: PermissionPosture;
+  permissionPosture?: "allow-all" | "ask";
   smartModel?: string;
   fastModel?: string;
 }
@@ -28,9 +24,9 @@ export async function runHandler(options: RunHandlerOptions): Promise<void> {
     } 
   });
   
-  const availability = await adapter.checkAvailability();
-  if (!availability.available) {
-    console.error(availability.error || "OpenCode is not available");
+  const available = await adapter.checkAvailability();
+  if (!available) {
+    console.error("OpenCode is not available");
     process.exit(1);
   }
 
@@ -47,14 +43,14 @@ export async function runHandler(options: RunHandlerOptions): Promise<void> {
       const resolvedPrompt = resolveModelPlaceholders(prompt, modelConfig);
       const result = await adapter.run(resolvedPrompt, modelConfig.smart);
       
-      if (!result.success) {
-        console.error(result.error || "Failed to run iteration");
+      if (result.exitCode !== 0) {
+        console.error(result.stderr || "Failed to run iteration");
         process.exit(1);
       }
 
       const sessionId = result.sessionId || `unknown-${iteration}`;
       console.log(`\n--- Iteration ${iteration}/${maxIterations} (Session: ${sessionId}) ---`);
-      console.log(result.output);
+      console.log(result.stdout);
 
       const sessionState: SessionState = {
         iteration,
@@ -66,7 +62,7 @@ export async function runHandler(options: RunHandlerOptions): Promise<void> {
       sessions.push(sessionState);
       await writeSessionsFile(sessions);
 
-      if (result.output.includes(COMPLETION_PROMISE)) {
+      if (result.completionDetected) {
         console.log(`\n--- Iteration ${iteration}/${maxIterations} Complete (Session: ${sessionId}) ---`);
         console.log(`\n✓ Completed in ${iteration} iteration(s)`);
         completed = true;

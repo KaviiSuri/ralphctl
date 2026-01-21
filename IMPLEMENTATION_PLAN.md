@@ -1,3 +1,23 @@
+# Implementation Plan
+
+## Dependency Chain Diagram
+
+```
+JTBD-102-SPEC-001 (Agent Adapter Interface - FOUNDATION) ✅ COMPLETE
+        ↓
+JTBD-102-SPEC-002 (ClaudeCodeAdapter Implementation) [NEXT]
+        ↓
+JTBD-101-SPEC-001 (Agent Selection via CLI/Env)
+        ↓
+JTBD-103-SPEC-001 (Claude Code Project Mode)
+        ↓
+JTBD-104-SPEC-001 (Agent-Aware Session Management)
+```
+
+---
+
+## JBTD-001: CLI Command Surface [COMPLETED]
+
 - [x] P0: Research and select a good zod-based typesafe CLI library (e.g., `clerc`, `zod-cli`, or similar) that integrates well with Bun/TypeScript
 - [x] P0: Add Bun + TypeScript setup (`package.json`, `bunfig.toml`, `tsconfig.json`) and ensure `bun run typecheck` is available
 - [x] P0: Scaffold baseline project layout with `src/`, `src/lib/` (standard library), `src/domain/` (business logic), and CLI entrypoint (`src/cli.ts`)
@@ -10,7 +30,12 @@
 - [x] P1: Wire command handler registry (stubs) in `src/lib/commands/*` with no extra commands beyond the core set
 - [x] P1: Ensure business logic is decoupled from CLI library - main file (`src/cli.ts`) should use domain types, not library-specific types
 - [x] P2: Add brief CLI usage reference in existing docs (optional) once help text is finalized
-- [x] P0: Create a shared process runner under `src/lib/process/` (Bun.spawn-based) for CLI execution with consistent stdout/stderr capture
+
+---
+
+## JBTD-002: Mode Contract, Prompt Defaults, Loop Termination, Model Defaults [COMPLETED]
+
+- [x] P0: Create shared process runner under `src/lib/process/` (Bun.spawn-based) for CLI execution with consistent stdout/stderr capture
 - [x] P0: Create a shared OpenCode CLI adapter under `src/lib/opencode/` that uses the process runner and never the SDK
 - [x] P0: Add `opencode --version` availability check for `run` and `step` (fail early if unavailable)
 - [x] P0: Wire `run` handler to invoke `opencode run` via the adapter (still stub logic, but CLI-based)
@@ -24,11 +49,16 @@
   - Added iteration markers showing progress
   - Graceful handling of max iterations and manual interruption
   - Tests for completion, max iterations, and multiple iterations
-- [x] P1: Implement `step` prompt overrides per jbtd-007-spec-001/002 (mode-aware prompt arguments)
+
+---
+
+## JBTD-003: Permission Posture Handling [COMPLETED]
+
+- [x] P0: Implement `step` prompt overrides per jbtd-007-spec-001/002 (mode-aware prompt arguments)
    - ✅ COMPLETED: Model overrides fully implemented for both run and step
    - See JBTD-007 section below for implementation details
 - [x] P1: Add permissions posture handling and log effective posture before first iteration (jbtd-003-spec-001/002)
- - [x] P2: Validate command expectations and `rctl` alias behaviors against jbtd-001-spec-001/003
+- [x] P2: Validate command expectations and `rctl` alias behaviors against jbtd-001-spec-001/003
 
 ---
 
@@ -109,10 +139,10 @@
   - [x] P2: Log session ID mapping for debugging purposes
   - [x] P2: Add test to verify no --continue or --session flags are passed implicitly
 
- - [x] P2: Update inspect handler integration
-    - [x] P2: Replace hardcoded sessionId placeholder in src/lib/commands/inspect.ts with session reading logic
-    - [x] P2: Read from .ralphctl/ralph-sessions.json to get session history
-    - [x] P0: Export session data matching JBTD-006 specs (see JBTD-006 section below)
+- [x] P2: Update inspect handler integration
+   - [x] P2: Replace hardcoded sessionId placeholder in src/lib/commands/inspect.ts with session reading logic
+   - [x] P2: Read from .ralphctl/ralph-sessions.json to get session history
+   - [x] P0: Export session data matching JBTD-006 specs (see JBTD-006 section below)
 
 ---
 
@@ -178,11 +208,11 @@
 - [x] P2: Add comprehensive tests for inspectHandler in tests/handlers.spec.ts
   - [x] P2: Test basic flow: read sessions, export all, write JSON file
   - [x] P2: Test empty sessions array outputs `[]`
- - [x] P2: Test export failure skips session and continues
- - [x] P2: Test missing required fields cause validation error
- - [x] P2: Test output file format is valid JSON
- - [x] P2: Test array length matches session count (jbtd-006-spec-002)
- - [x] P2: Test export field contains raw output from adapter
+  - [x] P2: Test export failure skips session and continues
+  - [x] P2: Test missing required fields cause validation error
+  - [x] P2: Test output file format is valid JSON
+  - [x] P2: Test array length matches session count (jbtd-006-spec-002)
+  - [x] P2: Test export field contains raw output from adapter
 
 - [x] P2: Add output file path parameter
    - [x] P2: Allow user to specify output file via CLI flag: `--output inspect.json`
@@ -276,31 +306,290 @@ Spec does not specify output file name/location. Options:
 
 ---
 
+## JTBD Series: Agent Support
+
+### Dependency Chain
+```
+JTBD-102-SPEC-001 (Agent Adapter Interface - FOUNDATION)
+        ↓
+JTBD-102-SPEC-002 (ClaudeCodeAdapter Implementation)
+        ↓
+JTBD-101-SPEC-001 (Agent Selection via CLI/Env)
+        ↓
+JTBD-103-SPEC-001 (Claude Code Project Mode)
+        ↓
+JTBD-104-SPEC-001 (Agent-Aware Session Management)
+```
+
+---
+
+## JTBD-102-SPEC-001: Agent Adapter Interface [P0 - FOUNDATION] ✅ COMPLETED
+
+**CRITICAL: This is the FOUNDATION for all other JTBD specs. Must implement first.**
+
+- [x] P0: Create `src/domain/agent.ts` with AgentAdapter interface
+  - [x] P0: Define `AgentType` enum with values "opencode" and "claude-code"
+  - [x] P0: Define `AgentRunOptions` interface (prompt, model, maxIterations, permissionPosture)
+  - [x] P0: Define `AgentRunResult` interface (stdout, stderr, sessionId, completionDetected, exitCode)
+  - [x] P0: Define `AgentExportResult` interface (exportData, success, error)
+  - [x] P0: Define `AgentMetadata` interface (name, displayName, version, cliCommand)
+  - [x] P0: Define `AgentAdapter` interface with methods:
+    - `checkAvailability(): Promise<boolean>`
+    - `run(prompt: string, model: string, options?: AgentRunOptions): Promise<AgentRunResult>`
+    - `runInteractive(prompt: string, model: string, options?: AgentRunOptions): Promise<void>`
+    - `export(sessionId: string): Promise<AgentExportResult>`
+    - `getMetadata(): AgentMetadata`
+
+- [x] P0: Update OpenCodeAdapter to implement AgentAdapter interface
+  - [x] P0: Rename/move existing OpenCode adapter to conform to interface
+  - [x] P0: Implement all interface methods (run, runInteractive, export, getMetadata, checkAvailability)
+  - [x] P0: Add `getMetadata()` method to OpenCodeAdapter that returns:
+    - name: "opencode"
+    - displayName: "OpenCode"
+    - version: from cached `opencode --version`
+    - cliCommand: "opencode"
+  - [x] P0: Add `detectCompletion()` helper method for `<promise>COMPLETE</promise>` detection
+
+- [x] P0: Create type exports in src/domain/index.ts
+  - [x] P0: Export all agent types and interfaces
+  - [x] P0: Export AgentAdapter interface
+  - [x] P0: Export AgentType enum and PermissionPosture type
+
+- [x] P0: Update command handlers to use new interface
+  - [x] Updated runHandler to use AgentAdapter interface methods
+  - [x] Updated stepHandler to use runInteractive instead of runWithPromptInteractive
+  - [x] Updated inspectHandler to use exportData instead of output field
+  - [x] Updated all tests to mock new AgentAdapter interface signatures
+
+### Implementation Notes
+- Interface design should be generic enough to support both OpenCode and Claude Code
+- OpenCodeAdapter now implements AgentAdapter interface at src/lib/opencode/adapter.ts
+- AgentRunResult differs from old OpenCodeRunResult: uses `stdout/stderr` instead of `output`, includes `completionDetected` and `exitCode` fields
+- AgentAdapter.checkAvailability() returns boolean directly instead of wrapping in result object
+- AgentExportResult uses `exportData` instead of `output` field
+- AgentAdapter.runInteractive() returns void instead of result object
+- All existing tests updated to match new interface signatures
+
+### Learnings
+- AgentAdapter interface abstracts CLI-specific implementation details
+- checkAvailability() returns boolean directly for simpler API
+- completionDetected field simplifies completion detection logic
+- Tests require updating when interface changes are made
+- Type exports in domain/index.ts simplify imports for consuming code
+
+---
+
+## JTBD-102-SPEC-002: ClaudeCodeAdapter Implementation [P0 - DEPENDS ON JTBD-102-SPEC-001]
+
+**Prerequisite: JTBD-102-SPEC-001 must be completed first.**
+
+- [ ] P0: Create `src/lib/agents/` directory structure
+  - [ ] P0: Create `src/lib/agents/claude-code-adapter.ts`
+  - [ ] P0: Create `src/lib/agents/index.ts` for exports
+
+- [ ] P0: Implement ClaudeCodeAdapter class implementing AgentAdapter interface
+  - [ ] P0: Constructor accepts `useProjectMode: boolean` parameter (defaults to true)
+  - [ ] P0: Implement `checkAvailability(): Promise<boolean>`
+    - Run `claude --version` and check exit code
+    - Return true if command succeeds, false otherwise
+
+  - [ ] P0: Implement `run(options: AgentRunOptions): Promise<AgentRunResult>`
+    - Build `claude` command with appropriate flags
+    - Pass `--prompt` with prompt content
+    - Pass `--model` if model option provided
+    - Handle `<promise>COMPLETE</promise>` completion detection
+    - Extract session ID from output (support 3 patterns below)
+    - Return AgentRunResult with success, sessionId, output, error
+
+  - [ ] P0: Implement `runInteractive(prompt: string, options?: Partial<AgentRunOptions>): Promise<AgentRunResult>`
+    - Interactive mode using `claude` command
+    - Pass prompt via stdin or --prompt flag
+    - Support same model and other options as run()
+
+  - [ ] P0: Implement `export(sessionId: string): Promise<AgentExportResult>`
+    - Run `claude export --session <sessionId>` or equivalent
+    - Return raw output in AgentExportResult
+
+  - [ ] P0: Implement `getMetadata(): Promise<AgentMetadata>`
+    - Return AgentMetadata with agentType: "claude-code"
+    - version: from `claude --version`
+    - available: from checkAvailability()
+
+- [ ] P0: Support session ID extraction patterns (3 patterns)
+  - Pattern 1: Session ID in header/stdout like "Session: <id>" or "[Session: <id>]"
+  - Pattern 2: Session ID in structured JSON output if available
+  - Pattern 3: Session ID in file path or metadata returned by CLI
+  - [ ] P0: Implement regex patterns for each extraction method
+  - [ ] P0: Fallback through patterns in order until one succeeds
+
+- [ ] P0: Support `<promise>COMPLETE</promise>` completion detection
+  - [ ] P0: Add completion detection in run() method
+  - [ ] P0: Check output for exact string `<promise>COMPLETE</promise>`
+  - [ ] P0: Set success=true when detected, even if other output exists
+
+- [ ] P0: Add project mode support via constructor parameter
+  - [ ] P0: When `useProjectMode=true`, add `-p` flag to commands
+  - [ ] P0: When `useProjectMode=false`, omit `-p` flag
+  - [ ] P0: Log project mode status when running
+
+### Implementation Notes
+- Claude Code CLI may have different flag syntax - research actual commands
+- Session ID extraction patterns may need adjustment based on actual CLI output
+- Interactive mode may require TUI handling different from OpenCode
+- Consider using Bun.spawn for process execution consistent with OpenCodeAdapter
+
+---
+
+## JTBD-101-SPEC-001: Agent Selection [P0 - DEPENDS ON JTBD-102-SPEC-001, JTBD-102-SPEC-002]
+
+**Prerequisites: JTBD-102-SPEC-001 and JTBD-102-SPEC-002 must be completed first.**
+
+- [ ] P0: Add CLI flags for agent selection
+  - [ ] P0: Add `--agent` flag to `run` command (accepts "opencode" or "claude-code")
+  - [ ] P0: Add `--agent` flag to `step` command (accepts "opencode" or "claude-code")
+  - [ ] P0: Validate agent flag values (error on unknown agent)
+
+- [ ] P0: Add environment variable support
+  - [ ] P0: Support `RALPHCTL_AGENT` environment variable
+  - [ ] P0: Valid values: "opencode", "claude-code"
+  - [ ] P0: Validate env var value (warn and use default if invalid)
+
+- [ ] P0: Implement priority resolution
+  - [ ] P0: Priority order: CLI flag > environment variable > default ("opencode")
+  - [ ] P0: Document priority in help text for --agent flag
+
+- [ ] P0: Create agent factory in `src/lib/agents/factory.ts`
+  - [ ] P0: Create `createAgent(type: AgentType, useProjectMode?: boolean): AgentAdapter`
+  - [ ] P0: Implement eager availability check during factory creation
+  - [ ] P0: Throw clear error with installation URL when agent unavailable
+    - OpenCode URL: https://opencode.ai
+    - Claude Code URL: https://claude.com/claude-code
+
+- [ ] P0: Update runHandler to use agent factory
+  - [ ] P0: Import createAgent from factory.ts
+  - [ ] P0: Resolve agent type from CLI flag > env > default
+  - [ ] P0: Create agent instance via factory
+  - [ ] P0: Pass agent instance to iteration loop instead of hardcoded OpenCodeAdapter
+
+- [ ] P0: Update stepHandler to use agent factory
+  - [ ] P0: Same pattern as runHandler
+  - [ ] P0: Pass agent instance to interactive execution
+
+- [ ] P0: Add clear error messages for unavailable agents
+  - [ ] P0: Error message format: "{agent} is not installed or not in PATH. Install from: {url}"
+  - [ ] P0: Exit with code 1 on agent unavailability
+
+### Implementation Notes
+- Default agent should be "opencode" for backward compatibility
+- Factory should cache agent instances or create fresh each time (decide based on state needs)
+- Installation URLs should be accurate and clickable
+- Consider adding --force flag to bypass availability check for testing
+
+---
+
+## JTBD-103-SPEC-001: Claude Code Project Mode [P1 - DEPENDS ON JTBD-102-SPEC-002, JTBD-101-SPEC-001]
+
+**Prerequisites: JTBD-102-SPEC-002 and JTBD-101-SPEC-001 must be completed first.**
+
+- [ ] P1: Add --no-project-mode CLI flag
+  - [ ] P1: Add `--no-project-mode` flag to `run` command
+  - [ ] P1: Add `--no-project-mode` flag to `step` command
+  - [ ] P1: Flag is boolean (true when present, false when absent)
+
+- [ ] P1: Update agent factory to accept project mode parameter
+  - [ ] P1: Add `useProjectMode?: boolean` parameter to createAgent()
+  - [ ] P1: Default value: true
+  - [ ] P1: Pass parameter to ClaudeCodeAdapter constructor
+
+- [ ] P1: Implement project mode in ClaudeCodeAdapter
+  - [ ] P1: When `useProjectMode=true`, add `-p` flag to `claude` commands
+  - [ ] P1: When `useProjectMode=false`, omit `-p` flag
+  - [ ] P1: Log "Project mode: enabled" or "Project mode: disabled" at start
+
+- [ ] P1: Handle project mode for OpenCodeAdapter (no-op)
+  - [ ] P1: OpenCodeAdapter constructor accepts useProjectMode but ignores it
+  - [ ] P1: Log "Project mode: N/A (OpenCode)" or simply don't log project mode status
+
+- [ ] P1: Update PROMPT_build.md and PROMPT_plan.md templates
+  - [ ] P1: Add note about project mode availability for Claude Code users
+  - [ ] P1: Document --no-project-mode flag usage
+
+### Implementation Notes
+- Project mode is Claude Code specific feature - OpenCode should silently ignore
+- Logging should indicate whether project mode is applicable to selected agent
+- Consider adding --project-mode flag as explicit opt-in (default true, explicit false with --no-project-mode)
+
+---
+
+## JTBD-104-SPEC-001: Agent-Aware Session Management [P2 - DEPENDS ON ALL ABOVE]
+
+**Prerequisites: All JTBD-102, JTBD-101, and JTBD-103 specs must be completed first.**
+
+- [ ] P2: Update SessionState interface to include agent information
+  - [ ] P2: Add optional `agent: AgentType` field to SessionState
+  - [ ] P2: Add optional `projectMode: boolean` field to SessionState
+  - [ ] P2: Update src/domain/types.ts with new fields
+
+- [ ] P2: Update SessionsFile interface with version field
+  - [ ] P2: Add `version: number` field (set to 1 for first version)
+  - [ ] P2: Update src/domain/types.ts
+
+- [ ] P2: Implement lazy migration for existing sessions
+  - [ ] P2: In readSessionsFile(), check for version field
+  - [ ] P2: If version missing or old, set default agent to "opencode" for all existing sessions
+  - [ ] P2: Set projectMode to undefined for existing sessions (unknown)
+
+- [ ] P2: Update runHandler to capture agent in SessionState
+  - [ ] P2: Include agent type when creating SessionState after each iteration
+  - [ ] P2: Include projectMode setting when creating SessionState
+
+- [ ] P2: Update inspectHandler for agent-aware export routing
+  - [ ] P2: InspectEntry should include agent and projectMode fields
+  - [ ] P2: Route each session export to correct agent adapter based on session.agent
+  - [ ] P2: If agent unavailable during inspection, log warning and skip that session
+
+- [ ] P2: Add graceful degradation during inspection
+  - [ ] P2: When exporting session with unknown/ unavailable agent:
+    - Log warning: "Skipping session {sessionId}: agent {agent} not available"
+    - Continue processing other sessions
+    - Include warning in final inspect output summary
+
+- [ ] P2: Update writeSessionsFile to include version field
+  - [ ] P2: On write, set version: 1
+  - [ ] P2: Maintain backward compatibility with older readers
+
+- [ ] P2: Include agent info in InspectEntry output
+  - [ ] P2: Add `agent: AgentType` field to InspectEntry
+  - [ ] P2: Add `projectMode?: boolean` field to InspectEntry
+  - [ ] P2: Update inspect.json schema documentation
+
+### Implementation Notes
+- Existing sessions without agent field should default to "opencode" (lazy migration)
+- inspect.json should include agent info for each session for debugging/reproducibility
+- Consider adding validation that session.agent matches current selected agent during export
+- Project mode stored per-session allows replay with same settings
+
+---
+
 ## Implementation Notes
 
 ### Cross-Spec Dependencies
-- jbtd-006-spec-001 (Export Fidelity): ✅ Already satisfied by OpenCodeAdapter.export() returning raw stdout
-- jbtd-006-spec-002 (Run Artifact Packaging): Requires P0 tasks for JSON file output
-- jbtd-006-spec-003 (Inspect Schema): Requires P0 tasks for validation
+- JTBD-102-SPEC-001 is the FOUNDATION - must implement first
+- OpenCodeAdapter currently exists but does NOT implement AgentAdapter interface
+- No AgentType enum exists in the codebase
+- src/lib/agents/ directory does not exist
+- All JTBD specs depend on the AgentAdapter interface being defined first
 
 ### Existing Code Patterns to Follow
-- File writing: `JSON.stringify(data, null, 2)` pattern from src/lib/state/index.ts:23
-- Error handling: `console.error(message)` + `process.exit(1)` from inspect.ts:12-13
-- Testing: mock.module() pattern from handlers.spec.ts with beforeEach()
-- State reading: `readSessionsFile()` from src/lib/state/index.ts:26
+- Bun.spawn-based process runner from src/lib/process/
+- Error handling: console.error() + process.exit(1)
+- Testing: mock.module() pattern with beforeEach()
+- File writing: JSON.stringify(data, null, 2) pattern
+- Session state: readSessionsFile() + writeSessionsFile() pattern
 
 ### Learnings to Add
-- Inspect output goes to JSON file in CWD (not console)
-- Export failures skip individual sessions, continue processing
-- Empty sessions output empty array `[]`
-- Progress logging via console for user feedback
-- Validation errors abort inspect generation with clear message
-- InspectEntry interface defines output schema with 4 required fields: sessionId, iteration, startedAt, export
-- Field validation happens before export call to fail fast on corrupted data
-- Model defaults from jbtd-002-spec-004: {smart}→openai/gpt-5.2-codex, {fast}→zai-coding-plan/glm-4.7
-- Model placeholder resolver replaces {smart} and {fast} with actual model IDs before passing to OpenCode CLI
-- OpenCodeAdapter accepts optional model parameter and conditionally adds --model flag to CLI commands
-- Model overrides work identically in both run and step commands for consistency per jbtd-007-spec-002
-- clerc's scriptName is hardcoded, not auto-detected; use process.argv[1].split("/").pop() to detect actual command name
-- Dynamic command name detection allows both 'ralphctl' and 'rctl' aliases to display correct help text
-- package.json bin section supports multiple aliases pointing to same entrypoint file
+- Agent selection priority: CLI flag > env var > default
+- Claude Code project mode adds -p flag when enabled
+- Agent metadata includes version, availability, and type
+- Session migration defaults old sessions to OpenCode agent
+- Inspect handler routes exports based on session.agent field

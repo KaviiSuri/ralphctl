@@ -11,17 +11,15 @@ describe("Command Handlers", () => {
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
-            checkAvailability = mock(() =>
-              Promise.resolve({
-                available: true,
-                version: "1.0.0",
-              })
-            );
+            checkAvailability = mock(() => Promise.resolve(true));
 
             run = mock(() =>
               Promise.resolve({
-                success: true,
-                output: "Iteration output <promise>COMPLETE</promise>",
+                stdout: "Iteration output <promise>COMPLETE</promise>",
+                stderr: "",
+                sessionId: "ses_test123",
+                completionDetected: true,
+                exitCode: 0,
               })
             );
           },
@@ -45,19 +43,7 @@ describe("Command Handlers", () => {
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
-            checkAvailability = mock(() =>
-              Promise.resolve({
-                available: false,
-                error: "OpenCode not found",
-              })
-            );
-
-            run = mock(() =>
-              Promise.resolve({
-                success: true,
-                output: "",
-              })
-            );
+            checkAvailability = mock(() => Promise.resolve(false));
           },
         };
       });
@@ -82,7 +68,7 @@ describe("Command Handlers", () => {
       );
 
       expect(mockConsoleError).toHaveBeenCalledWith(
-        "OpenCode not found"
+        "OpenCode is not available"
       );
 
       mockExit.mockRestore();
@@ -92,17 +78,15 @@ describe("Command Handlers", () => {
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
-            checkAvailability = mock(() =>
-              Promise.resolve({
-                available: true,
-                version: "1.0.0",
-              })
-            );
+            checkAvailability = mock(() => Promise.resolve(true));
 
             run = mock(() =>
               Promise.resolve({
-                success: true,
-                output: "Iteration output without completion",
+                stdout: "Iteration output without completion",
+                stderr: "",
+                sessionId: "ses_test123",
+                completionDetected: false,
+                exitCode: 0,
               })
             );
           },
@@ -134,24 +118,25 @@ describe("Command Handlers", () => {
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
-            checkAvailability = mock(() =>
-              Promise.resolve({
-                available: true,
-                version: "1.0.0",
-              })
-            );
+            checkAvailability = mock(() => Promise.resolve(true));
 
             run = mock(() => {
               callCount++;
               if (callCount < 2) {
                 return Promise.resolve({
-                  success: true,
-                  output: "Still working...",
+                  stdout: "Still working...",
+                  stderr: "",
+                  sessionId: `ses_test${callCount}`,
+                  completionDetected: false,
+                  exitCode: 0,
                 });
               }
               return Promise.resolve({
-                success: true,
-                output: "Done! <promise>COMPLETE</promise>",
+                stdout: "Done! <promise>COMPLETE</promise>",
+                stderr: "",
+                sessionId: `ses_test${callCount}`,
+                completionDetected: true,
+                exitCode: 0,
               });
             });
           },
@@ -185,17 +170,15 @@ describe("Command Handlers", () => {
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
-            checkAvailability = mock(() =>
-              Promise.resolve({
-                available: true,
-                version: "1.0.0",
-              })
-            );
+            checkAvailability = mock(() => Promise.resolve(true));
 
             run = mock(() =>
               Promise.resolve({
-                success: true,
-                output: "Output <promise>COMPLETE</promise>",
+                stdout: "Output <promise>COMPLETE</promise>",
+                stderr: "",
+                sessionId: "ses_test123",
+                completionDetected: true,
+                exitCode: 0,
               })
             );
           },
@@ -226,17 +209,15 @@ describe("Command Handlers", () => {
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
-            checkAvailability = mock(() =>
-              Promise.resolve({
-                available: true,
-                version: "1.0.0",
-              })
-            );
+            checkAvailability = mock(() => Promise.resolve(true));
 
             run = mock(() =>
               Promise.resolve({
-                success: true,
-                output: "Output <promise>COMPLETE</promise>",
+                stdout: "Output <promise>COMPLETE</promise>",
+                stderr: "",
+                sessionId: "ses_test123",
+                completionDetected: true,
+                exitCode: 0,
               })
             );
           },
@@ -270,17 +251,15 @@ describe("Command Handlers", () => {
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
-            checkAvailability = mock(() =>
-              Promise.resolve({
-                available: true,
-                version: "1.0.0",
-              })
-            );
+            checkAvailability = mock(() => Promise.resolve(true));
 
             run = mock(() =>
               Promise.resolve({
-                success: true,
-                output: "Output <promise>COMPLETE</promise>",
+                stdout: "Output <promise>COMPLETE</promise>",
+                stderr: "",
+                sessionId: "ses_test123",
+                completionDetected: true,
+                exitCode: 0,
               })
             );
           },
@@ -306,7 +285,7 @@ describe("Command Handlers", () => {
       const { resolveModelPlaceholders } = await import("../src/lib/models/resolver.js");
       expect(resolveModelPlaceholders).toHaveBeenCalledWith(
         "Use {fast} for this",
-        { smart: "openai/gpt-5.2-codex", fast: "custom/fast-model" }
+        { smart: "zai-coding-plan/glm-4.7", fast: "custom/fast-model" }
       );
     });
 
@@ -314,17 +293,15 @@ describe("Command Handlers", () => {
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
-            checkAvailability = mock(() =>
-              Promise.resolve({
-                available: true,
-                version: "1.0.0",
-              })
-            );
+            checkAvailability = mock(() => Promise.resolve(true));
 
             run = mock(() =>
               Promise.resolve({
-                success: true,
-                output: "Output <promise>COMPLETE</promise>",
+                stdout: "Output <promise>COMPLETE</promise>",
+                stderr: "",
+                sessionId: "ses_test123",
+                completionDetected: true,
+                exitCode: 0,
               })
             );
           },
@@ -364,17 +341,15 @@ describe("Command Handlers", () => {
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
-            checkAvailability = mock(() =>
-              Promise.resolve({
-                available: true,
-                version: "1.0.0",
-              })
-            );
+            checkAvailability = mock(() => Promise.resolve(true));
 
             run = mock(() =>
               Promise.resolve({
-                success: true,
-                output: "Output <promise>COMPLETE</promise>",
+                stdout: "Output <promise>COMPLETE</promise>",
+                stderr: "",
+                sessionId: "ses_test123",
+                completionDetected: true,
+                exitCode: 0,
               })
             );
           },
@@ -402,7 +377,7 @@ describe("Command Handlers", () => {
       const { resolveModelPlaceholders } = await import("../src/lib/models/resolver.js");
       expect(resolveModelPlaceholders).toHaveBeenCalledWith(
         "Use {smart} and {fast}",
-        { smart: "openai/gpt-5.2-codex", fast: "zai-coding-plan/glm-4.7" }
+        { smart: "zai-coding-plan/glm-4.7", fast: "zai-coding-plan/glm-4.7" }
       );
     });
 
@@ -412,18 +387,16 @@ describe("Command Handlers", () => {
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
-            checkAvailability = mock(() =>
-              Promise.resolve({
-                available: true,
-                version: "1.0.0",
-              })
-            );
+            checkAvailability = mock(() => Promise.resolve(true));
 
             run = mock((prompt: string, model?: string) => {
               capturedRunCall = { prompt, model };
               return Promise.resolve({
-                success: true,
-                output: "Output with smart model and fast model <promise>COMPLETE</promise>",
+                stdout: "Output with smart model and fast model <promise>COMPLETE</promise>",
+                stderr: "",
+                sessionId: "ses_test123",
+                completionDetected: true,
+                exitCode: 0,
               });
             });
           },
@@ -440,7 +413,7 @@ describe("Command Handlers", () => {
         return {
           resolveModelPlaceholders: mock((prompt) =>
             prompt
-              .replace("{smart}", "openai/gpt-5.2-codex")
+              .replace("{smart}", "zai-coding-plan/glm-4.7")
               .replace("{fast}", "zai-coding-plan/glm-4.7")
           ),
         };
@@ -454,8 +427,8 @@ describe("Command Handlers", () => {
       const { resolveModelPlaceholders } = await import("../src/lib/models/resolver.js");
 
       expect(resolveModelPlaceholders).toHaveBeenCalled();
-      expect(capturedRunCall.prompt).toBe("Use openai/gpt-5.2-codex and zai-coding-plan/glm-4.7");
-      expect(capturedRunCall.model).toBe("openai/gpt-5.2-codex");
+      expect(capturedRunCall.prompt).toBe("Use zai-coding-plan/glm-4.7 and zai-coding-plan/glm-4.7");
+      expect(capturedRunCall.model).toBe("zai-coding-plan/glm-4.7");
     });
   });
 
@@ -464,18 +437,9 @@ describe("Command Handlers", () => {
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
-            checkAvailability = mock(() =>
-              Promise.resolve({
-                available: true,
-                version: "1.0.0",
-              })
-            );
+            checkAvailability = mock(() => Promise.resolve(true));
 
-            runWithPromptInteractive = mock(() =>
-              Promise.resolve({
-                success: true,
-              })
-            );
+            runInteractive = mock(() => Promise.resolve());
           },
         };
       });
@@ -493,7 +457,7 @@ describe("Command Handlers", () => {
       });
     });
 
-    it("should check opencode availability and use runWithPromptInteractive", async () => {
+    it("should check opencode availability and use runInteractive", async () => {
       const mockLog = mock();
       global.console.log = mockLog;
 
@@ -513,12 +477,7 @@ describe("Command Handlers", () => {
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
-            checkAvailability = mock(() =>
-              Promise.resolve({
-                available: false,
-                error: "OpenCode not found",
-              })
-            );
+            checkAvailability = mock(() => Promise.resolve(false));
           },
         };
       });
@@ -543,7 +502,7 @@ describe("Command Handlers", () => {
       );
 
       expect(mockConsoleError).toHaveBeenCalledWith(
-        "OpenCode not found"
+        "OpenCode is not available"
       );
 
       mockExit.mockRestore();
@@ -563,16 +522,11 @@ describe("Command Handlers", () => {
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
-            checkAvailability = mock(() =>
-              Promise.resolve({
-                available: true,
-                version: "1.0.0",
-              })
-            );
+            checkAvailability = mock(() => Promise.resolve(true));
 
-            runWithPromptInteractive = mock((prompt: string) => {
+            runInteractive = mock((prompt: string, model?: string) => {
               capturedPrompt = prompt;
-              return Promise.resolve({ success: true });
+              return Promise.resolve();
             });
           },
         };
@@ -601,18 +555,9 @@ describe("Command Handlers", () => {
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
-            checkAvailability = mock(() =>
-              Promise.resolve({
-                available: true,
-                version: "1.0.0",
-              })
-            );
+            checkAvailability = mock(() => Promise.resolve(true));
 
-            runWithPromptInteractive = mock(() =>
-              Promise.resolve({
-                success: true,
-              })
-            );
+            runInteractive = mock(() => Promise.resolve());
           },
         };
       });
@@ -641,18 +586,9 @@ describe("Command Handlers", () => {
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
-            checkAvailability = mock(() =>
-              Promise.resolve({
-                available: true,
-                version: "1.0.0",
-              })
-            );
+            checkAvailability = mock(() => Promise.resolve(true));
 
-            runWithPromptInteractive = mock(() =>
-              Promise.resolve({
-                success: true,
-              })
-            );
+            runInteractive = mock(() => Promise.resolve());
           },
         };
       });
@@ -684,18 +620,9 @@ describe("Command Handlers", () => {
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
-            checkAvailability = mock(() =>
-              Promise.resolve({
-                available: true,
-                version: "1.0.0",
-              })
-            );
+            checkAvailability = mock(() => Promise.resolve(true));
 
-            runWithPromptInteractive = mock(() =>
-              Promise.resolve({
-                success: true,
-              })
-            );
+            runInteractive = mock(() => Promise.resolve());
           },
         };
       });
@@ -719,7 +646,7 @@ describe("Command Handlers", () => {
       const { resolveModelPlaceholders } = await import("../src/lib/models/resolver.js");
       expect(resolveModelPlaceholders).toHaveBeenCalledWith(
         "Use {fast} for this",
-        { smart: "openai/gpt-5.2-codex", fast: "custom/fast-model" }
+        { smart: "zai-coding-plan/glm-4.7", fast: "custom/fast-model" }
       );
     });
 
@@ -727,18 +654,9 @@ describe("Command Handlers", () => {
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
-            checkAvailability = mock(() =>
-              Promise.resolve({
-                available: true,
-                version: "1.0.0",
-              })
-            );
+            checkAvailability = mock(() => Promise.resolve(true));
 
-            runWithPromptInteractive = mock(() =>
-              Promise.resolve({
-                success: true,
-              })
-            );
+            runInteractive = mock(() => Promise.resolve());
           },
         };
       });
@@ -772,73 +690,17 @@ describe("Command Handlers", () => {
       );
     });
 
-    it("should fail if runWithPromptInteractive fails", async () => {
-      const mockExit = mock((code: number) => {
-        throw new Error(`process.exit(${code})`);
-      });
-
-      global.process.exit = mockExit;
-
-      mock.module("../src/lib/opencode/adapter.js", () => {
-        return {
-          OpenCodeAdapter: class {
-            checkAvailability = mock(() =>
-              Promise.resolve({
-                available: true,
-                version: "1.0.0",
-              })
-            );
-
-            runWithPromptInteractive = mock(() =>
-              Promise.resolve({
-                success: false,
-                error: "Interactive run failed",
-              })
-            );
-          },
-        };
-      });
-
-      mock.module("../src/lib/prompts/resolver.js", () => {
-        return {
-          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
-        };
-      });
-
-      mock.module("../src/lib/models/resolver.js", () => {
-        return {
-          resolveModelPlaceholders: mock((prompt) => prompt),
-        };
-      });
-
-      const mockConsoleError = mock();
-      global.console.error = mockConsoleError;
-
-      await expect(stepHandler({ mode: Mode.Build })).rejects.toThrow(
-        "process.exit(1)"
-      );
-
-      expect(mockConsoleError).toHaveBeenCalledWith("Interactive run failed");
-
-      mockExit.mockRestore();
-    });
-
     it("should resolve model placeholders and pass to interactive run", async () => {
       let capturedRunCall: any;
 
       mock.module("../src/lib/opencode/adapter.js", () => {
         return {
           OpenCodeAdapter: class {
-            checkAvailability = mock(() =>
-              Promise.resolve({
-                available: true,
-                version: "1.0.0",
-              })
-            );
+            checkAvailability = mock(() => Promise.resolve(true));
 
-            runWithPromptInteractive = mock((prompt: string, model?: string) => {
+            runInteractive = mock((prompt: string, model?: string) => {
               capturedRunCall = { prompt, model };
-              return Promise.resolve({ success: true });
+              return Promise.resolve();
             });
           },
         };
@@ -917,8 +779,8 @@ describe("Command Handlers", () => {
             export = mock(() => {
               exportCallCount++;
               return Promise.resolve({
+                exportData: `Exported data ${exportCallCount}`,
                 success: true,
-                output: `Exported data ${exportCallCount}`,
               });
             });
           },
@@ -1011,14 +873,14 @@ describe("Command Handlers", () => {
               exportCallCount++;
               if (exportCallCount === 1) {
                 return Promise.resolve({
+                  exportData: null,
                   success: false,
-                  output: "",
                   error: "Export failed",
                 });
               }
               return Promise.resolve({
+                exportData: "Exported data",
                 success: true,
-                output: "Exported data",
               });
             });
           },
@@ -1079,8 +941,8 @@ describe("Command Handlers", () => {
           OpenCodeAdapter: class {
             export = mock(() =>
               Promise.resolve({
+                exportData: "Exported data",
                 success: true,
-                output: "Exported data",
               })
             );
           },
@@ -1128,8 +990,8 @@ describe("Command Handlers", () => {
           OpenCodeAdapter: class {
             export = mock(() =>
               Promise.resolve({
+                exportData: "Exported data",
                 success: true,
-                output: "Exported data",
               })
             );
           },
@@ -1177,8 +1039,8 @@ describe("Command Handlers", () => {
           OpenCodeAdapter: class {
             export = mock(() =>
               Promise.resolve({
+                exportData: "Exported data",
                 success: true,
-                output: "Exported data",
               })
             );
           },
@@ -1226,8 +1088,8 @@ describe("Command Handlers", () => {
           OpenCodeAdapter: class {
             export = mock(() =>
               Promise.resolve({
+                exportData: "Exported data",
                 success: true,
-                output: "Exported data",
               })
             );
           },
@@ -1280,8 +1142,8 @@ describe("Command Handlers", () => {
           OpenCodeAdapter: class {
             export = mock(() =>
               Promise.resolve({
+                exportData: "Exported data",
                 success: true,
-                output: "Exported data",
               })
             );
           },
@@ -1338,8 +1200,8 @@ describe("Command Handlers", () => {
           OpenCodeAdapter: class {
             export = mock(() =>
               Promise.resolve({
+                exportData: "Exported data",
                 success: true,
-                output: "Exported data",
               })
             );
           },

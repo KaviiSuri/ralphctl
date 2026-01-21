@@ -50,7 +50,7 @@ export async function inspectHandler(options?: { output?: string }): Promise<voi
       sessionId: session.sessionId,
       iteration: session.iteration,
       startedAt: session.startedAt,
-      export: result.output,
+      export: String(result.exportData),
     };
     
     entries.push(entry);

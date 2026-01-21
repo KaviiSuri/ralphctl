@@ -65,3 +65,5 @@ export function createModelConfig(smartOverride?: string, fastOverride?: string)
     fast: fastOverride ?? DEFAULT_FAST_MODEL,
   };
 }
+
+export { AgentType, type PermissionPosture } from "./agent.js";

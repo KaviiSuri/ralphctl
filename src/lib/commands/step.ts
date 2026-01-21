@@ -2,12 +2,11 @@ import { Mode, createModelConfig } from "../../domain/types.js";
 import { OpenCodeAdapter } from "../opencode/adapter.js";
 import { resolvePrompt } from "../prompts/resolver.js";
 import { resolveModelPlaceholders } from "../models/resolver.js";
-import type { PermissionPosture } from "./run.js";
 
 export interface StepHandlerOptions {
   mode: Mode;
   customPrompt?: string;
-  permissionPosture?: PermissionPosture;
+  permissionPosture?: "allow-all" | "ask";
   smartModel?: string;
   fastModel?: string;
 }
@@ -24,9 +23,9 @@ export async function stepHandler(options: StepHandlerOptions): Promise<void> {
     } 
   });
 
-  const availability = await adapter.checkAvailability();
-  if (!availability.available) {
-    console.error(availability.error || "OpenCode is not available");
+  const available = await adapter.checkAvailability();
+  if (!available) {
+    console.error("OpenCode is not available");
     process.exit(1);
   }
 
@@ -35,10 +34,5 @@ export async function stepHandler(options: StepHandlerOptions): Promise<void> {
 
   const prompt = await resolvePrompt({ mode, customPrompt });
   const resolvedPrompt = resolveModelPlaceholders(prompt, modelConfig);
-  const result = await adapter.runWithPromptInteractive(resolvedPrompt, modelConfig.smart);
-
-  if (!result.success) {
-    console.error(result.error || "Failed to step");
-    process.exit(1);
-  }
+  await adapter.runInteractive(resolvedPrompt, modelConfig.smart);
 }

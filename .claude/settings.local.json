@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "WebSearch",
+      "Bash(wc:*)",
+      "Bash(opencode --help:*)",
+      "Bash(bun test:*)",
+      "Bash(opencode agent:*)",
+      "Bash(opencode models:*)"
+    ]
+  }
+}
