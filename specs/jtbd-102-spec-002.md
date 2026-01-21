@@ -16,8 +16,9 @@ Implement the `AgentAdapter` interface for Claude Code CLI, enabling rctl to exe
 **In Scope**:
 - ClaudeCodeAdapter class implementing AgentAdapter interface
 - Claude Code CLI command construction
-- Session ID extraction from Claude Code output
-- Project mode (`-p`) flag handling
+- Print mode (`-p`) flag handling for headless execution
+- Session export from JSONL files in `~/.claude/projects/*/chat_*.jsonl`
+- Completion detection from CLI output
 - Claude Code-specific environment configuration
 
 **Out of Scope**:
@@ -25,6 +26,7 @@ Implement the `AgentAdapter` interface for Claude Code CLI, enabling rctl to exe
 - Custom Claude Code features beyond what CLI provides
 - Model capability detection
 - Claude Code installation or configuration
+- Session ID extraction (not available from CLI output)
 
 ---
 
@@ -143,20 +145,19 @@ async checkAvailability(): Promise<boolean> {
 
 **Command Construction**:
 ```
-claude -p --model <model> --prompt <prompt>
+claude -p --model <model> <prompt>
 ```
 
 **Flags**:
-- `-p`: Project mode (enabled by default, controlled by constructor param)
-- `--model`: Model selection (e.g., "claude-sonnet-4-5")
-- `--prompt`: Instruction prompt (passed as argument or via heredoc)
-- `--headless`: Force non-interactive mode (if available)
+- `-p`: Print/headless mode (non-interactive, output to stdout/stderr)
+- `--model`: Model selection (e.g., "claude-sonnet-4-5-20250929")
+- `<prompt>`: Instruction prompt (passed as argument, no --prompt flag)
 
-**Session ID Extraction**:
-- Pattern 1: `Session ID: <id>` (plain text)
-- Pattern 2: `"sessionId":"<id>"` (JSON output)
-- Pattern 3: `[Session: <id>]` (bracketed format)
-- Return null if no match
+**Session ID Handling**:
+- Claude Code CLI does not output session IDs in a predictable format
+- Track session by timestamp/chat file instead of extracting from CLI output
+- Session files stored in `~/.claude/projects/*/chat_*.jsonl`
+- Return null for sessionId in run() result (not available from CLI)
 
 **Completion Detection**:
 - Search for `<promise>COMPLETE</promise>` marker
@@ -185,7 +186,7 @@ async run(
   return {
     stdout: result.stdout,
     stderr: result.stderr,
-    sessionId: this.extractSessionId(combinedOutput),
+    sessionId: null, // Claude Code CLI doesn't output session IDs
     completionDetected: this.detectCompletion(combinedOutput),
     exitCode: result.exitCode,
   };
@@ -196,11 +197,13 @@ async run(
 
 **Command Construction**:
 ```
-claude -p --model <model> --prompt <prompt>
+claude --model <model> <prompt>
 ```
 
 **Behavior**:
-- Same flags as headless mode
+- No `-p` flag (interactive mode doesn't use print mode)
+- `--model`: Model selection
+- `<prompt>`: Instruction prompt (passed as argument)
 - Use `runProcessInteractive` to inherit stdio
 - User interacts directly with Claude Code TUI
 - Wait for user to exit
@@ -225,43 +228,84 @@ async runInteractive(
 
 ### 5. Session Export
 
-**Command**: `claude export <sessionId>`
-
 **Behavior**:
-- Execute export command with session ID
-- Capture JSON output
-- Parse JSON if possible (optional)
-- Return raw export data
-- Handle missing sessions gracefully
+- Read session data from Claude Code's local JSONL storage files
+- Files are located at `~/.claude/projects/*/chat_*.jsonl`
+- Find the most recent chat file for the current project
+- Parse JSONL format (newline-delimited JSON)
+- Return raw session data
+- Handle missing files gracefully
 
 **Implementation**:
 ```typescript
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import * as os from "node:os";
+
 async export(sessionId: string): Promise<AgentExportResult> {
   try {
-    const result = await runProcess(`claude export ${sessionId}`, {
-      cwd: this.cwd,
-      stdout: "pipe",
-      stderr: "pipe",
-    });
-
-    if (result.exitCode === 0) {
-      let exportData: unknown;
-      try {
-        exportData = JSON.parse(result.stdout);
-      } catch {
-        exportData = result.stdout; // Fallback to raw string
+    const claudeDir = path.join(os.homedir(), ".claude", "projects");
+    
+    // Find project directory by matching current working directory
+    const projects = await fs.readdir(claudeDir, { withFileTypes: true });
+    let projectDir: string | null = null;
+    
+    for (const dirent of projects) {
+      if (dirent.isDirectory()) {
+        const projectPath = path.join(claudeDir, dirent.name);
+        // Try to match by checking project config or path
+        const configPath = path.join(projectPath, "project.json");
+        try {
+          const config = JSON.parse(await fs.readFile(configPath, "utf-8"));
+          if (config.path === this.cwd) {
+            projectDir = projectPath;
+            break;
+          }
+        } catch {
+          continue;
+        }
       }
+    }
 
+    if (!projectDir) {
       return {
-        exportData,
-        success: true,
+        exportData: null,
+        success: false,
+        error: "Project not found in Claude Code directory",
       };
     }
 
+    // Find most recent chat_*.jsonl file
+    const files = await fs.readdir(projectDir);
+    const chatFiles = files.filter(f => f.startsWith("chat_") && f.endsWith(".jsonl"));
+    
+    if (chatFiles.length === 0) {
+      return {
+        exportData: null,
+        success: false,
+        error: "No chat files found",
+      };
+    }
+
+    // Sort by modification time, get most recent
+    const chatFileStats = await Promise.all(
+      chatFiles.map(async f => ({
+        name: f,
+        stat: await fs.stat(path.join(projectDir, f)),
+      }))
+    );
+    chatFileStats.sort((a, b) => b.stat.mtimeMs - a.stat.mtimeMs);
+    const latestFile = chatFileStats[0].name;
+
+    // Read and parse JSONL
+    const content = await fs.readFile(path.join(projectDir, latestFile), "utf-8");
+    const exportData = content.split("\n")
+      .filter(line => line.trim())
+      .map(line => JSON.parse(line));
+
     return {
-      exportData: null,
-      success: false,
-      error: result.stderr || "Export failed",
+      exportData,
+      success: true,
     };
   } catch (error) {
     return {
@@ -286,25 +330,21 @@ private buildCommandArgs(
 ): string[] {
   const args: string[] = [];
 
-  // Project mode flag
-  if (this.useProjectMode) {
+  // Print mode (headless) - only for non-interactive runs
+  if (!interactive && this.useProjectMode) {
     args.push("-p");
   }
 
   // Model selection
   args.push("--model", model);
 
-  // Prompt (quote if contains spaces)
-  args.push("--prompt", `"${prompt.replace(/"/g, '\\"')}"`);
+  // Prompt (passed as argument, no --prompt flag)
+  // Quote if contains spaces
+  args.push(`"${prompt.replace(/"/g, '\\"')}"`);
 
   // Additional agent-specific flags
   if (options?.agentFlags) {
     args.push(...options.agentFlags);
-  }
-
-  // Headless mode if not interactive
-  if (!interactive) {
-    args.push("--headless"); // If Claude Code supports this flag
   }
 
   return args;
@@ -318,14 +358,14 @@ private buildCommandArgs(
 - [ ] ClaudeCodeAdapter class created in `src/lib/agents/claude-code-adapter.ts`
 - [ ] Implements all AgentAdapter interface methods
 - [ ] Availability check works with Claude Code CLI
-- [ ] Headless execution runs Claude Code in non-interactive mode
-- [ ] Interactive execution launches Claude Code TUI
-- [ ] Session ID extraction works with Claude Code output formats
+- [ ] Headless execution runs Claude Code with `-p` flag for print mode
+- [ ] Interactive execution launches Claude Code TUI without `-p` flag
+- [ ] Session ID returns null (Claude Code CLI doesn't output session IDs)
 - [ ] Completion detection finds `<promise>COMPLETE</promise>` marker
-- [ ] Export command retrieves session data
-- [ ] Project mode flag `-p` is included when enabled
+- [ ] Export reads from JSONL files in `~/.claude/projects/*/chat_*.jsonl`
+- [ ] Print mode flag `-p` is only used for headless runs
 - [ ] All methods handle errors gracefully (no uncaught exceptions)
-- [ ] Unit tests cover all methods with mocked process execution
+- [ ] Unit tests cover all methods with mocked file system and process execution
 - [ ] Integration tests verify against actual Claude Code CLI (optional, gated)
 
 ---
@@ -334,46 +374,55 @@ private buildCommandArgs(
 
 ### Design Decisions
 
-1. **Project Mode Constructor Param**: Enable/disable via constructor rather than per-call to maintain consistency across a session
+1. **Print Mode vs Project Mode**: `-p` flag is for print mode (headless/non-interactive), not project mode. Interactive mode omits `-p`.
 
-2. **Prompt Escaping**: Quote prompts and escape internal quotes to prevent shell injection
+2. **No Built-in Export**: Claude Code CLI doesn't have an `export` subcommand. Session data must be read from local JSONL files in `~/.claude/projects/*/chat_*.jsonl`.
 
-3. **Combined Output Search**: Search both stdout and stderr for session IDs and completion markers (Claude Code may output to either)
+3. **Session ID Not Available**: Claude Code CLI doesn't output session IDs in a predictable format. Return null for sessionId and track sessions by timestamp/chat file.
 
-4. **Version Storage**: Store version from availability check for metadata and debugging
+4. **Prompt as Argument**: Prompts are passed directly as arguments, not via `--prompt` flag.
 
-### Claude Code CLI Research Needed
+5. **Prompt Escaping**: Quote prompts and escape internal quotes to prevent shell injection
 
-Before implementation, research/verify:
-- [ ] Exact CLI command name (`claude` vs `claude-code`)
-- [ ] Project mode flag (`-p` vs `--project`)
-- [ ] Headless mode support (flag name or alternative approach)
-- [ ] Session ID output format
-- [ ] Export command syntax
-- [ ] Model name format (e.g., "claude-sonnet-4-5" vs "sonnet-4-5")
+6. **Completion Detection**: Search both stdout and stderr for `<promise>COMPLETE</promise>` marker (Claude Code may output to either)
 
-**NOTE**: If Claude Code CLI differs from assumptions, update this spec accordingly.
+7. **Version Storage**: Store version from availability check for metadata and debugging
+
+### Claude Code CLI Research Completed
+
+✅ **Verified**:
+- [x] CLI command name: `claude`
+- [x] Print mode flag: `-p` (for headless/non-interactive)
+- [x] Headless mode: Use `-p` flag, no separate `--headless` flag
+- [x] Interactive mode: No `-p` flag, just `claude --model <model> <prompt>`
+- [x] Version flag: `--version` or `-v`
+- [x] Model flag: `--model <model>` (e.g., `claude-sonnet-4-5-20250929`)
+- [x] Session ID: Not output by CLI in predictable format, track via JSONL files
+- [x] Export: No built-in export command, read from `~/.claude/projects/*/chat_*.jsonl`
 
 ### Error Cases
 
 Handle these scenarios:
 - Claude Code not installed: `checkAvailability()` returns false
 - Invalid model name: Propagate Claude Code error in AgentRunResult
-- Session ID not found: Return null, log warning
-- Export command fails: Return success=false with error message
+- Session file not found: Export returns success=false with error message
+- Project directory not found: Export returns success=false with error message
+- JSONL parse error: Export returns success=false with error message
 
 ### Testing Strategy
 
 1. **Unit Tests** (with mocks):
-   - Mock `runProcess` and `runProcessInteractive`
-   - Test session ID extraction with various formats
-   - Test completion detection
-   - Test command argument building
+    - Mock `runProcess` and `runProcessInteractive`
+    - Mock file system operations for `export()`
+    - Test completion detection
+    - Test command argument building
+    - Test export file finding and parsing
 
 2. **Integration Tests** (gated):
-   - Require `CLAUDE_CODE_INSTALLED=true` environment variable
-   - Test actual Claude Code CLI if available
-   - Skip if not installed
+    - Require `CLAUDE_CODE_INSTALLED=true` environment variable
+    - Test actual Claude Code CLI if available
+    - Test actual JSONL file reading if Claude Code is installed
+    - Skip if not installed
 
 ---
 
@@ -393,14 +442,14 @@ Handle these scenarios:
 
 ## Implementation Checklist
 
-- [ ] Research Claude Code CLI commands and flags
+- [x] Research Claude Code CLI commands and flags
 - [ ] Create `src/lib/agents/claude-code-adapter.ts`
 - [ ] Implement `checkAvailability()`
-- [ ] Implement `run()` with session ID extraction
+- [ ] Implement `run()` (no session ID extraction)
 - [ ] Implement `runInteractive()`
-- [ ] Implement `export()`
+- [ ] Implement `export()` (read from JSONL files)
 - [ ] Implement `getMetadata()`
 - [ ] Implement private helper methods
-- [ ] Write unit tests
+- [ ] Write unit tests (with file system mocks)
 - [ ] Write integration tests (gated)
 - [ ] Update documentation with Claude Code CLI requirements
