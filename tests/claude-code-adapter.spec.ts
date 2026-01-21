@@ -58,9 +58,9 @@ class TestableClaudeCodeAdapter {
   async run(
     prompt: string,
     model: string,
-    useProjectMode: boolean = true
+    headless: boolean = true
   ): Promise<{ stdout: string; stderr: string; sessionId: string | null; completionDetected: boolean; exitCode: number }> {
-    const args = this.buildCommandArgs(prompt, model, false, useProjectMode);
+    const args = this.buildCommandArgs(prompt, model, false, headless);
     const result = await this.mockRunner({
       command: ["claude", ...args],
       cwd: this.cwd,
@@ -81,9 +81,9 @@ class TestableClaudeCodeAdapter {
   async runInteractive(
     prompt: string,
     model: string,
-    useProjectMode: boolean = true
+    headless: boolean = true
   ): Promise<{ command: string[] }> {
-    const args = this.buildCommandArgs(prompt, model, true, useProjectMode);
+    const args = this.buildCommandArgs(prompt, model, true, headless);
     return {
       command: args,
     };
@@ -110,11 +110,11 @@ class TestableClaudeCodeAdapter {
     prompt: string,
     model: string,
     interactive: boolean = false,
-    useProjectMode: boolean = true
+    headless: boolean = true
   ): string[] {
     const args: string[] = [];
 
-    if (!interactive && useProjectMode) {
+    if (!interactive && headless) {
       args.push("-p");
     }
 

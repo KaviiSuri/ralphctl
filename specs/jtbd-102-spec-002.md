@@ -49,7 +49,7 @@ import { runProcess, runProcessInteractive } from "../process/runner";
 export class ClaudeCodeAdapter implements AgentAdapter {
   constructor(
     private readonly cwd: string,
-    private readonly useProjectMode: boolean = true
+    private readonly headless: boolean = true  // Controls -p flag for print/headless mode
   ) {}
 
   async checkAvailability(): Promise<boolean> {
@@ -330,8 +330,8 @@ private buildCommandArgs(
 ): string[] {
   const args: string[] = [];
 
-  // Print mode (headless) - only for non-interactive runs
-  if (!interactive && this.useProjectMode) {
+  // Print mode flag (-p) - enables headless/non-interactive execution
+  if (!interactive && this.headless) {
     args.push("-p");
   }
 
@@ -374,7 +374,7 @@ private buildCommandArgs(
 
 ### Design Decisions
 
-1. **Print Mode vs Project Mode**: `-p` flag is for print mode (headless/non-interactive), not project mode. Interactive mode omits `-p`.
+1. **Print Mode (`-p` flag)**: The `-p` flag enables print/headless mode for non-interactive execution (outputs to stdout/stderr). Interactive mode omits this flag. The `headless` constructor parameter controls when to use `-p`.
 
 2. **No Built-in Export**: Claude Code CLI doesn't have an `export` subcommand. Session data must be read from local JSONL files in `~/.claude/projects/*/chat_*.jsonl`.
 

@@ -5,9 +5,9 @@
 ```
 JTBD-102-SPEC-001 (Agent Adapter Interface - FOUNDATION) ✅ COMPLETE
         ↓
-JTBD-102-SPEC-002 (ClaudeCodeAdapter Implementation) [NEXT]
+JTBD-102-SPEC-002 (ClaudeCodeAdapter Implementation) ✅ COMPLETE
         ↓
-JTBD-101-SPEC-001 (Agent Selection via CLI/Env)
+JTBD-101-SPEC-001 (Agent Selection via CLI/Env) [NEXT]
         ↓
 JTBD-103-SPEC-001 (Claude Code Project Mode)
         ↓
@@ -379,21 +379,21 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management)
 
 ---
 
-## JTBD-102-SPEC-002: ClaudeCodeAdapter Implementation [P0 - DEPENDS ON JTBD-102-SPEC-001]
+## JTBD-102-SPEC-002: ClaudeCodeAdapter Implementation [P0 - DEPENDS ON JTBD-102-SPEC-001] ✅ COMPLETED
 
 **Prerequisite: JTBD-102-SPEC-001 must be completed first.**
 
-- [ ] P0: Create `src/lib/agents/` directory structure
-  - [ ] P0: Create `src/lib/agents/claude-code-adapter.ts`
-  - [ ] P0: Create `src/lib/agents/index.ts` for exports
+- [x] P0: Create `src/lib/agents/` directory structure
+  - [x] P0: Create `src/lib/agents/claude-code-adapter.ts`
+  - [x] P0: Create `src/lib/agents/index.ts` for exports
 
-- [ ] P0: Implement ClaudeCodeAdapter class implementing AgentAdapter interface
-  - [ ] P0: Constructor accepts `useProjectMode: boolean` parameter (defaults to true)
-  - [ ] P0: Implement `checkAvailability(): Promise<boolean>`
+- [x] P0: Implement ClaudeCodeAdapter class implementing AgentAdapter interface
+  - [x] P0: Constructor accepts `useProjectMode: boolean` parameter (defaults to true)
+  - [x] P0: Implement `checkAvailability(): Promise<boolean>`
     - Run `claude --version` and check exit code
     - Return true if command succeeds, false otherwise
 
-  - [ ] P0: Implement `run(options: AgentRunOptions): Promise<AgentRunResult>`
+  - [x] P0: Implement `run(options: AgentRunOptions): Promise<AgentRunResult>`
     - Build `claude` command with appropriate flags
     - Pass `--prompt` with prompt content
     - Pass `--model` if model option provided
@@ -401,46 +401,57 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management)
     - Extract session ID from output (support 3 patterns below)
     - Return AgentRunResult with success, sessionId, output, error
 
-  - [ ] P0: Implement `runInteractive(prompt: string, options?: Partial<AgentRunOptions>): Promise<AgentRunResult>`
+  - [x] P0: Implement `runInteractive(prompt: string, options?: Partial<AgentRunOptions>): Promise<AgentRunResult>`
     - Interactive mode using `claude` command
     - Pass prompt via stdin or --prompt flag
     - Support same model and other options as run()
 
-  - [ ] P0: Implement `export(sessionId: string): Promise<AgentExportResult>`
+  - [x] P0: Implement `export(sessionId: string): Promise<AgentExportResult>`
     - Run `claude export --session <sessionId>` or equivalent
     - Return raw output in AgentExportResult
 
-  - [ ] P0: Implement `getMetadata(): Promise<AgentMetadata>`
+  - [x] P0: Implement `getMetadata(): Promise<AgentMetadata>`
     - Return AgentMetadata with agentType: "claude-code"
     - version: from `claude --version`
     - available: from checkAvailability()
 
-- [ ] P0: Support session ID extraction patterns (3 patterns)
+- [x] P0: Support session ID extraction patterns (3 patterns)
   - Pattern 1: Session ID in header/stdout like "Session: <id>" or "[Session: <id>]"
   - Pattern 2: Session ID in structured JSON output if available
   - Pattern 3: Session ID in file path or metadata returned by CLI
-  - [ ] P0: Implement regex patterns for each extraction method
-  - [ ] P0: Fallback through patterns in order until one succeeds
+  - [x] P0: Implement regex patterns for each extraction method
+  - [x] P0: Fallback through patterns in order until one succeeds
 
-- [ ] P0: Support `<promise>COMPLETE</promise>` completion detection
-  - [ ] P0: Add completion detection in run() method
-  - [ ] P0: Check output for exact string `<promise>COMPLETE</promise>`
-  - [ ] P0: Set success=true when detected, even if other output exists
+- [x] P0: Support `<promise>COMPLETE</promise>` completion detection
+  - [x] P0: Add completion detection in run() method
+  - [x] P0: Check output for exact string `<promise>COMPLETE</promise>`
+  - [x] P0: Set success=true when detected, even if other output exists
 
-- [ ] P0: Add project mode support via constructor parameter
-  - [ ] P0: When `useProjectMode=true`, add `-p` flag to commands
-  - [ ] P0: When `useProjectMode=false`, omit `-p` flag
-  - [ ] P0: Log project mode status when running
+- [x] P0: Add project mode support via constructor parameter
+  - [x] P0: When `useProjectMode=true`, add `-p` flag to commands
+  - [x] P0: When `useProjectMode=false`, omit `-p` flag
+  - [x] P0: Log project mode status when running
 
 ### Implementation Notes
-- Claude Code CLI may have different flag syntax - research actual commands
-- Session ID extraction patterns may need adjustment based on actual CLI output
-- Interactive mode may require TUI handling different from OpenCode
-- Consider using Bun.spawn for process execution consistent with OpenCodeAdapter
+- Claude Code CLI uses `claude` command
+- Project mode uses `-p` flag (not --headless)
+- Interactive mode: prompt passed directly as argument
+- Headless mode: uses `--prompt` flag with `-p`
+- No built-in export command - reads from ~/.claude/projects/*/chat_*.jsonl files
+- Session ID extraction uses UUID patterns
+- Completion detection uses same <promise>COMPLETE</promise> marker
+- Version parsing: "Claude Code v1.2.3" -> "1.2.3"
+
+### Learnings
+- Claude Code CLI has different command structure than OpenCode
+- Export functionality requires reading session files directly (no CLI command)
+- Session IDs are UUIDs stored in JSONL format in project directories
+- Project mode flag is `-p`, not `--project` or `--headless`
+- Same completion marker works across both CLIs
 
 ---
 
-## JTBD-101-SPEC-001: Agent Selection [P0 - DEPENDS ON JTBD-102-SPEC-001, JTBD-102-SPEC-002]
+## JTBD-101-SPEC-001: Agent Selection [P0 - DEPENDS ON JTBD-102-SPEC-001, JTBD-102-SPEC-002] [NEXT]
 
 **Prerequisites: JTBD-102-SPEC-001 and JTBD-102-SPEC-002 must be completed first.**
 

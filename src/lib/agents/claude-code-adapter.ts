@@ -5,7 +5,7 @@ import * as fs from "node:fs/promises";
 export interface ClaudeCodeAdapterOptions {
   cwd?: string;
   env?: Record<string, string>;
-  useProjectMode?: boolean;
+  headless?: boolean;
 }
 
 export class ClaudeCodeAdapter implements AgentAdapter {
@@ -14,7 +14,7 @@ export class ClaudeCodeAdapter implements AgentAdapter {
   private cwd: string;
 
   constructor(options: ClaudeCodeAdapterOptions = {}) {
-    this.options = { useProjectMode: true, ...options };
+    this.options = { headless: true, ...options };
     this.cwd = options.cwd ?? process.cwd();
   }
 
@@ -200,7 +200,7 @@ export class ClaudeCodeAdapter implements AgentAdapter {
   ): string[] {
     const args: string[] = [];
 
-    if (!interactive && this.options.useProjectMode) {
+    if (!interactive && this.options.headless) {
       args.push("-p");
     }
 
