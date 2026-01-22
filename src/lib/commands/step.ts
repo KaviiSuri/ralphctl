@@ -11,20 +11,27 @@ export interface StepHandlerOptions {
   smartModel?: string;
   fastModel?: string;
   agent?: AgentType;
+  noPrint?: boolean;
 }
 
 export async function stepHandler(options: StepHandlerOptions): Promise<void> {
-  const { mode, customPrompt, permissionPosture = "allow-all", smartModel, fastModel, agent } = options;
+  const { mode, customPrompt, permissionPosture = "allow-all", smartModel, fastModel, agent, noPrint = false } = options;
 
   const modelConfig = createModelConfig(smartModel, fastModel);
+  const headless = !noPrint;
 
   const adapter = await createAgent(agent, {
     permissionPosture,
     env: { ...process.env } as Record<string, string>,
+    headless,
   });
 
   console.log(`Running ${mode} mode step`);
   console.log(`Permissions: ${permissionPosture}`);
+
+  if (agent === AgentType.ClaudeCode) {
+    console.log(`Print mode: ${headless ? "enabled" : "disabled"}`);
+  }
 
   const prompt = await resolvePrompt({ mode, customPrompt });
   const resolvedPrompt = resolveModelPlaceholders(prompt, modelConfig);

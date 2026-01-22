@@ -1,4 +1,6 @@
-export const PLAN_TEMPLATE = `0a. Study \`specs/*\` with up to 250 parallel {fast} subagents to learn the application specifications.
+export const PLAN_TEMPLATE = `> **Note**: If using Claude Code in print mode (default), responses are streamed directly without interactive prompts. The workspace trust dialog is skipped. Only run rctl in directories you trust.
+
+0a. Study \`specs/*\` with up to 250 parallel {fast} subagents to learn the application specifications.
 0b. Study @IMPLEMENTATION_PLAN.md (if present) to understand the plan so far.
 0c. Study \`src/lib/*\` with up to 250 parallel {fast} subagents to understand shared utilities & components.
 0d. For reference, the application source code is in \`src/*\`.
@@ -9,7 +11,9 @@ IMPORTANT: Plan only. Do NOT implement anything. Do NOT assume functionality is 
 
 ULTIMATE GOAL: We want to achieve [project-specific goal]. Consider missing elements and plan accordingly. If an element is missing, search first to confirm it doesn't exist, then if needed author the specification at specs/FILENAME.md. If you create a new element then document the plan to implement it in @IMPLEMENTATION_PLAN.md using a subagent.`;
 
-export const BUILD_TEMPLATE = `0a. Study \`specs/*\` with up to 500 parallel {fast} subagents to learn the application specifications.
+export const BUILD_TEMPLATE = `> **Note**: If using Claude Code in print mode (default), responses are streamed directly without interactive prompts. The workspace trust dialog is skipped. Only run rctl in directories you trust.
+
+0a. Study \`specs/*\` with up to 500 parallel {fast} subagents to learn the application specifications.
 0b. Study @IMPLEMENTATION_PLAN.md.
 0c. For reference, the application source code is in \`src/*\`.
 

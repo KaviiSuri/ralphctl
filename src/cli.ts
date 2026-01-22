@@ -54,6 +54,11 @@ const cli = Cli()
         description: "Agent to use (default: opencode)",
         default: AgentType.OpenCode,
       },
+      "no-print": {
+        type: Boolean,
+        description: "Disable Claude Code print mode (shows interactive prompts)",
+        default: false,
+      },
     },
   })
   .on("run", async (ctx) => {
@@ -64,6 +69,7 @@ const cli = Cli()
       smartModel: ctx.flags["smart-model"],
       fastModel: ctx.flags["fast-model"],
       agent: ctx.flags.agent as AgentType,
+      noPrint: ctx.flags["no-print"] as boolean,
     });
   })
   .command("step", "Run a single interactive iteration", {
@@ -98,6 +104,11 @@ const cli = Cli()
         description: "Agent to use (default: opencode)",
         default: AgentType.OpenCode,
       },
+      "no-print": {
+        type: Boolean,
+        description: "Disable Claude Code print mode (shows interactive prompts)",
+        default: false,
+      },
     },
   })
   .on("step", async (ctx) => {
@@ -108,6 +119,7 @@ const cli = Cli()
       smartModel: ctx.flags["smart-model"],
       fastModel: ctx.flags["fast-model"],
       agent: ctx.flags.agent as AgentType,
+      noPrint: ctx.flags["no-print"] as boolean,
     });
   })
   .command("inspect", "Inspect run exports", {

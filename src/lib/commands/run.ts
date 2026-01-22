@@ -12,20 +12,27 @@ export interface RunHandlerOptions {
   smartModel?: string;
   fastModel?: string;
   agent?: AgentType;
+  noPrint?: boolean;
 }
 
 export async function runHandler(options: RunHandlerOptions): Promise<void> {
-  const { mode, maxIterations = 10, permissionPosture = "allow-all", smartModel, fastModel, agent } = options;
+  const { mode, maxIterations = 10, permissionPosture = "allow-all", smartModel, fastModel, agent, noPrint = false } = options;
 
   const modelConfig = createModelConfig(smartModel, fastModel);
+  const headless = !noPrint;
 
   const adapter = await createAgent(agent, {
     permissionPosture,
     env: { ...process.env } as Record<string, string>,
+    headless,
   });
 
   console.log(`Running ${mode} mode`);
   console.log(`Permissions: ${permissionPosture}`);
+
+  if (agent === AgentType.ClaudeCode) {
+    console.log(`Print mode: ${headless ? "enabled" : "disabled"}`);
+  }
 
   let iteration = 1;
   let completed = false;

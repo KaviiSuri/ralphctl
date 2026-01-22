@@ -1,5 +1,6 @@
 import { describe, it, expect, mock, beforeEach } from "bun:test";
 import { Mode } from "../src/domain/types.js";
+import { AgentType } from "../src/domain/agent.js";
 
 let mockProcessExit: any;
 
@@ -559,6 +560,152 @@ describe("Command Handlers", () => {
       expect(mockRunCalls[0].prompt).toBe("Use zai-coding-plan/glm-4.7 and zai-coding-plan/glm-4.7");
       expect(mockRunCalls[0].model).toBe("zai-coding-plan/glm-4.7");
     });
+
+    it("should enable print mode by default for Claude Code", async () => {
+      mock.module("../src/lib/agents/factory.js", () => {
+        const MockAdapter = class {
+          checkAvailability = mock(() => Promise.resolve(true));
+          run = mock(() =>
+            Promise.resolve({
+              stdout: "Output <promise>COMPLETE</promise>",
+              stderr: "",
+              sessionId: "ses_test123",
+              completionDetected: true,
+              exitCode: 0,
+            })
+          );
+          runInteractive = mock(() => Promise.resolve());
+          getMetadata = mock(() => ({
+            name: "claude-code",
+            displayName: "Claude Code",
+            cliCommand: "claude",
+            version: "1.0.0",
+          }));
+        };
+        return {
+          createAgent: mock((cliAgent?: string, options?: any) => {
+            expect(options?.headless).toBe(true);
+            return Promise.resolve(new MockAdapter() as any);
+          }),
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) => prompt),
+        };
+      });
+
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await runHandler({ mode: Mode.Plan, agent: AgentType.ClaudeCode });
+
+      expect(mockLog).toHaveBeenCalledWith("Print mode: enabled");
+    });
+
+    it("should disable print mode when --no-print flag is passed for Claude Code", async () => {
+      mock.module("../src/lib/agents/factory.js", () => {
+        const MockAdapter = class {
+          checkAvailability = mock(() => Promise.resolve(true));
+          run = mock(() =>
+            Promise.resolve({
+              stdout: "Output <promise>COMPLETE</promise>",
+              stderr: "",
+              sessionId: "ses_test123",
+              completionDetected: true,
+              exitCode: 0,
+            })
+          );
+          runInteractive = mock(() => Promise.resolve());
+          getMetadata = mock(() => ({
+            name: "claude-code",
+            displayName: "Claude Code",
+            cliCommand: "claude",
+            version: "1.0.0",
+          }));
+        };
+        return {
+          createAgent: mock((cliAgent?: string, options?: any) => {
+            expect(options?.headless).toBe(false);
+            return Promise.resolve(new MockAdapter() as any);
+          }),
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) => prompt),
+        };
+      });
+
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await runHandler({ mode: Mode.Plan, agent: AgentType.ClaudeCode, noPrint: true });
+
+      expect(mockLog).toHaveBeenCalledWith("Print mode: disabled");
+    });
+
+    it("should not log print mode for OpenCode", async () => {
+      mock.module("../src/lib/agents/factory.js", () => {
+        const MockAdapter = class {
+          checkAvailability = mock(() => Promise.resolve(true));
+          run = mock(() =>
+            Promise.resolve({
+              stdout: "Output <promise>COMPLETE</promise>",
+              stderr: "",
+              sessionId: "ses_test123",
+              completionDetected: true,
+              exitCode: 0,
+            })
+          );
+          runInteractive = mock(() => Promise.resolve());
+          getMetadata = mock(() => ({
+            name: "opencode",
+            displayName: "OpenCode",
+            cliCommand: "opencode",
+            version: "1.0.0",
+          }));
+        };
+        return {
+          createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) => prompt),
+        };
+      });
+
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await runHandler({ mode: Mode.Plan, agent: AgentType.OpenCode });
+
+      expect(mockLog).toHaveBeenCalledWith("Running plan mode");
+      expect(mockLog).toHaveBeenCalledWith("Permissions: allow-all");
+      expect(mockLog).not.toHaveBeenCalledWith(expect.stringContaining("Print mode"));
+    });
   });
 
   describe("stepHandler", () => {
@@ -1034,6 +1181,152 @@ describe("Command Handlers", () => {
       expect(mockRunInteractiveCalls.length).toBeGreaterThan(0);
       expect(mockRunInteractiveCalls[0].prompt).toBe("Use custom/smart-model and custom/fast-model");
       expect(mockRunInteractiveCalls[0].model).toBe("custom/smart-model");
+    });
+
+    it("should enable print mode by default for Claude Code", async () => {
+      mock.module("../src/lib/agents/factory.js", () => {
+        const MockAdapter = class {
+          checkAvailability = mock(() => Promise.resolve(true));
+          run = mock(() =>
+            Promise.resolve({
+              stdout: "Iteration output <promise>COMPLETE</promise>",
+              stderr: "",
+              sessionId: "ses_test123",
+              completionDetected: true,
+              exitCode: 0,
+            })
+          );
+          runInteractive = mock(() => Promise.resolve());
+          getMetadata = mock(() => ({
+            name: "claude-code",
+            displayName: "Claude Code",
+            cliCommand: "claude",
+            version: "1.0.0",
+          }));
+        };
+        return {
+          createAgent: mock((cliAgent?: string, options?: any) => {
+            expect(options?.headless).toBe(true);
+            return Promise.resolve(new MockAdapter() as any);
+          }),
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) => prompt),
+        };
+      });
+
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await stepHandler({ mode: Mode.Plan, agent: AgentType.ClaudeCode });
+
+      expect(mockLog).toHaveBeenCalledWith("Print mode: enabled");
+    });
+
+    it("should disable print mode when --no-print flag is passed for Claude Code", async () => {
+      mock.module("../src/lib/agents/factory.js", () => {
+        const MockAdapter = class {
+          checkAvailability = mock(() => Promise.resolve(true));
+          run = mock(() =>
+            Promise.resolve({
+              stdout: "Iteration output <promise>COMPLETE</promise>",
+              stderr: "",
+              sessionId: "ses_test123",
+              completionDetected: true,
+              exitCode: 0,
+            })
+          );
+          runInteractive = mock(() => Promise.resolve());
+          getMetadata = mock(() => ({
+            name: "claude-code",
+            displayName: "Claude Code",
+            cliCommand: "claude",
+            version: "1.0.0",
+          }));
+        };
+        return {
+          createAgent: mock((cliAgent?: string, options?: any) => {
+            expect(options?.headless).toBe(false);
+            return Promise.resolve(new MockAdapter() as any);
+          }),
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) => prompt),
+        };
+      });
+
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await stepHandler({ mode: Mode.Plan, agent: AgentType.ClaudeCode, noPrint: true });
+
+      expect(mockLog).toHaveBeenCalledWith("Print mode: disabled");
+    });
+
+    it("should not log print mode for OpenCode", async () => {
+      mock.module("../src/lib/agents/factory.js", () => {
+        const MockAdapter = class {
+          checkAvailability = mock(() => Promise.resolve(true));
+          run = mock(() =>
+            Promise.resolve({
+              stdout: "Iteration output <promise>COMPLETE</promise>",
+              stderr: "",
+              sessionId: "ses_test123",
+              completionDetected: true,
+              exitCode: 0,
+            })
+          );
+          runInteractive = mock(() => Promise.resolve());
+          getMetadata = mock(() => ({
+            name: "opencode",
+            displayName: "OpenCode",
+            cliCommand: "opencode",
+            version: "1.0.0",
+          }));
+        };
+        return {
+          createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) => prompt),
+        };
+      });
+
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await stepHandler({ mode: Mode.Plan, agent: AgentType.OpenCode });
+
+      expect(mockLog).toHaveBeenCalledWith("Running plan mode step");
+      expect(mockLog).toHaveBeenCalledWith("Permissions: allow-all");
+      expect(mockLog).not.toHaveBeenCalledWith(expect.stringContaining("Print mode"));
     });
   });
 

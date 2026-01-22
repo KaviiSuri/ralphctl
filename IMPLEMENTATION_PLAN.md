@@ -8,8 +8,10 @@ JTBD-102-SPEC-001 (Agent Adapter Interface - FOUNDATION) ✅ COMPLETE
 JTBD-102-SPEC-002 (ClaudeCodeAdapter Implementation) ✅ COMPLETE
         ↓
 JTBD-101-SPEC-001 (Agent Selection via CLI/Env) ✅ COMPLETE
-        ↓
-JTBD-103-SPEC-001 (Claude Code Project Mode) [NEXT]
+         ↓
+JTBD-103-SPEC-001 (Claude Code Print Mode) ✅ COMPLETE
+         ↓
+JTBD-104-SPEC-001 (Agent-Aware Session Management) [NEXT]
         ↓
 JTBD-104-SPEC-001 (Agent-Aware Session Management)
 ```
@@ -316,7 +318,7 @@ JTBD-102-SPEC-002 (ClaudeCodeAdapter Implementation)
         ↓
 JTBD-101-SPEC-001 (Agent Selection via CLI/Env)
         ↓
-JTBD-103-SPEC-001 (Claude Code Project Mode)
+JTBD-103-SPEC-001 (Claude Code Print Mode)
         ↓
 JTBD-104-SPEC-001 (Agent-Aware Session Management)
 ```
@@ -388,7 +390,7 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management)
   - [x] P0: Create `src/lib/agents/index.ts` for exports
 
 - [x] P0: Implement ClaudeCodeAdapter class implementing AgentAdapter interface
-  - [x] P0: Constructor accepts `useProjectMode: boolean` parameter (defaults to true)
+  - [x] P0: Constructor accepts `headless: boolean` parameter (defaults to true, controls `-p` print mode flag)
   - [x] P0: Implement `checkAvailability(): Promise<boolean>`
     - Run `claude --version` and check exit code
     - Return true if command succeeds, false otherwise
@@ -427,14 +429,14 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management)
   - [x] P0: Check output for exact string `<promise>COMPLETE</promise>`
   - [x] P0: Set success=true when detected, even if other output exists
 
-- [x] P0: Add project mode support via constructor parameter
-  - [x] P0: When `useProjectMode=true`, add `-p` flag to commands
-  - [x] P0: When `useProjectMode=false`, omit `-p` flag
-  - [x] P0: Log project mode status when running
+- [x] P0: Add print mode support via constructor parameter
+  - [x] P0: When `headless=true`, add `-p` flag to commands (print mode)
+  - [x] P0: When `headless=false`, omit `-p` flag (interactive mode)
+  - [x] P0: Log print mode status when running
 
 ### Implementation Notes
 - Claude Code CLI uses `claude` command
-- Project mode uses `-p` flag (not --headless)
+- Print mode uses `-p` / `--print` flag (prints response and exits, skips trust dialog)
 - Interactive mode: prompt passed directly as argument
 - Headless mode: uses `--prompt` flag with `-p`
 - No built-in export command - reads from ~/.claude/projects/*/chat_*.jsonl files
@@ -446,7 +448,8 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management)
 - Claude Code CLI has different command structure than OpenCode
 - Export functionality requires reading session files directly (no CLI command)
 - Session IDs are UUIDs stored in JSONL format in project directories
-- Project mode flag is `-p`, not `--project` or `--headless`
+- `-p` flag is for print mode (headless, skips trust dialog), NOT project mode
+- Print mode is useful for pipes and automation, but skips security dialogs
 - Same completion marker works across both CLIs
 
 ---
@@ -470,7 +473,7 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management)
   - [x] P0: Document priority in help text for --agent flag
 
 - [x] P0: Create agent factory in `src/lib/agents/factory.ts`
-  - [x] P0: Create `createAgent(type: AgentType, useProjectMode?: boolean): AgentAdapter`
+  - [x] P0: Create `createAgent(type: AgentType): AgentAdapter`
   - [x] P0: Implement eager availability check during factory creation
   - [x] P0: Throw clear error with installation URL when agent unavailable
     - OpenCode URL: https://opencode.ai
@@ -498,37 +501,38 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management)
 
 ---
 
-## JTBD-103-SPEC-001: Claude Code Project Mode [P1 - DEPENDS ON JTBD-102-SPEC-002, JTBD-101-SPEC-001] [NEXT]
+## JTBD-103-SPEC-001: Claude Code Print Mode [P1 - DEPENDS ON JTBD-102-SPEC-002, JTBD-101-SPEC-001] ✅ COMPLETED
 
 **Prerequisites: JTBD-102-SPEC-002 and JTBD-101-SPEC-001 must be completed first.**
 
-- [ ] P1: Add --no-project-mode CLI flag
-  - [ ] P1: Add `--no-project-mode` flag to `run` command
-  - [ ] P1: Add `--no-project-mode` flag to `step` command
-  - [ ] P1: Flag is boolean (true when present, false when absent)
+- [x] P1: Add --no-print CLI flag
+  - [x] P1: Add `--no-print` flag to `run` command
+  - [x] P1: Add `--no-print` flag to `step` command
+  - [x] P1: Flag is boolean (true when present, false when absent)
 
-- [ ] P1: Update agent factory to accept project mode parameter
-  - [ ] P1: Add `useProjectMode?: boolean` parameter to createAgent()
-  - [ ] P1: Default value: true
-  - [ ] P1: Pass parameter to ClaudeCodeAdapter constructor
+- [x] P1: Update agent factory to accept headless parameter
+  - [x] P1: Add `headless?: boolean` parameter to createAgent()
+  - [x] P1: Default value: true (enables print mode / `-p` flag)
+  - [x] P1: Pass parameter to ClaudeCodeAdapter constructor
 
-- [ ] P1: Implement project mode in ClaudeCodeAdapter
-  - [ ] P1: When `useProjectMode=true`, add `-p` flag to `claude` commands
-  - [ ] P1: When `useProjectMode=false`, omit `-p` flag
-  - [ ] P1: Log "Project mode: enabled" or "Project mode: disabled" at start
+- [x] P1: Implement print mode in ClaudeCodeAdapter
+  - [x] P1: When `headless=true`, add `-p` flag to `claude` commands
+  - [x] P1: When `headless=false`, omit `-p` flag
+  - [x] P1: Log "Print mode: enabled" or "Print mode: disabled" at start
 
-- [ ] P1: Handle project mode for OpenCodeAdapter (no-op)
-  - [ ] P1: OpenCodeAdapter constructor accepts useProjectMode but ignores it
-  - [ ] P1: Log "Project mode: N/A (OpenCode)" or simply don't log project mode status
+- [x] P1: Handle print mode for OpenCodeAdapter (no-op)
+  - [x] P1: OpenCodeAdapter constructor accepts headless but ignores it
+  - [x] P1: Log "Print mode: N/A (OpenCode)" or simply don't log print mode status
 
-- [ ] P1: Update PROMPT_build.md and PROMPT_plan.md templates
-  - [ ] P1: Add note about project mode availability for Claude Code users
-  - [ ] P1: Document --no-project-mode flag usage
+- [x] P1: Update PROMPT_build.md and PROMPT_plan.md templates
+  - [x] P1: Add note about print mode and security implications for Claude Code users
+  - [x] P1: Document --no-print flag usage and trust dialog behavior
 
 ### Implementation Notes
-- Project mode is Claude Code specific feature - OpenCode should silently ignore
-- Logging should indicate whether project mode is applicable to selected agent
-- Consider adding --project-mode flag as explicit opt-in (default true, explicit false with --no-project-mode)
+- Print mode is Claude Code specific feature - OpenCode should silently ignore
+- Print mode (`-p` / `--print`): prints response and exits, skips workspace trust dialog
+- Security: Only use in trusted directories (trust dialog is skipped with `-p`)
+- Logging should indicate whether print mode is applicable to selected agent
 
 ---
 
@@ -538,7 +542,7 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management)
 
 - [ ] P2: Update SessionState interface to include agent information
   - [ ] P2: Add optional `agent: AgentType` field to SessionState
-  - [ ] P2: Add optional `projectMode: boolean` field to SessionState
+  - [ ] P2: Add optional `printMode: boolean` field to SessionState (tracks if `-p` was used)
   - [ ] P2: Update src/domain/types.ts with new fields
 
 - [ ] P2: Update SessionsFile interface with version field
@@ -548,14 +552,14 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management)
 - [ ] P2: Implement lazy migration for existing sessions
   - [ ] P2: In readSessionsFile(), check for version field
   - [ ] P2: If version missing or old, set default agent to "opencode" for all existing sessions
-  - [ ] P2: Set projectMode to undefined for existing sessions (unknown)
+  - [ ] P2: Set printMode to undefined for existing sessions (unknown)
 
 - [ ] P2: Update runHandler to capture agent in SessionState
   - [ ] P2: Include agent type when creating SessionState after each iteration
-  - [ ] P2: Include projectMode setting when creating SessionState
+  - [ ] P2: Include printMode setting when creating SessionState
 
 - [ ] P2: Update inspectHandler for agent-aware export routing
-  - [ ] P2: InspectEntry should include agent and projectMode fields
+  - [ ] P2: InspectEntry should include agent and printMode fields
   - [ ] P2: Route each session export to correct agent adapter based on session.agent
   - [ ] P2: If agent unavailable during inspection, log warning and skip that session
 
@@ -571,14 +575,14 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management)
 
 - [ ] P2: Include agent info in InspectEntry output
   - [ ] P2: Add `agent: AgentType` field to InspectEntry
-  - [ ] P2: Add `projectMode?: boolean` field to InspectEntry
+  - [ ] P2: Add `printMode?: boolean` field to InspectEntry
   - [ ] P2: Update inspect.json schema documentation
 
 ### Implementation Notes
 - Existing sessions without agent field should default to "opencode" (lazy migration)
 - inspect.json should include agent info for each session for debugging/reproducibility
 - Consider adding validation that session.agent matches current selected agent during export
-- Project mode stored per-session allows replay with same settings
+- Print mode stored per-session allows replay with same settings
 
 ---
 
@@ -600,10 +604,14 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management)
 
 ### Learnings to Add
 - Agent selection priority: CLI flag > env var > default
-- Claude Code project mode adds -p flag when enabled
+- Claude Code print mode (`-p` / `--print`) enables headless execution and skips trust dialog
+- Print mode is enabled by default for Claude Code for faster automation
+- `--no-print` flag allows disabling print mode for interactive debugging
+- Print mode is Claude Code specific - OpenCode ignores it silently
+- Print mode status is only logged when using Claude Code
 - Agent metadata includes version, availability, and type
 - Session migration defaults old sessions to OpenCode agent
 - Inspect handler routes exports based on session.agent field
 - Agent factory performs eager availability check and provides clear error messages
-- All 78 tests passing for agent selection implementation
-- Typecheck passing for agent selection implementation
+- All 84 tests passing after print mode implementation
+- Typecheck passing for agent selection and print mode implementation

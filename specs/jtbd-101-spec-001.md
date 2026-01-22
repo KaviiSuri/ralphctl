@@ -116,7 +116,6 @@ import { ClaudeCodeAdapter } from "./claude-code-adapter";
 export interface CreateAgentOptions {
   cwd: string;
   agentType?: AgentType;
-  useProjectMode?: boolean; // For Claude Code
 }
 
 export async function createAgent(
@@ -134,7 +133,6 @@ export async function createAgent(
     case AgentType.ClaudeCode:
       adapter = new ClaudeCodeAdapter(
         options.cwd,
-        options.useProjectMode ?? true
       );
       break;
 
@@ -213,7 +211,6 @@ export async function runHandler(ctx: {
     adapter = await createAgent({
       cwd,
       agentType,
-      useProjectMode: mode === Mode.Build, // Enable project mode for build
     });
   } catch (error) {
     if (error instanceof AgentUnavailableError) {

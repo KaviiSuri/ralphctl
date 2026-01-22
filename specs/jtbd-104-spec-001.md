@@ -89,7 +89,6 @@ const session: RalphSession = {
   mode,
   prompt: resolvedPrompt,
   agent: agentType, // NEW
-  projectMode: agentType === AgentType.ClaudeCode ? useProjectMode : undefined, // NEW
 };
 
 await addSession(session);

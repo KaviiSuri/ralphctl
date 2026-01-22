@@ -1227,871 +1227,185 @@
     },
     {
       "iteration": 1,
+      "sessionId": "unknown-1",
+      "startedAt": "2026-01-22T08:46:17.390Z",
+      "mode": "build",
+      "prompt": "0a. Study `specs/*` with up to 500 parallel {fast} subagents to learn the application specifications.\n0b. Study @IMPLEMENTATION_PLAN.md.\n0c. For reference, the application source code is in `src/*`.\n\n1. Your task is to implement functionality per the specifications using parallel subagents. Follow @IMPLEMENTATION_PLAN.md and choose the most important item to address. Before making changes, search the codebase (don't assume not implemented) using {fast} subagents. You may use up to 500 parallel {fast} subagents for searches/reads and only 1 {fast} subagent for build/tests. Use {smart} subagents when complex reasoning is needed (debugging, architectural decisions).\n2. After implementing functionality or resolving problems, run the tests for that unit of code that was improved. If functionality is missing then it's your job to add it as per the application specifications. Ultrathink.\n3. When you discover issues, immediately update @IMPLEMENTATION_PLAN.md with your findings using a subagent. When resolved, update and remove the item.\n4. When the tests pass, update @IMPLEMENTATION_PLAN.md, then `git add -A` then `git commit` with a message describing the changes. After the commit, `git push`.\n5. stop after the spec is done. you do not need to keep going to other specs.\n\n99999. Important: When authoring documentation, capture the why — tests and implementation importance.\n999999. Important: Single sources of truth, no migrations/adapters. If tests unrelated to your work fail, resolve them as part of the increment.\n9999999. As soon as there are no build or test errors create a git tag. If there are no git tags start at 0.0.0 and increment patch by 1 for example 0.0.1  if 0.0.0 does not exist.\n99999999. You may add extra logging if required to debug issues.\n999999999. Keep @IMPLEMENTATION_PLAN.md current with learnings using a subagent — future work depends on this to avoid duplicating efforts. Update especially after finishing your turn.\n9999999999. When you learn something new about how to run the application, update @AGENTS.md using a subagent but keep it brief. For example if you run commands multiple times before learning the correct command then that file should be updated.\n99999999999. For any bugs you notice, resolve them or document them in @IMPLEMENTATION_PLAN.md using a subagent even if it is unrelated to the current piece of work.\n999999999999. Implement functionality completely. Placeholders and stubs waste efforts and time redoing the same work.\n9999999999999. When @IMPLEMENTATION_PLAN.md becomes large periodically clean out the items that are completed from the file using a subagent.\n99999999999999. If you find inconsistencies in the specs/* then use an {smart} 4.5 subagent with 'ultrathink' requested to update the specs.\n999999999999999. IMPORTANT: Keep @AGENTS.md operational only — status updates and progress notes belong in `IMPLEMENTATION_PLAN.md`. A bloated AGENTS.md pollutes every future loop's context.\n"
+    },
+    {
+      "iteration": 1,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T07:43:28.207Z",
+      "startedAt": "2026-01-22T08:53:03.314Z",
       "mode": "plan",
       "prompt": "Mocked prompt"
     },
     {
       "iteration": 2,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T07:43:28.208Z",
+      "startedAt": "2026-01-22T08:53:03.317Z",
       "mode": "plan",
       "prompt": "Mocked prompt"
     },
     {
       "iteration": 3,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T07:43:28.209Z",
+      "startedAt": "2026-01-22T08:53:03.317Z",
       "mode": "plan",
       "prompt": "Mocked prompt"
     },
     {
       "iteration": 1,
       "sessionId": "ses_test1",
-      "startedAt": "2026-01-22T07:43:28.210Z",
+      "startedAt": "2026-01-22T08:53:03.318Z",
       "mode": "plan",
       "prompt": "Mocked prompt"
     },
     {
       "iteration": 2,
       "sessionId": "ses_test2",
-      "startedAt": "2026-01-22T07:43:28.210Z",
+      "startedAt": "2026-01-22T08:53:03.318Z",
       "mode": "plan",
       "prompt": "Mocked prompt"
     },
     {
       "iteration": 1,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T07:43:28.212Z",
+      "startedAt": "2026-01-22T08:53:03.318Z",
       "mode": "plan",
       "prompt": "Mocked prompt"
     },
     {
       "iteration": 1,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T07:43:28.213Z",
+      "startedAt": "2026-01-22T08:53:03.319Z",
       "mode": "plan",
       "prompt": "Use {smart} for this"
     },
     {
       "iteration": 1,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T07:43:28.214Z",
+      "startedAt": "2026-01-22T08:53:03.319Z",
       "mode": "plan",
       "prompt": "Use {fast} for this"
     },
     {
       "iteration": 1,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T07:43:28.215Z",
+      "startedAt": "2026-01-22T08:53:03.319Z",
       "mode": "plan",
       "prompt": "Use {smart} and {fast}"
     },
     {
       "iteration": 1,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T07:43:28.215Z",
+      "startedAt": "2026-01-22T08:53:03.320Z",
       "mode": "plan",
       "prompt": "Use {smart} and {fast}"
     },
     {
       "iteration": 1,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T07:43:28.215Z",
+      "startedAt": "2026-01-22T08:53:03.320Z",
       "mode": "plan",
       "prompt": "Use {smart} and {fast}"
     },
     {
       "iteration": 1,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T07:58:58.154Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T07:58:58.156Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T07:58:58.157Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T07:58:58.157Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T07:58:58.158Z",
-      "mode": "plan",
-      "prompt": "Use {smart} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T07:58:58.158Z",
-      "mode": "plan",
-      "prompt": "Use {fast} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T07:58:58.158Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T07:58:58.159Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T07:58:58.159Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:17:52.285Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:17:52.286Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:17:52.287Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:17:52.287Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:17:52.288Z",
-      "mode": "plan",
-      "prompt": "Use {smart} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:17:52.288Z",
-      "mode": "plan",
-      "prompt": "Use {fast} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:17:52.288Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:17:52.289Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:17:52.289Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:18:26.035Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:18:26.036Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:18:26.037Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:18:26.037Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:18:26.038Z",
-      "mode": "plan",
-      "prompt": "Use {smart} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:18:26.038Z",
-      "mode": "plan",
-      "prompt": "Use {fast} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:18:26.039Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:18:26.039Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:18:26.040Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:24:05.798Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:24:05.800Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:24:05.801Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:24:05.802Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:24:05.802Z",
-      "mode": "plan",
-      "prompt": "Use {smart} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:24:05.803Z",
-      "mode": "plan",
-      "prompt": "Use {fast} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:24:05.803Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:24:05.804Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:24:05.804Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:25:58.583Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:25:58.584Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:25:58.585Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:25:58.585Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:25:58.586Z",
-      "mode": "plan",
-      "prompt": "Use {smart} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:25:58.586Z",
-      "mode": "plan",
-      "prompt": "Use {fast} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:25:58.587Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:25:58.587Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:25:58.588Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:38:18.696Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:38:18.697Z",
+      "startedAt": "2026-01-22T09:26:08.056Z",
       "mode": "plan",
       "prompt": "Mocked prompt"
     },
     {
       "iteration": 2,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:38:18.697Z",
+      "startedAt": "2026-01-22T09:26:08.057Z",
       "mode": "plan",
       "prompt": "Mocked prompt"
     },
     {
       "iteration": 3,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:38:18.698Z",
+      "startedAt": "2026-01-22T09:26:08.058Z",
       "mode": "plan",
       "prompt": "Mocked prompt"
     },
     {
       "iteration": 1,
       "sessionId": "ses_test1",
-      "startedAt": "2026-01-22T08:38:18.698Z",
+      "startedAt": "2026-01-22T09:26:08.058Z",
       "mode": "plan",
       "prompt": "Mocked prompt"
     },
     {
       "iteration": 2,
       "sessionId": "ses_test2",
-      "startedAt": "2026-01-22T08:38:18.698Z",
+      "startedAt": "2026-01-22T09:26:08.058Z",
       "mode": "plan",
       "prompt": "Mocked prompt"
     },
     {
       "iteration": 1,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:38:18.698Z",
+      "startedAt": "2026-01-22T09:26:08.058Z",
       "mode": "plan",
       "prompt": "Mocked prompt"
     },
     {
       "iteration": 1,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:38:18.699Z",
+      "startedAt": "2026-01-22T09:26:08.059Z",
       "mode": "plan",
       "prompt": "Use {smart} for this"
     },
     {
       "iteration": 1,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:38:18.699Z",
+      "startedAt": "2026-01-22T09:26:08.059Z",
       "mode": "plan",
       "prompt": "Use {fast} for this"
     },
     {
       "iteration": 1,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:38:18.700Z",
+      "startedAt": "2026-01-22T09:26:08.060Z",
       "mode": "plan",
       "prompt": "Use {smart} and {fast}"
     },
     {
       "iteration": 1,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:38:18.700Z",
+      "startedAt": "2026-01-22T09:26:08.060Z",
       "mode": "plan",
       "prompt": "Use {smart} and {fast}"
     },
     {
       "iteration": 1,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:38:18.701Z",
+      "startedAt": "2026-01-22T09:26:08.060Z",
       "mode": "plan",
       "prompt": "Use {smart} and {fast}"
     },
     {
       "iteration": 1,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:39:55.036Z",
+      "startedAt": "2026-01-22T09:26:08.061Z",
       "mode": "plan",
       "prompt": "Mocked prompt"
     },
     {
       "iteration": 1,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:39:55.036Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 2,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:39:55.037Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 3,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:39:55.037Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test1",
-      "startedAt": "2026-01-22T08:39:55.037Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 2,
-      "sessionId": "ses_test2",
-      "startedAt": "2026-01-22T08:39:55.037Z",
+      "startedAt": "2026-01-22T09:26:08.061Z",
       "mode": "plan",
       "prompt": "Mocked prompt"
     },
     {
       "iteration": 1,
       "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:39:55.038Z",
+      "startedAt": "2026-01-22T09:26:08.061Z",
       "mode": "plan",
       "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:39:55.038Z",
-      "mode": "plan",
-      "prompt": "Use {smart} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:39:55.038Z",
-      "mode": "plan",
-      "prompt": "Use {fast} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:39:55.039Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:39:55.039Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:39:55.039Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:41:14.767Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 2,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:41:14.768Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 3,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:41:14.769Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test1",
-      "startedAt": "2026-01-22T08:41:14.770Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 2,
-      "sessionId": "ses_test2",
-      "startedAt": "2026-01-22T08:41:14.770Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:41:14.770Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:41:14.771Z",
-      "mode": "plan",
-      "prompt": "Use {smart} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:41:14.772Z",
-      "mode": "plan",
-      "prompt": "Use {fast} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:41:14.773Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:41:14.773Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:41:14.774Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:42:20.288Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 2,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:42:20.288Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 3,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:42:20.288Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test1",
-      "startedAt": "2026-01-22T08:42:20.289Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 2,
-      "sessionId": "ses_test2",
-      "startedAt": "2026-01-22T08:42:20.289Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:42:20.289Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:42:20.290Z",
-      "mode": "plan",
-      "prompt": "Use {smart} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:42:20.291Z",
-      "mode": "plan",
-      "prompt": "Use {fast} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:42:20.291Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:42:20.291Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:42:20.292Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:42:43.115Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 2,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:42:43.115Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 3,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:42:43.116Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test1",
-      "startedAt": "2026-01-22T08:42:43.116Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 2,
-      "sessionId": "ses_test2",
-      "startedAt": "2026-01-22T08:42:43.117Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:42:43.117Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:42:43.118Z",
-      "mode": "plan",
-      "prompt": "Use {smart} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:42:43.118Z",
-      "mode": "plan",
-      "prompt": "Use {fast} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:42:43.119Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:42:43.119Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:42:43.120Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:43:00.125Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 2,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:43:00.126Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 3,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:43:00.126Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test1",
-      "startedAt": "2026-01-22T08:43:00.127Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 2,
-      "sessionId": "ses_test2",
-      "startedAt": "2026-01-22T08:43:00.127Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:43:00.128Z",
-      "mode": "plan",
-      "prompt": "Mocked prompt"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:43:00.128Z",
-      "mode": "plan",
-      "prompt": "Use {smart} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:43:00.129Z",
-      "mode": "plan",
-      "prompt": "Use {fast} for this"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:43:00.130Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:43:00.131Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
-    },
-    {
-      "iteration": 1,
-      "sessionId": "ses_test123",
-      "startedAt": "2026-01-22T08:43:00.132Z",
-      "mode": "plan",
-      "prompt": "Use {smart} and {fast}"
     }
   ]
 }

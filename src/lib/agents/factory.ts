@@ -7,7 +7,7 @@ export interface CreateAgentOptions {
   permissionPosture?: "allow-all" | "ask";
   cwd?: string;
   env?: Record<string, string>;
-  useProjectMode?: boolean;
+  headless?: boolean;
 }
 
 function resolveAgentType(cliAgent?: string): AgentType {
@@ -28,7 +28,7 @@ export async function createAgent(
   options?: CreateAgentOptions
 ): Promise<AgentAdapter> {
   const agentType = resolveAgentType(cliAgent);
-  const { permissionPosture = "allow-all", cwd, env, useProjectMode } = options ?? {};
+  const { permissionPosture = "allow-all", cwd, env, headless = true } = options ?? {};
 
   let adapter: AgentAdapter;
 
@@ -36,7 +36,7 @@ export async function createAgent(
     adapter = new ClaudeCodeAdapter({
       cwd,
       env,
-      headless: true,
+      headless,
     });
   } else {
     adapter = new OpenCodeAdapter({
