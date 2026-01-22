@@ -79,7 +79,7 @@ export class ClaudeCodeAdapter implements AgentAdapter {
     return {
       stdout: result.stdout,
       stderr: result.stderr,
-      sessionId: this.extractSessionId(combinedOutput),
+      sessionId: null,
       completionDetected: this.detectCompletion(combinedOutput),
       exitCode: result.exitCode ?? -1,
     };

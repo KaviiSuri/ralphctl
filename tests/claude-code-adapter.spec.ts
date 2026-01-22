@@ -72,7 +72,7 @@ class TestableClaudeCodeAdapter {
     return {
       stdout: result.stdout,
       stderr: result.stderr,
-      sessionId: this.extractSessionId(combinedOutput),
+      sessionId: null,
       completionDetected: this.detectCompletion(combinedOutput),
       exitCode: result.exitCode ?? -1,
     };
@@ -273,7 +273,7 @@ describe("ClaudeCodeAdapter", () => {
       expect(result.completionDetected).toBe(true);
     });
 
-    it("should return null sessionId when not found", async () => {
+    it("should return null sessionId (file-based session tracking)", async () => {
       const mockRunner = async () => ({
         exitCode: 0,
         stdout: "No session info here",
@@ -285,62 +285,6 @@ describe("ClaudeCodeAdapter", () => {
       const result = await adapter.run("test", "model");
 
       expect(result.sessionId).toBe(null);
-    });
-
-    it("should extract session ID from 'Session ID:' format", async () => {
-      const mockRunner = async () => ({
-        exitCode: 0,
-        stdout: "Session ID: 550e8400-e29b-41d4-a716-446655440000",
-        stderr: "",
-        success: true,
-      });
-
-      const adapter = new TestableClaudeCodeAdapter(mockRunner);
-      const result = await adapter.run("test", "model");
-
-      expect(result.sessionId).toBe("550e8400-e29b-41d4-a716-446655440000");
-    });
-
-    it("should extract session ID from JSON format", async () => {
-      const mockRunner = async () => ({
-        exitCode: 0,
-        stdout: '{"sessionId":"550e8400-e29b-41d4-a716-446655440000","status":"active"}',
-        stderr: "",
-        success: true,
-      });
-
-      const adapter = new TestableClaudeCodeAdapter(mockRunner);
-      const result = await adapter.run("test", "model");
-
-      expect(result.sessionId).toBe("550e8400-e29b-41d4-a716-446655440000");
-    });
-
-    it("should extract session ID from bracketed format", async () => {
-      const mockRunner = async () => ({
-        exitCode: 0,
-        stdout: "[Session: 550e8400-e29b-41d4-a716-446655440000]",
-        stderr: "",
-        success: true,
-      });
-
-      const adapter = new TestableClaudeCodeAdapter(mockRunner);
-      const result = await adapter.run("test", "model");
-
-      expect(result.sessionId).toBe("550e8400-e29b-41d4-a716-446655440000");
-    });
-
-    it("should extract session ID from lowercase 'session:' format", async () => {
-      const mockRunner = async () => ({
-        exitCode: 0,
-        stdout: "session: 550e8400-e29b-41d4-a716-446655440000",
-        stderr: "",
-        success: true,
-      });
-
-      const adapter = new TestableClaudeCodeAdapter(mockRunner);
-      const result = await adapter.run("test", "model");
-
-      expect(result.sessionId).toBe("550e8400-e29b-41d4-a716-446655440000");
     });
 
     it("should return exit code -1 when not provided", async () => {

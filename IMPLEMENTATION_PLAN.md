@@ -2,10 +2,11 @@
 
 ## Overall Status
 
-**Completed Specs:** 12/12 (JTBD-101-SPEC-001, JTBD-102-SPEC-001, JTBD-102-SPEC-002, JTBD-103-SPEC-001, JBTD-001 through JBTD-007) ✅
+**Completed Specs:** 12/12 (JTBD-101-SPEC-001, JTBD-102-SPEC-001, JTBD-102-SPEC-002, JTBD-103-SPEC-001, JTBD-104-SPEC-001, JBTD-001 through JBTD-007) ✅
 **Remaining Specs:** 0
-**Current Tests:** 95 passing ✅
+**Current Tests:** 91 passing ✅
 **Typecheck:** Passing ✅
+**P2 Gaps:** All complete ✅
 
 ---
 
@@ -27,13 +28,7 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management) ✅ COMPLETE
 
 ## Remaining Tasks
 
-### JTBD-104-SPEC-001: Agent-Aware Session Management [P0 - IN PROGRESS]
-
-**Prerequisites:** JTBD-102-SPEC-001 complete ✅, JTBD-102-SPEC-002 complete ✅, JTBD-101-SPEC-001 complete ✅
-
-**Purpose:** This spec addresses gaps in JBTD-005 (session state missing agent/printMode) and JBTD-006 (inspect routing hardcoded, missing fields). It enables mixed-agent session support and proper export routing while maintaining backward compatibility with existing session files.
-
-#### P0: Domain Type Updates [COMPLETE]
+All tasks complete! ✅
 
 - [x] P0: Add `agent: AgentType` field to SessionState interface in src/domain/types.ts:30-40
 - [x] P0: Add `printMode?: boolean` field to SessionState interface in src/domain/types.ts:30-40
@@ -105,21 +100,6 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management) ✅ COMPLETE
 
 ---
 
-### P2 Gaps (Medium Priority)
-
-#### JTBD-005-SPEC-002: Session Identification [P2]
-
-- [ ] P2: Update ClaudeCodeAdapter to return null for sessionId in src/lib/agents/claude-code-adapter.ts
-  - **Current:** Extracts sessionId from output
-  - **Required:** Return null as per spec (session tracking is file-based, not CLI output-based)
-
-#### JTBD-006-SPEC-002: Inspect Schema [P2]
-
-- [x] P2: Ensure InspectEntry has error field in src/domain/types.ts:42-47
-  - This is already tracked in JTBD-104-SPEC-001 P0 tasks
-
----
-
 ## Completed Specs (For Reference)
 
 ### JTBD-102-SPEC-001: Agent Adapter Interface ✅
@@ -183,6 +163,13 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management) ✅ COMPLETE
 - --smart-model and --fast-model CLI flags
 - Model placeholder resolution ({smart}, {fast})
 
+### JTBD-104-SPEC-001: Agent-Aware Session Management ✅
+- Session state schema extended with agent and printMode fields
+- Lazy migration for backward compatibility with old sessions
+- Agent-aware export routing in inspect command
+- Graceful handling of unavailable agents during inspection
+- P2 gap: ClaudeCodeAdapter returns null for sessionId (file-based session tracking)
+
 ---
 
 ## Learnings
@@ -211,3 +198,4 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management) ✅ COMPLETE
 - AgentUnavailableError class needed for factory error handling (FIXED)
 - End iteration markers already present in run.ts (--- Iteration N/M ---)
 - JTBD-104-SPEC-001 P1 tasks completed (error handling, test coverage)
+- ClaudeCodeAdapter returns null for sessionId because session tracking is file-based, not CLI output-based
