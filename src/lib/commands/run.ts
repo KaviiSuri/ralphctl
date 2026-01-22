@@ -1,4 +1,4 @@
-import { Mode, type SessionState, createModelConfig } from "../../domain/types.js";
+import { Mode, type SessionState, type ModelConfig, createModelConfig } from "../../domain/types.js";
 import { AgentType, type AgentAdapter } from "../../domain/agent.js";
 import { createAgent, AgentUnavailableError } from "../agents/factory.js";
 import { resolvePrompt } from "../prompts/resolver.js";
@@ -18,7 +18,6 @@ export interface RunHandlerOptions {
 export async function runHandler(options: RunHandlerOptions): Promise<void> {
   const { mode, maxIterations = 10, permissionPosture = "allow-all", smartModel, fastModel, agent, noPrint = false } = options;
 
-  const modelConfig = createModelConfig(smartModel, fastModel);
   const headless = !noPrint;
   const resolvedAgent = agent ?? AgentType.OpenCode;
 
@@ -36,6 +35,12 @@ export async function runHandler(options: RunHandlerOptions): Promise<void> {
     }
     throw error;
   }
+
+  const adapterDefaults = adapter.getDefaultModels();
+  const modelConfig: ModelConfig = createModelConfig(
+    smartModel ?? adapterDefaults.smart,
+    fastModel ?? adapterDefaults.fast
+  );
 
   console.log(`Running ${mode} mode`);
   console.log(`Permissions: ${permissionPosture}`);

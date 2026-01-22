@@ -106,6 +106,26 @@ class TestableClaudeCodeAdapter {
     };
   }
 
+  getDefaultModels() {
+    return {
+      smart: "claude-opus-4-5",
+      fast: "claude-sonnet-4-5",
+    };
+  }
+
+  getInstallationUrl() {
+    return "https://claude.ai/code";
+  }
+
+  getUnavailableErrorMessage() {
+    const metadata = this.getMetadata();
+    return (
+      `${metadata.displayName} (${metadata.cliCommand}) is not available.\n` +
+      `Please install ${metadata.displayName} and ensure it's in your PATH.\n` +
+      `Visit: ${this.getInstallationUrl()}`
+    );
+  }
+
   private buildCommandArgs(
     prompt: string,
     model: string,
@@ -405,6 +425,58 @@ describe("ClaudeCodeAdapter", () => {
       expect(result).toHaveProperty("success");
       expect(result).toHaveProperty("exportData");
       expect(typeof result.success).toBe("boolean");
+    });
+  });
+
+  describe("getDefaultModels", () => {
+    it("should return Claude-specific model defaults", () => {
+      const mockRunner = async () => ({
+        exitCode: 0,
+        stdout: "",
+        stderr: "",
+        success: true,
+      });
+
+      const adapter = new TestableClaudeCodeAdapter(mockRunner);
+      const models = adapter.getDefaultModels();
+
+      expect(models.smart).toBe("claude-opus-4-5");
+      expect(models.fast).toBe("claude-sonnet-4-5");
+    });
+  });
+
+  describe("getInstallationUrl", () => {
+    it("should return Claude Code installation URL", () => {
+      const mockRunner = async () => ({
+        exitCode: 0,
+        stdout: "",
+        stderr: "",
+        success: true,
+      });
+
+      const adapter = new TestableClaudeCodeAdapter(mockRunner);
+      const url = adapter.getInstallationUrl();
+
+      expect(url).toBe("https://claude.ai/code");
+    });
+  });
+
+  describe("getUnavailableErrorMessage", () => {
+    it("should return formatted error message with metadata", () => {
+      const mockRunner = async () => ({
+        exitCode: 0,
+        stdout: "",
+        stderr: "",
+        success: true,
+      });
+
+      const adapter = new TestableClaudeCodeAdapter(mockRunner);
+      const message = adapter.getUnavailableErrorMessage();
+
+      expect(message).toContain("Claude Code");
+      expect(message).toContain("claude");
+      expect(message).toContain("not available");
+      expect(message).toContain("https://claude.ai/code");
     });
   });
 });

@@ -36,6 +36,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
         return {
           createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
@@ -69,6 +75,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
 
         const originalExit = process.exit;
@@ -103,6 +115,12 @@ describe("Command Handlers", () => {
               cliCommand: "opencode",
               version: "1.0.0",
             }));
+            getDefaultModels = mock(() => ({
+              smart: "openai/gpt-5.2-codex",
+              fast: "zai-coding-plan/glm-4.7",
+            }));
+            getInstallationUrl = mock(() => "https://opencode.ai");
+            getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
           },
         };
       });
@@ -161,6 +179,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
         return {
           createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
@@ -220,6 +244,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
         return {
           createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
@@ -270,6 +300,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
         return {
           createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
@@ -317,6 +353,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
         return {
           createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
@@ -367,6 +409,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
         return {
           createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
@@ -417,6 +465,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
         return {
           createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
@@ -473,6 +527,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
         return {
           createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
@@ -526,6 +586,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
         return {
           createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
@@ -581,6 +647,12 @@ describe("Command Handlers", () => {
             cliCommand: "claude",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "claude-opus-4-5",
+            fast: "claude-sonnet-4-5",
+          }));
+          getInstallationUrl = mock(() => "https://claude.ai/code");
+          getUnavailableErrorMessage = mock(() => "Claude Code (claude) is not available.");
         };
         return {
           createAgent: mock((cliAgent?: string, options?: any) => {
@@ -630,6 +702,12 @@ describe("Command Handlers", () => {
             cliCommand: "claude",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "claude-opus-4-5",
+            fast: "claude-sonnet-4-5",
+          }));
+          getInstallationUrl = mock(() => "https://claude.ai/code");
+          getUnavailableErrorMessage = mock(() => "Claude Code (claude) is not available.");
         };
         return {
           createAgent: mock((cliAgent?: string, options?: any) => {
@@ -679,6 +757,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
         return {
           createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
@@ -729,6 +813,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
         return {
           createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
@@ -790,6 +880,12 @@ describe("Command Handlers", () => {
             cliCommand: "claude",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "claude-opus-4-5",
+            fast: "claude-sonnet-4-5",
+          }));
+          getInstallationUrl = mock(() => "https://claude.ai/code");
+          getUnavailableErrorMessage = mock(() => "Claude Code (claude) is not available.");
         };
         return {
           createAgent: mock((cliAgent?: string, options?: any) => {
@@ -853,6 +949,12 @@ describe("Command Handlers", () => {
             cliCommand: "claude",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "claude-opus-4-5",
+            fast: "claude-sonnet-4-5",
+          }));
+          getInstallationUrl = mock(() => "https://claude.ai/code");
+          getUnavailableErrorMessage = mock(() => "Claude Code (claude) is not available.");
         };
         return {
           createAgent: mock((cliAgent?: string, options?: any) => {
@@ -923,6 +1025,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
         return {
           createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
@@ -972,6 +1080,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
 
         mockProcessExit = mock((code: number) => {
@@ -1005,6 +1119,12 @@ describe("Command Handlers", () => {
               cliCommand: "opencode",
               version: "1.0.0",
             }));
+            getDefaultModels = mock(() => ({
+              smart: "openai/gpt-5.2-codex",
+              fast: "zai-coding-plan/glm-4.7",
+            }));
+            getInstallationUrl = mock(() => "https://opencode.ai");
+            getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
           },
         };
       });
@@ -1066,6 +1186,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
         return {
           createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
@@ -1123,6 +1249,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
         return {
           createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
@@ -1172,6 +1304,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
         return {
           createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
@@ -1224,6 +1362,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
         return {
           createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
@@ -1276,6 +1420,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
         return {
           createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
@@ -1334,6 +1484,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
         return {
           createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
@@ -1390,6 +1546,12 @@ describe("Command Handlers", () => {
             cliCommand: "claude",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "claude-opus-4-5",
+            fast: "claude-sonnet-4-5",
+          }));
+          getInstallationUrl = mock(() => "https://claude.ai/code");
+          getUnavailableErrorMessage = mock(() => "Claude Code (claude) is not available.");
         };
         return {
           createAgent: mock((cliAgent?: string, options?: any) => {
@@ -1439,6 +1601,12 @@ describe("Command Handlers", () => {
             cliCommand: "claude",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "claude-opus-4-5",
+            fast: "claude-sonnet-4-5",
+          }));
+          getInstallationUrl = mock(() => "https://claude.ai/code");
+          getUnavailableErrorMessage = mock(() => "Claude Code (claude) is not available.");
         };
         return {
           createAgent: mock((cliAgent?: string, options?: any) => {
@@ -1488,6 +1656,12 @@ describe("Command Handlers", () => {
             cliCommand: "opencode",
             version: "1.0.0",
           }));
+          getDefaultModels = mock(() => ({
+            smart: "openai/gpt-5.2-codex",
+            fast: "zai-coding-plan/glm-4.7",
+          }));
+          getInstallationUrl = mock(() => "https://opencode.ai");
+          getUnavailableErrorMessage = mock(() => "OpenCode (opencode) is not available.");
         };
         return {
           createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),

@@ -1,6 +1,6 @@
 import type { AgentAdapter } from "../../domain/agent.js";
 import { AgentType } from "../../domain/agent.js";
-import { OpenCodeAdapter } from "../opencode/adapter.js";
+import { OpenCodeAdapter } from "./opencode-adapter.js";
 import { ClaudeCodeAdapter } from "./claude-code-adapter.js";
 
 export interface CreateAgentOptions {
@@ -30,17 +30,6 @@ function resolveAgentType(cliAgent?: string): AgentType {
   return AgentType.OpenCode;
 }
 
-function getInstallationUrl(agentType: AgentType): string {
-  switch (agentType) {
-    case AgentType.OpenCode:
-      return "https://opencode.ai";
-    case AgentType.ClaudeCode:
-      return "https://claude.ai/code";
-    default:
-      return "";
-  }
-}
-
 export async function createAgent(
   cliAgent?: string,
   options?: CreateAgentOptions
@@ -68,14 +57,7 @@ export async function createAgent(
 
   const available = await adapter.checkAvailability();
   if (!available) {
-    const metadata = adapter.getMetadata();
-    const installationUrl = getInstallationUrl(agentType);
-
-    throw new AgentUnavailableError(
-      `${metadata.displayName} (${metadata.cliCommand}) is not available.\n` +
-        `Please install ${metadata.displayName} and ensure it's in your PATH.\n` +
-        `Visit: ${installationUrl}`
-    );
+    throw new AgentUnavailableError(adapter.getUnavailableErrorMessage());
   }
 
   return adapter;

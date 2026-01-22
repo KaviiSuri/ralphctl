@@ -1,3 +1,5 @@
+import type { ModelConfig } from "./types.js";
+
 export type PermissionPosture = "allow-all" | "ask";
 
 export interface AgentAdapter {
@@ -18,6 +20,12 @@ export interface AgentAdapter {
   export(sessionId: string): Promise<AgentExportResult>;
 
   getMetadata(): AgentMetadata;
+
+  getDefaultModels(): ModelConfig;
+
+  getInstallationUrl(): string;
+
+  getUnavailableErrorMessage(): string;
 }
 
 export interface AgentRunOptions {

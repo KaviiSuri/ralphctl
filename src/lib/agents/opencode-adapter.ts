@@ -1,5 +1,6 @@
 import { runProcess, runProcessInteractive, type ProcessRunnerResult, type ProcessRunnerOptions } from "../process/runner.js";
 import type { AgentAdapter, AgentRunOptions, AgentRunResult, AgentExportResult, AgentMetadata, PermissionPosture } from "../../domain/agent.js";
+import { type ModelConfig, DEFAULT_SMART_MODEL, DEFAULT_FAST_MODEL } from "../../domain/types.js";
 
 export interface OpenCodeAdapterOptions {
   cwd?: string;
@@ -134,5 +135,25 @@ export class OpenCodeAdapter implements AgentAdapter {
       version: this.cachedVersion,
       cliCommand: "opencode",
     };
+  }
+
+  getDefaultModels(): ModelConfig {
+    return {
+      smart: DEFAULT_SMART_MODEL,
+      fast: DEFAULT_FAST_MODEL,
+    };
+  }
+
+  getInstallationUrl(): string {
+    return "https://opencode.ai";
+  }
+
+  getUnavailableErrorMessage(): string {
+    const metadata = this.getMetadata();
+    return (
+      `${metadata.displayName} (${metadata.cliCommand}) is not available.\n` +
+      `Please install ${metadata.displayName} and ensure it's in your PATH.\n` +
+      `Visit: ${this.getInstallationUrl()}`
+    );
   }
 }

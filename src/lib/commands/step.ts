@@ -1,4 +1,4 @@
-import { Mode, createModelConfig } from "../../domain/types.js";
+import { Mode, type ModelConfig, createModelConfig } from "../../domain/types.js";
 import { AgentType, type AgentAdapter } from "../../domain/agent.js";
 import { createAgent, AgentUnavailableError } from "../agents/factory.js";
 import { resolvePrompt } from "../prompts/resolver.js";
@@ -17,7 +17,6 @@ export interface StepHandlerOptions {
 export async function stepHandler(options: StepHandlerOptions): Promise<void> {
   const { mode, customPrompt, permissionPosture = "allow-all", smartModel, fastModel, agent, noPrint = false } = options;
 
-  const modelConfig = createModelConfig(smartModel, fastModel);
   const headless = !noPrint;
   const resolvedAgent = agent ?? AgentType.OpenCode;
 
@@ -35,6 +34,12 @@ export async function stepHandler(options: StepHandlerOptions): Promise<void> {
     }
     throw error;
   }
+
+  const adapterDefaults = adapter.getDefaultModels();
+  const modelConfig: ModelConfig = createModelConfig(
+    smartModel ?? adapterDefaults.smart,
+    fastModel ?? adapterDefaults.fast
+  );
 
   console.log(`Running ${mode} mode step`);
   console.log(`Permissions: ${permissionPosture}`);

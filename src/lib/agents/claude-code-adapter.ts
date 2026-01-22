@@ -1,6 +1,10 @@
 import { runProcess, runProcessInteractive, type ProcessRunnerOptions, type ProcessRunnerResult } from "../process/runner.js";
 import type { AgentAdapter, AgentRunOptions, AgentRunResult, AgentExportResult, AgentMetadata } from "../../domain/agent.js";
+import type { ModelConfig } from "../../domain/types.js";
 import * as fs from "node:fs/promises";
+
+const CLAUDE_DEFAULT_SMART_MODEL = "claude-opus-4-5";
+const CLAUDE_DEFAULT_FAST_MODEL = "claude-sonnet-4-5";
 
 export interface ClaudeCodeAdapterOptions {
   cwd?: string;
@@ -207,6 +211,26 @@ export class ClaudeCodeAdapter implements AgentAdapter {
       version: this.cachedVersion,
       cliCommand: "claude",
     };
+  }
+
+  getDefaultModels(): ModelConfig {
+    return {
+      smart: CLAUDE_DEFAULT_SMART_MODEL,
+      fast: CLAUDE_DEFAULT_FAST_MODEL,
+    };
+  }
+
+  getInstallationUrl(): string {
+    return "https://claude.ai/code";
+  }
+
+  getUnavailableErrorMessage(): string {
+    const metadata = this.getMetadata();
+    return (
+      `${metadata.displayName} (${metadata.cliCommand}) is not available.\n` +
+      `Please install ${metadata.displayName} and ensure it's in your PATH.\n` +
+      `Visit: ${this.getInstallationUrl()}`
+    );
   }
 
   private buildCommandArgs(
