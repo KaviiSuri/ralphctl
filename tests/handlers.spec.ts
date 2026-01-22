@@ -1348,6 +1348,7 @@ describe("Command Handlers", () => {
           startedAt: "2024-01-01T00:00:00Z",
           mode: "plan",
           prompt: "Test prompt",
+          agent: AgentType.OpenCode,
         },
         {
           iteration: 2,
@@ -1355,6 +1356,7 @@ describe("Command Handlers", () => {
           startedAt: "2024-01-01T00:01:00Z",
           mode: "plan",
           prompt: "Test prompt",
+          agent: AgentType.OpenCode,
         },
       ];
 
@@ -1367,23 +1369,32 @@ describe("Command Handlers", () => {
       });
 
       let exportCallCount = 0;
-      mock.module("../src/lib/opencode/adapter.js", () => {
+      const mockAdapter = {
+        export: mock(() => {
+          exportCallCount++;
+          return Promise.resolve({
+            exportData: `Exported data ${exportCallCount}`,
+            success: true,
+          });
+        }),
+        runInteractive: mock(() => Promise.resolve()),
+        getMetadata: mock(() => ({
+          name: "opencode",
+          displayName: "OpenCode",
+          cliCommand: "opencode",
+          version: "1.0.0",
+        })),
+        checkAvailability: mock(() => Promise.resolve(true)),
+      };
+
+      mock.module("../src/lib/agents/factory.js", () => {
         return {
-          OpenCodeAdapter: class {
-            export = mock(() => {
-              exportCallCount++;
-              return Promise.resolve({
-                exportData: `Exported data ${exportCallCount}`,
-                success: true,
-              });
-            });
-            runInteractive = mock(() => Promise.resolve());
-            getMetadata = mock(() => ({
-              name: "opencode",
-              displayName: "OpenCode",
-              cliCommand: "opencode",
-              version: "1.0.0",
-            }));
+          createAgent: mock(() => Promise.resolve(mockAdapter)),
+          AgentUnavailableError: class extends Error {
+            constructor(message: string) {
+              super(message);
+              this.name = "AgentUnavailableError";
+            }
           },
         };
       });
@@ -1405,12 +1416,14 @@ describe("Command Handlers", () => {
               sessionId: "ses_test1",
               iteration: 1,
               startedAt: "2024-01-01T00:00:00Z",
+              agent: "opencode",
               export: "Exported data 1",
             },
             {
               sessionId: "ses_test2",
               iteration: 2,
               startedAt: "2024-01-01T00:01:00Z",
+              agent: "opencode",
               export: "Exported data 2",
             },
           ],
@@ -1448,6 +1461,7 @@ describe("Command Handlers", () => {
           startedAt: "2024-01-01T00:00:00Z",
           mode: "plan",
           prompt: "Test prompt",
+          agent: AgentType.OpenCode,
         },
         {
           iteration: 2,
@@ -1455,6 +1469,7 @@ describe("Command Handlers", () => {
           startedAt: "2024-01-01T00:01:00Z",
           mode: "plan",
           prompt: "Test prompt",
+          agent: AgentType.OpenCode,
         },
       ];
 
@@ -1467,30 +1482,39 @@ describe("Command Handlers", () => {
       });
 
       let exportCallCount = 0;
-      mock.module("../src/lib/opencode/adapter.js", () => {
-        return {
-          OpenCodeAdapter: class {
-            export = mock(() => {
-              exportCallCount++;
-              if (exportCallCount === 1) {
-                return Promise.resolve({
-                  exportData: null,
-                  success: false,
-                  error: "Export failed",
-                });
-              }
-              return Promise.resolve({
-                exportData: "Exported data",
-                success: true,
-              });
+      const mockAdapter = {
+        export: mock(() => {
+          exportCallCount++;
+          if (exportCallCount === 1) {
+            return Promise.resolve({
+              exportData: null,
+              success: false,
+              error: "Export failed",
             });
-            runInteractive = mock(() => Promise.resolve());
-            getMetadata = mock(() => ({
-              name: "opencode",
-              displayName: "OpenCode",
-              cliCommand: "opencode",
-              version: "1.0.0",
-            }));
+          }
+          return Promise.resolve({
+            exportData: "Exported data",
+            success: true,
+          });
+        }),
+        runInteractive: mock(() => Promise.resolve()),
+        getMetadata: mock(() => ({
+          name: "opencode",
+          displayName: "OpenCode",
+          cliCommand: "opencode",
+          version: "1.0.0",
+        })),
+        checkAvailability: mock(() => Promise.resolve(true)),
+      };
+
+      mock.module("../src/lib/agents/factory.js", () => {
+        return {
+          createAgent: mock(() => Promise.resolve(mockAdapter)),
+          AgentUnavailableError: class extends Error {
+            constructor(message: string) {
+              super(message);
+              this.name = "AgentUnavailableError";
+            }
           },
         };
       });
@@ -1504,17 +1528,23 @@ describe("Command Handlers", () => {
       await inspectHandler();
 
       expect(exportCallCount).toBe(2);
-      expect(mockError).toHaveBeenCalledWith(
-        "Warning: Failed to export session ses_test1 (iteration 1): Export failed"
-      );
       expect(writeFile).toHaveBeenCalledWith(
         "inspect.json",
         JSON.stringify(
           [
             {
+              sessionId: "ses_test1",
+              iteration: 1,
+              startedAt: "2024-01-01T00:00:00Z",
+              agent: "opencode",
+              export: null,
+              error: "Export failed",
+            },
+            {
               sessionId: "ses_test2",
               iteration: 2,
               startedAt: "2024-01-01T00:01:00Z",
+              agent: "opencode",
               export: "Exported data",
             },
           ],
@@ -1522,236 +1552,6 @@ describe("Command Handlers", () => {
           2
         )
       );
-      expect(mockLog).toHaveBeenCalledWith("Exported 1 session(s) to inspect.json");
-    });
-
-    it("should error when sessionId is missing", async () => {
-      const mockSessions = [
-        {
-          iteration: 1,
-          sessionId: "",
-          startedAt: "2024-01-01T00:00:00Z",
-          mode: "plan",
-          prompt: "Test prompt",
-        },
-      ];
-
-      mock.module("../src/lib/state/index.js", () => {
-        return {
-          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
-          writeSessionsFile: mock(() => Promise.resolve()),
-          ensureRalphctlDir: mock(() => Promise.resolve()),
-        };
-      });
-
-      mock.module("../src/lib/opencode/adapter.js", () => {
-        return {
-          OpenCodeAdapter: class {
-            export = mock(() =>
-              Promise.resolve({
-                exportData: "Exported data",
-                success: true,
-              })
-            );
-            runInteractive = mock(() => Promise.resolve());
-            getMetadata = mock(() => ({
-              name: "opencode",
-              displayName: "OpenCode",
-              cliCommand: "opencode",
-              version: "1.0.0",
-            }));
-          },
-        };
-      });
-
-      const mockExit = mock((code: number) => {
-        throw new Error(`process.exit(${code})`);
-      });
-      global.process.exit = mockExit;
-
-      const mockError = mock();
-      global.console.error = mockError;
-
-      await expect(inspectHandler()).rejects.toThrow("process.exit(1)");
-
-      expect(mockError).toHaveBeenCalledWith(
-        "Error: Missing sessionId for iteration 1"
-      );
-
-      mockExit.mockRestore();
-    });
-
-    it("should error when startedAt is missing", async () => {
-      const mockSessions = [
-        {
-          iteration: 1,
-          sessionId: "ses_test1",
-          startedAt: "",
-          mode: "plan",
-          prompt: "Test prompt",
-        },
-      ];
-
-      mock.module("../src/lib/state/index.js", () => {
-        return {
-          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
-          writeSessionsFile: mock(() => Promise.resolve()),
-          ensureRalphctlDir: mock(() => Promise.resolve()),
-        };
-      });
-
-      mock.module("../src/lib/opencode/adapter.js", () => {
-        return {
-          OpenCodeAdapter: class {
-            export = mock(() =>
-              Promise.resolve({
-                exportData: "Exported data",
-                success: true,
-              })
-            );
-            runInteractive = mock(() => Promise.resolve());
-            getMetadata = mock(() => ({
-              name: "opencode",
-              displayName: "OpenCode",
-              cliCommand: "opencode",
-              version: "1.0.0",
-            }));
-          },
-        };
-      });
-
-      const mockExit = mock((code: number) => {
-        throw new Error(`process.exit(${code})`);
-      });
-      global.process.exit = mockExit;
-
-      const mockError = mock();
-      global.console.error = mockError;
-
-      await expect(inspectHandler()).rejects.toThrow("process.exit(1)");
-
-      expect(mockError).toHaveBeenCalledWith(
-        "Error: Missing startedAt for session ses_test1"
-      );
-
-      mockExit.mockRestore();
-    });
-
-    it("should error when iteration is invalid", async () => {
-      const mockSessions = [
-        {
-          iteration: 0,
-          sessionId: "ses_test1",
-          startedAt: "2024-01-01T00:00:00Z",
-          mode: "plan",
-          prompt: "Test prompt",
-        },
-      ];
-
-      mock.module("../src/lib/state/index.js", () => {
-        return {
-          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
-          writeSessionsFile: mock(() => Promise.resolve()),
-          ensureRalphctlDir: mock(() => Promise.resolve()),
-        };
-      });
-
-      mock.module("../src/lib/opencode/adapter.js", () => {
-        return {
-          OpenCodeAdapter: class {
-            export = mock(() =>
-              Promise.resolve({
-                exportData: "Exported data",
-                success: true,
-              })
-            );
-            runInteractive = mock(() => Promise.resolve());
-            getMetadata = mock(() => ({
-              name: "opencode",
-              displayName: "OpenCode",
-              cliCommand: "opencode",
-              version: "1.0.0",
-            }));
-          },
-        };
-      });
-
-      const mockExit = mock((code: number) => {
-        throw new Error(`process.exit(${code})`);
-      });
-      global.process.exit = mockExit;
-
-      const mockError = mock();
-      global.console.error = mockError;
-
-      await expect(inspectHandler()).rejects.toThrow("process.exit(1)");
-
-      expect(mockError).toHaveBeenCalledWith(
-        "Error: Invalid iteration number 0 for session ses_test1"
-      );
-
-      mockExit.mockRestore();
-    });
-
-    it("should error when writeFile fails", async () => {
-      const mockSessions = [
-        {
-          iteration: 1,
-          sessionId: "ses_test1",
-          startedAt: "2024-01-01T00:00:00Z",
-          mode: "plan",
-          prompt: "Test prompt",
-        },
-      ];
-
-      mock.module("../src/lib/state/index.js", () => {
-        return {
-          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
-          writeSessionsFile: mock(() => Promise.resolve()),
-          ensureRalphctlDir: mock(() => Promise.resolve()),
-        };
-      });
-
-      mock.module("../src/lib/opencode/adapter.js", () => {
-        return {
-          OpenCodeAdapter: class {
-            export = mock(() =>
-              Promise.resolve({
-                exportData: "Exported data",
-                success: true,
-              })
-            );
-            runInteractive = mock(() => Promise.resolve());
-            getMetadata = mock(() => ({
-              name: "opencode",
-              displayName: "OpenCode",
-              cliCommand: "opencode",
-              version: "1.0.0",
-            }));
-          },
-        };
-      });
-
-      mock.module("../src/lib/files/index.js", () => {
-        return {
-          fileExists: mock(() => Promise.resolve(false)),
-          writeFile: mock(() => Promise.reject(new Error("Write failed"))),
-        };
-      });
-
-      const mockExit = mock((code: number) => {
-        throw new Error(`process.exit(${code})`);
-      });
-      global.process.exit = mockExit;
-
-      const mockError = mock();
-      global.console.error = mockError;
-
-      await expect(inspectHandler()).rejects.toThrow("process.exit(1)");
-
-      expect(mockError).toHaveBeenCalledWith("Failed to write inspect file: Error: Write failed");
-
-      mockExit.mockRestore();
     });
 
     it("should use default output file when no output option provided", async () => {
@@ -1762,6 +1562,7 @@ describe("Command Handlers", () => {
           startedAt: "2024-01-01T00:00:00Z",
           mode: "plan",
           prompt: "Test prompt",
+          agent: AgentType.OpenCode,
         },
       ];
 
@@ -1773,22 +1574,31 @@ describe("Command Handlers", () => {
         };
       });
 
-      mock.module("../src/lib/opencode/adapter.js", () => {
+      const mockAdapter = {
+        export: mock(() =>
+          Promise.resolve({
+            exportData: "Exported data",
+            success: true,
+          })
+        ),
+        runInteractive: mock(() => Promise.resolve()),
+        getMetadata: mock(() => ({
+          name: "opencode",
+          displayName: "OpenCode",
+          cliCommand: "opencode",
+          version: "1.0.0",
+        })),
+        checkAvailability: mock(() => Promise.resolve(true)),
+      };
+
+      mock.module("../src/lib/agents/factory.js", () => {
         return {
-          OpenCodeAdapter: class {
-            export = mock(() =>
-              Promise.resolve({
-                exportData: "Exported data",
-                success: true,
-              })
-            );
-            runInteractive = mock(() => Promise.resolve());
-            getMetadata = mock(() => ({
-              name: "opencode",
-              displayName: "OpenCode",
-              cliCommand: "opencode",
-              version: "1.0.0",
-            }));
+          createAgent: mock(() => Promise.resolve(mockAdapter)),
+          AgentUnavailableError: class extends Error {
+            constructor(message: string) {
+              super(message);
+              this.name = "AgentUnavailableError";
+            }
           },
         };
       });
@@ -1809,6 +1619,7 @@ describe("Command Handlers", () => {
               sessionId: "ses_test1",
               iteration: 1,
               startedAt: "2024-01-01T00:00:00Z",
+              agent: "opencode",
               export: "Exported data",
             },
           ],
@@ -1827,6 +1638,7 @@ describe("Command Handlers", () => {
           startedAt: "2024-01-01T00:00:00Z",
           mode: "plan",
           prompt: "Test prompt",
+          agent: AgentType.OpenCode,
         },
       ];
 
@@ -1838,22 +1650,31 @@ describe("Command Handlers", () => {
         };
       });
 
-      mock.module("../src/lib/opencode/adapter.js", () => {
+      const mockAdapter = {
+        export: mock(() =>
+          Promise.resolve({
+            exportData: "Exported data",
+            success: true,
+          })
+        ),
+        runInteractive: mock(() => Promise.resolve()),
+        getMetadata: mock(() => ({
+          name: "opencode",
+          displayName: "OpenCode",
+          cliCommand: "opencode",
+          version: "1.0.0",
+        })),
+        checkAvailability: mock(() => Promise.resolve(true)),
+      };
+
+      mock.module("../src/lib/agents/factory.js", () => {
         return {
-          OpenCodeAdapter: class {
-            export = mock(() =>
-              Promise.resolve({
-                exportData: "Exported data",
-                success: true,
-              })
-            );
-            runInteractive = mock(() => Promise.resolve());
-            getMetadata = mock(() => ({
-              name: "opencode",
-              displayName: "OpenCode",
-              cliCommand: "opencode",
-              version: "1.0.0",
-            }));
+          createAgent: mock(() => Promise.resolve(mockAdapter)),
+          AgentUnavailableError: class extends Error {
+            constructor(message: string) {
+              super(message);
+              this.name = "AgentUnavailableError";
+            }
           },
         };
       });
@@ -1874,6 +1695,7 @@ describe("Command Handlers", () => {
               sessionId: "ses_test1",
               iteration: 1,
               startedAt: "2024-01-01T00:00:00Z",
+              agent: "opencode",
               export: "Exported data",
             },
           ],

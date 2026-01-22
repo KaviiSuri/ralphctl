@@ -9,7 +9,7 @@
 
 ## Purpose
 
-Implement the `AgentAdapter` interface for Claude Code CLI, enabling rctl to execute Claude Code in both headless and interactive modes with proper session management and project mode support.
+Implement the `AgentAdapter` interface for Claude Code CLI, enabling rctl to execute Claude Code in both headless and interactive modes with proper session management and print mode support.
 
 ## Scope
 
@@ -435,7 +435,7 @@ Handle these scenarios:
 ## Impacts
 
 - **JTBD-101-SPEC-001**: Agent selection logic will instantiate ClaudeCodeAdapter
-- **JTBD-103-SPEC-001**: Project mode configuration depends on constructor parameter
+- **JTBD-103-SPEC-001**: Print mode configuration depends on constructor parameter (headless flag)
 - All command handlers will be updated to support ClaudeCodeAdapter via interface
 
 ---

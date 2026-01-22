@@ -2,7 +2,7 @@
 
 ## Product Intent
 
-Extend rctl to support Claude Code as an alternative AI agent backend alongside OpenCode, enabling developers to leverage Claude Code's project mode (`-p`) in headless Ralph loops while maintaining the same operational guarantees: isolation, repeatability, inspectability, and the dumb loop philosophy.
+Extend rctl to support Claude Code as an alternative AI agent backend alongside OpenCode, enabling developers to leverage Claude Code's print mode (`-p`) for headless Ralph loops while maintaining the same operational guarantees: isolation, repeatability, inspectability, and the dumb loop philosophy.
 
 ## Background
 
@@ -18,7 +18,7 @@ rctl currently integrates exclusively with OpenCode as the AI coding agent. The 
 
 **Vendor Lock-in**: Users cannot leverage Claude Code's capabilities (Anthropic's official CLI) even though it offers:
 - Native Claude model support (Opus 4.5, Sonnet 4.5, etc.)
-- Project mode (`-p`) for context-aware development
+- Print mode (`-p`) for headless execution (skips trust dialogs)
 - Official Anthropic tooling with first-class updates
 - Potentially better integration with Claude ecosystem
 

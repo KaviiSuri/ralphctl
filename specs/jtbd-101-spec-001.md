@@ -277,7 +277,7 @@ Visit: https://claude.com/claude-code
 
 3. **Factory Pattern**: Centralize agent creation logic to ensure consistent validation and configuration.
 
-4. **Project Mode Auto-Enable**: Automatically enable Claude Code project mode for build mode (can be overridden in future spec).
+4. **Print Mode Auto-Enable**: Automatically enable Claude Code print mode (headless) for both plan and build modes (can be overridden via `--no-print` flag in JTBD-103).
 
 ### User Experience
 

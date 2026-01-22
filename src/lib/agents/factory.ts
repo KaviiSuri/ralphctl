@@ -10,6 +10,13 @@ export interface CreateAgentOptions {
   headless?: boolean;
 }
 
+export class AgentUnavailableError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "AgentUnavailableError";
+  }
+}
+
 function resolveAgentType(cliAgent?: string): AgentType {
   if (cliAgent && (cliAgent === AgentType.OpenCode || cliAgent === AgentType.ClaudeCode)) {
     return cliAgent;
@@ -21,6 +28,17 @@ function resolveAgentType(cliAgent?: string): AgentType {
   }
 
   return AgentType.OpenCode;
+}
+
+function getInstallationUrl(agentType: AgentType): string {
+  switch (agentType) {
+    case AgentType.OpenCode:
+      return "https://opencode.ai";
+    case AgentType.ClaudeCode:
+      return "https://claude.ai/code";
+    default:
+      return "";
+  }
 }
 
 export async function createAgent(
@@ -51,14 +69,13 @@ export async function createAgent(
   const available = await adapter.checkAvailability();
   if (!available) {
     const metadata = adapter.getMetadata();
-    const installationUrl = agentType === AgentType.ClaudeCode
-      ? "https://claude.ai/code"
-      : "https://opencode.ai";
+    const installationUrl = getInstallationUrl(agentType);
 
-    console.error(`Error: ${metadata.displayName} is not available`);
-    console.error(`CLI command '${metadata.cliCommand}' not found or not executable`);
-    console.error(`\nPlease install ${metadata.displayName}: ${installationUrl}`);
-    process.exit(1);
+    throw new AgentUnavailableError(
+      `${metadata.displayName} (${metadata.cliCommand}) is not available.\n` +
+        `Please install ${metadata.displayName} and ensure it's in your PATH.\n` +
+        `Visit: ${installationUrl}`
+    );
   }
 
   return adapter;

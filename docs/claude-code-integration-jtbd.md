@@ -60,30 +60,30 @@ This document defines the Jobs To Be Done (JTBD) for extending rctl to support C
 
 ---
 
-## JTBD-103: Configure Claude Code Project Mode
+## JTBD-103: Configure Claude Code Print Mode
 
-**As a developer**, I need to leverage Claude Code's project mode (`-p` flag) when running build loops, so that Claude maintains context about my project structure and improves code quality.
+**As a developer**, I need to leverage Claude Code's print mode (`-p` / `--print` flag) when running headless loops, so that responses are printed directly without interactive prompts and trust dialogs are skipped for faster automation.
 
 ### Topics (Priority Order)
 
-1. **Project mode semantics** - What does `-p` do in Claude Code?
+1. **Print mode semantics** - What does `-p` do in Claude Code? (prints response, exits, skips trust dialog)
 2. **Mode mapping** - Should plan/build modes use different Claude Code flags?
-3. **Context boundaries** - How does project mode affect session isolation?
-4. **Performance implications** - Does project mode slow down iterations?
-5. **Template compatibility** - Do existing prompts work with project mode?
+3. **Trust implications** - What are the security implications of skipping trust dialogs?
+4. **Performance implications** - Does print mode improve execution speed?
+5. **Template compatibility** - Do existing prompts work with print mode?
 
 ### Non-Goals
 
 - Supporting all Claude Code flags and configuration options
-- Implementing project mode for OpenCode (doesn't exist)
-- Custom context management beyond what Claude Code provides
+- Implementing print mode for OpenCode (doesn't exist)
+- Custom trust dialog configuration
 
 ### Deliverables
 
-1. **Default behavior**: Build mode with Claude Code uses `-p` flag automatically
-2. **Override option**: `--no-project-mode` flag to disable if needed
-3. **Documentation**: Clear explanation of when project mode is active
-4. **Plan mode handling**: Decide if plan mode should use project context
+1. **Default behavior**: Both plan and build modes with Claude Code use `-p` flag automatically for headless execution
+2. **Override option**: `--no-print` flag to disable if needed (shows trust dialogs, interactive prompts)
+3. **Documentation**: Clear explanation of print mode and security implications
+4. **Security warnings**: Document that print mode skips trust dialogs, only use in trusted directories
 
 ---
 
@@ -201,7 +201,7 @@ Recommended implementation order based on dependencies:
 
 1. **JTBD-102** (Adapter abstraction) - Foundation for everything else
 2. **JTBD-101** (Agent selection) - Required to test adapter implementations
-3. **JTBD-103** (Claude Code project mode) - Core feature differentiator
+3. **JTBD-103** (Claude Code print mode) - Core feature differentiator
 4. **JTBD-105** (Model configuration) - Essential for prompt execution
 5. **JTBD-104** (Session management) - Preserve inspectability
 6. **JTBD-106** (Templates) - Improve user experience

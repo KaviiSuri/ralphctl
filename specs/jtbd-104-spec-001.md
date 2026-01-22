@@ -42,7 +42,7 @@ export interface RalphSession {
   mode: Mode;
   prompt: string;
   agent: AgentType; // NEW FIELD
-  projectMode?: boolean; // NEW FIELD (optional, for Claude Code)
+  printMode?: boolean; // NEW FIELD (optional, for Claude Code)
 }
 
 export interface SessionsFile {
@@ -110,7 +110,7 @@ export async function readSessionsFile(): Promise<SessionsFile> {
   const sessions = parsed.sessions.map((session: any) => ({
     ...session,
     agent: session.agent || AgentType.OpenCode, // Default to OpenCode for old sessions
-    projectMode: session.projectMode, // May be undefined
+    printMode: session.printMode, // May be undefined
   }));
 
   return {
@@ -190,7 +190,7 @@ export async function inspectHandler(ctx: {
         iteration: session.iteration,
         startedAt: session.startedAt,
         agent: agentType,
-        projectMode: session.projectMode,
+        printMode: session.printMode,
         export: exportResult.success ? exportResult.exportData : null,
         error: exportResult.success ? undefined : exportResult.error,
       });
@@ -200,7 +200,7 @@ export async function inspectHandler(ctx: {
         iteration: session.iteration,
         startedAt: session.startedAt,
         agent: agentType,
-        projectMode: session.projectMode,
+        printMode: session.printMode,
         export: null,
         error: String(error),
       });
@@ -223,7 +223,7 @@ export interface InspectEntry {
   iteration: number;
   startedAt: string;
   agent: AgentType; // NEW FIELD
-  projectMode?: boolean; // NEW FIELD
+  printMode?: boolean; // NEW FIELD
   export: unknown | null;
   error?: string;
 }
@@ -248,7 +248,7 @@ export interface InspectEntry {
       "iteration": 2,
       "startedAt": "2026-01-21T11:30:00Z",
       "agent": "claude-code",
-      "projectMode": true,
+      "printMode": true,
       "export": { /* Claude Code export data */ }
     },
     {
@@ -256,7 +256,7 @@ export interface InspectEntry {
       "iteration": 3,
       "startedAt": "2026-01-21T12:00:00Z",
       "agent": "claude-code",
-      "projectMode": true,
+      "printMode": true,
       "export": null,
       "error": "Session not found"
     }
@@ -269,16 +269,16 @@ export interface InspectEntry {
 ## Acceptance Criteria
 
 - [ ] `RalphSession` type includes `agent` field
-- [ ] `RalphSession` type includes optional `projectMode` field
+- [ ] `RalphSession` type includes optional `printMode` field
 - [ ] `SessionsFile` includes optional `version` field
-- [ ] Session write logic populates agent and projectMode
+- [ ] Session write logic populates agent and printMode
 - [ ] Session read logic handles missing agent field (backward compatibility)
 - [ ] Old sessions default to `opencode` agent type
 - [ ] Inspect command creates adapters for each agent type
 - [ ] Inspect command routes exports to correct agent
 - [ ] Inspect command handles missing agents gracefully
 - [ ] Inspect output includes agent type per session
-- [ ] Inspect output includes projectMode if applicable
+- [ ] Inspect output includes printMode if applicable
 - [ ] Mixed-agent sessions are supported in single project
 - [ ] Unit tests cover session read/write with new fields
 - [ ] Unit tests cover backward compatibility
@@ -298,7 +298,7 @@ export interface InspectEntry {
 
 4. **Graceful Degradation**: If an agent is unavailable during inspection, include error in output rather than failing entirely.
 
-5. **Optional projectMode**: Only populated for Claude Code sessions. Avoids clutter for OpenCode sessions.
+5. **Optional printMode**: Only populated for Claude Code sessions. Avoids clutter for OpenCode sessions.
 
 ### Edge Cases
 

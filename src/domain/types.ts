@@ -33,17 +33,23 @@ export interface SessionState {
   startedAt: string;
   mode: string;
   prompt: string;
+  agent: AgentType;
+  printMode?: boolean;
 }
 
 export interface SessionsFile {
   sessions: SessionState[];
+  version?: string;
 }
 
 export interface InspectEntry {
   sessionId: string;
   iteration: number;
   startedAt: string;
-  export: string;
+  agent: AgentType;
+  printMode?: boolean;
+  export: unknown | null;
+  error?: string;
 }
 
 export enum ModelRole {
@@ -66,4 +72,6 @@ export function createModelConfig(smartOverride?: string, fastOverride?: string)
   };
 }
 
-export { AgentType, type PermissionPosture } from "./agent.js";
+import { AgentType, type PermissionPosture } from "./agent.js";
+
+export { AgentType };

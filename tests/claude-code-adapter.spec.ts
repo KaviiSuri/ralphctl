@@ -213,7 +213,7 @@ describe("ClaudeCodeAdapter", () => {
       expect(result.exitCode).toBe(0);
     });
 
-    it("should not include -p flag when project mode is disabled", async () => {
+    it("should not include -p flag when headless mode is disabled", async () => {
       const mockRunner = async (options: ProcessRunnerOptions) => {
         expect(options.command).not.toContain("-p");
         expect(options.command).toContain("--prompt");
@@ -428,7 +428,7 @@ describe("ClaudeCodeAdapter", () => {
       expect(result.command).not.toContain("--prompt");
     });
 
-    it("should build args for interactive mode with project mode disabled", async () => {
+    it("should build args for interactive mode with headless mode disabled", async () => {
       const mockRunner = async () => ({
         exitCode: 0,
         stdout: "",

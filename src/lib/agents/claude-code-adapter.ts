@@ -107,30 +107,63 @@ export class ClaudeCodeAdapter implements AgentAdapter {
       const projectsDir = `${claudePath}/projects`;
 
       const projectDirs = await this.listProjectDirectories(projectsDir);
+      let projectDir: string | null = null;
 
-      for (const projectDir of projectDirs) {
-        const chatFile = await this.findChatFile(projectDir, sessionId);
-        if (chatFile) {
-          const content = await this.readChatFile(chatFile);
-          let exportData: unknown;
-
-          try {
-            exportData = JSON.parse(content);
-          } catch {
-            exportData = content;
+      for (const dir of projectDirs) {
+        try {
+          const configPath = `${dir}/project.json`;
+          const config = JSON.parse(await fs.readFile(configPath, "utf-8"));
+          if (config.path === this.cwd) {
+            projectDir = dir;
+            break;
           }
-
-          return {
-            exportData,
-            success: true,
-          };
+        } catch {
+          continue;
         }
       }
 
+      if (!projectDir) {
+        return {
+          exportData: null,
+          success: false,
+          error: "Project not found in Claude Code directory",
+        };
+      }
+
+      const chatFiles = await fs.readdir(projectDir);
+      const filteredChatFiles = chatFiles.filter(f => f.startsWith("chat_") && f.endsWith(".jsonl"));
+
+      if (filteredChatFiles.length === 0) {
+        return {
+          exportData: null,
+          success: false,
+          error: "No chat files found",
+        };
+      }
+
+      const chatFileStats = await Promise.all(
+        filteredChatFiles.map(async f => ({
+          name: f,
+          stat: await fs.stat(`${projectDir}/${f}`),
+        }))
+      );
+      chatFileStats.sort((a, b) => b.stat.mtimeMs - a.stat.mtimeMs);
+      const latestFile = chatFileStats[0].name;
+
+      const content = await this.readChatFile(`${projectDir}/${latestFile}`);
+      let exportData: unknown;
+
+      try {
+        exportData = content.split("\n")
+          .filter(line => line.trim())
+          .map(line => JSON.parse(line));
+      } catch {
+        exportData = content;
+      }
+
       return {
-        exportData: null,
-        success: false,
-        error: `Session ${sessionId} not found in any project`,
+        exportData,
+        success: true,
       };
     } catch (error) {
       return {
@@ -155,22 +188,6 @@ export class ClaudeCodeAdapter implements AgentAdapter {
       return dirs;
     } catch {
       return [];
-    }
-  }
-
-  private async findChatFile(projectDir: string, sessionId: string): Promise<string | null> {
-    try {
-      const entries = await fs.readdir(projectDir, { withFileTypes: true });
-
-      for (const entry of entries) {
-        if (entry.isFile() && entry.name.endsWith('.jsonl') && entry.name.includes(sessionId)) {
-          return `${projectDir}/${entry.name}`;
-        }
-      }
-
-      return null;
-    } catch {
-      return null;
     }
   }
 
@@ -212,11 +229,7 @@ export class ClaudeCodeAdapter implements AgentAdapter {
       args.push(...options.agentFlags);
     }
 
-    if (interactive) {
-      args.push(prompt);
-    } else {
-      args.push("--prompt", prompt);
-    }
+    args.push(prompt);
 
     return args;
   }
