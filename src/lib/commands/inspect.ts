@@ -83,11 +83,19 @@ export async function inspectHandler(options?: { output?: string }): Promise<voi
     }
   }
 
+  let writeSuccess = false;
   try {
     await writeFile(outputFile, JSON.stringify(entries, null, 2));
+    writeSuccess = true;
     console.log(`Exported ${entries.length} session(s) to ${outputFile}`);
   } catch (error) {
     console.error(`Failed to write inspect file: ${error}`);
-    process.exit(1);
+  }
+
+  const successfulExports = entries.filter(e => e.export !== null && !e.error).length;
+  const failedExports = entries.length - successfulExports;
+
+  if (!writeSuccess || failedExports > 0) {
+    console.warn(`\nExport summary: ${successfulExports}/${entries.length} sessions succeeded, ${failedExports} failed`);
   }
 }

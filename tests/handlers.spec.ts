@@ -706,6 +706,193 @@ describe("Command Handlers", () => {
       expect(mockLog).toHaveBeenCalledWith("Permissions: allow-all");
       expect(mockLog).not.toHaveBeenCalledWith(expect.stringContaining("Print mode"));
     });
+
+    it("should capture agent and printMode in SessionState for OpenCode", async () => {
+      let capturedSession: any = null;
+
+      mock.module("../src/lib/agents/factory.js", () => {
+        const MockAdapter = class {
+          checkAvailability = mock(() => Promise.resolve(true));
+          run = mock(() =>
+            Promise.resolve({
+              stdout: "Output <promise>COMPLETE</promise>",
+              stderr: "",
+              sessionId: "ses_test123",
+              completionDetected: true,
+              exitCode: 0,
+            })
+          );
+          runInteractive = mock(() => Promise.resolve());
+          getMetadata = mock(() => ({
+            name: "opencode",
+            displayName: "OpenCode",
+            cliCommand: "opencode",
+            version: "1.0.0",
+          }));
+        };
+        return {
+          createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) => prompt),
+        };
+      });
+
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve([])),
+          writeSessionsFile: mock((sessions: any[]) => {
+            capturedSession = sessions[sessions.length - 1];
+            return Promise.resolve();
+          }),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await runHandler({ mode: Mode.Plan, agent: AgentType.OpenCode });
+
+      expect(capturedSession).not.toBeNull();
+      expect(capturedSession.agent).toBe(AgentType.OpenCode);
+      expect(capturedSession.printMode).toBe(true);
+    });
+
+    it("should capture agent and printMode in SessionState for Claude Code", async () => {
+      let capturedSession: any = null;
+
+      mock.module("../src/lib/agents/factory.js", () => {
+        const MockAdapter = class {
+          checkAvailability = mock(() => Promise.resolve(true));
+          run = mock(() =>
+            Promise.resolve({
+              stdout: "Output <promise>COMPLETE</promise>",
+              stderr: "",
+              sessionId: "ses_test123",
+              completionDetected: true,
+              exitCode: 0,
+            })
+          );
+          runInteractive = mock(() => Promise.resolve());
+          getMetadata = mock(() => ({
+            name: "claude-code",
+            displayName: "Claude Code",
+            cliCommand: "claude",
+            version: "1.0.0",
+          }));
+        };
+        return {
+          createAgent: mock((cliAgent?: string, options?: any) => {
+            return Promise.resolve(new MockAdapter() as any);
+          }),
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) => prompt),
+        };
+      });
+
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve([])),
+          writeSessionsFile: mock((sessions: any[]) => {
+            capturedSession = sessions[sessions.length - 1];
+            return Promise.resolve();
+          }),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await runHandler({ mode: Mode.Plan, agent: AgentType.ClaudeCode });
+
+      expect(capturedSession).not.toBeNull();
+      expect(capturedSession.agent).toBe(AgentType.ClaudeCode);
+      expect(capturedSession.printMode).toBe(true);
+    });
+
+    it("should capture printMode=false when --no-print is used", async () => {
+      let capturedSession: any = null;
+
+      mock.module("../src/lib/agents/factory.js", () => {
+        const MockAdapter = class {
+          checkAvailability = mock(() => Promise.resolve(true));
+          run = mock(() =>
+            Promise.resolve({
+              stdout: "Output <promise>COMPLETE</promise>",
+              stderr: "",
+              sessionId: "ses_test123",
+              completionDetected: true,
+              exitCode: 0,
+            })
+          );
+          runInteractive = mock(() => Promise.resolve());
+          getMetadata = mock(() => ({
+            name: "claude-code",
+            displayName: "Claude Code",
+            cliCommand: "claude",
+            version: "1.0.0",
+          }));
+        };
+        return {
+          createAgent: mock((cliAgent?: string, options?: any) => {
+            return Promise.resolve(new MockAdapter() as any);
+          }),
+        };
+      });
+
+      mock.module("../src/lib/prompts/resolver.js", () => {
+        return {
+          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+        };
+      });
+
+      mock.module("../src/lib/models/resolver.js", () => {
+        return {
+          resolveModelPlaceholders: mock((prompt) => prompt),
+        };
+      });
+
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve([])),
+          writeSessionsFile: mock((sessions: any[]) => {
+            capturedSession = sessions[sessions.length - 1];
+            return Promise.resolve();
+          }),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
+      const mockLog = mock();
+      global.console.log = mockLog;
+
+      await runHandler({ mode: Mode.Plan, agent: AgentType.ClaudeCode, noPrint: true });
+
+      expect(capturedSession).not.toBeNull();
+      expect(capturedSession.agent).toBe(AgentType.ClaudeCode);
+      expect(capturedSession.printMode).toBe(false);
+    });
   });
 
   describe("stepHandler", () => {
@@ -2073,6 +2260,159 @@ describe("Command Handlers", () => {
       );
     });
 
+    it("should support export type as unknown (object data)", async () => {
+      const mockSessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_test1",
+          startedAt: "2024-01-01T00:00:00Z",
+          mode: "plan",
+          prompt: "Test prompt",
+          agent: AgentType.OpenCode,
+        },
+      ];
+
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          writeSessionsFile: mock(() => Promise.resolve()),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
+      const complexExportData = {
+        messages: [
+          { role: "user", content: "Hello" },
+          { role: "assistant", content: "Hi there!" },
+        ],
+        metadata: {
+          model: "gpt-4",
+          timestamp: "2024-01-01T00:00:00Z",
+        },
+      };
+
+      const mockAdapter = {
+        export: mock(() =>
+          Promise.resolve({
+            exportData: complexExportData,
+            success: true,
+          })
+        ),
+        runInteractive: mock(() => Promise.resolve()),
+        getMetadata: mock(() => ({
+          name: "opencode",
+          displayName: "OpenCode",
+          cliCommand: "opencode",
+          version: "1.0.0",
+        })),
+        checkAvailability: mock(() => Promise.resolve(true)),
+      };
+
+      mock.module("../src/lib/agents/factory.js", () => {
+        return {
+          createAgent: mock(() => Promise.resolve(mockAdapter)),
+          AgentUnavailableError: class extends Error {
+            constructor(message: string) {
+              super(message);
+              this.name = "AgentUnavailableError";
+            }
+          },
+        };
+      });
+
+      const { writeFile } = await import("../src/lib/files/index.js");
+      const mockLog = mock();
+      const mockError = mock();
+      global.console.log = mockLog;
+      global.console.error = mockError;
+
+      await inspectHandler();
+
+      const expectedInspectEntry = {
+        sessionId: "ses_test1",
+        iteration: 1,
+        startedAt: "2024-01-01T00:00:00Z",
+        agent: "opencode",
+        export: complexExportData,
+      };
+
+      expect(writeFile).toHaveBeenCalledWith(
+        "inspect.json",
+        JSON.stringify([expectedInspectEntry], null, 2)
+      );
+    });
+
+    it("should support export type as null", async () => {
+      const mockSessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_test1",
+          startedAt: "2024-01-01T00:00:00Z",
+          mode: "plan",
+          prompt: "Test prompt",
+          agent: AgentType.OpenCode,
+        },
+      ];
+
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          writeSessionsFile: mock(() => Promise.resolve()),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
+      const mockAdapter = {
+        export: mock(() =>
+          Promise.resolve({
+            exportData: null,
+            success: true,
+          })
+        ),
+        runInteractive: mock(() => Promise.resolve()),
+        getMetadata: mock(() => ({
+          name: "opencode",
+          displayName: "OpenCode",
+          cliCommand: "opencode",
+          version: "1.0.0",
+        })),
+        checkAvailability: mock(() => Promise.resolve(true)),
+      };
+
+      mock.module("../src/lib/agents/factory.js", () => {
+        return {
+          createAgent: mock(() => Promise.resolve(mockAdapter)),
+          AgentUnavailableError: class extends Error {
+            constructor(message: string) {
+              super(message);
+              this.name = "AgentUnavailableError";
+            }
+          },
+        };
+      });
+
+      const { writeFile } = await import("../src/lib/files/index.js");
+      const mockLog = mock();
+      const mockError = mock();
+      global.console.log = mockLog;
+      global.console.error = mockError;
+
+      await inspectHandler();
+
+      const expectedInspectEntry = {
+        sessionId: "ses_test1",
+        iteration: 1,
+        startedAt: "2024-01-01T00:00:00Z",
+        agent: "opencode",
+        export: null,
+      };
+
+      expect(writeFile).toHaveBeenCalledWith(
+        "inspect.json",
+        JSON.stringify([expectedInspectEntry], null, 2)
+      );
+    });
+
     it("should throw when createAgent fails with unexpected error", async () => {
       const mockSessions = [
         {
@@ -2164,17 +2504,17 @@ describe("Command Handlers", () => {
         };
       });
 
-      const mockProcessExit = mock((code: number) => {
-        throw new Error(`process.exit(${code})`);
-      });
-      const originalExit = process.exit;
-      process.exit = mockProcessExit;
+      const mockLog = mock();
+      const mockWarn = mock();
+      const mockError = mock();
+      global.console.log = mockLog;
+      global.console.warn = mockWarn;
+      global.console.error = mockError;
 
-      try {
-        await expect(inspectHandler()).rejects.toThrow("process.exit(1)");
-      } finally {
-        process.exit = originalExit;
-      }
+      await inspectHandler();
+
+      expect(mockError).toHaveBeenCalledWith("Failed to write inspect file: Error: Permission denied");
+      expect(mockWarn).toHaveBeenCalledWith("\nExport summary: 1/1 sessions succeeded, 0 failed");
     });
   });
 

@@ -28,7 +28,14 @@ async function readTestSessionsFile(): Promise<SessionState[]> {
     const fs = await import("fs/promises");
     const content = await fs.readFile(SESSIONS_FILE, "utf-8");
     const sessionsFile = JSON.parse(content);
-    return sessionsFile.sessions || [];
+
+    const migratedSessions = sessionsFile.sessions.map((session: any): SessionState => ({
+      ...session,
+      agent: session.agent || AgentType.OpenCode,
+      printMode: session.printMode,
+    }));
+
+    return migratedSessions;
   } catch (error) {
     return [];
   }
@@ -161,6 +168,96 @@ describe("state utilities", () => {
 
       expect(parsed).toHaveProperty("sessions");
       expect(parsed.sessions).toEqual(sessions);
+    });
+
+    it("should migrate old session format without agent field", async () => {
+      const oldSessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_old123",
+          startedAt: "2024-01-01T00:00:00.000Z",
+          mode: "plan",
+          prompt: "old prompt",
+        },
+      ];
+
+      await ensureTestDir();
+      const fs = await import("fs/promises");
+      await fs.writeFile(SESSIONS_FILE, JSON.stringify({ sessions: oldSessions }, null, 2));
+
+      const migratedSessions = await readTestSessionsFile();
+
+      expect(migratedSessions).toHaveLength(1);
+      expect(migratedSessions[0].agent).toBe(AgentType.OpenCode);
+      expect(migratedSessions[0].printMode).toBeUndefined();
+      expect(migratedSessions[0].sessionId).toBe("ses_old123");
+    });
+
+    it("should migrate old session format without version field", async () => {
+      const oldSessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_old456",
+          startedAt: "2024-01-01T00:00:00.000Z",
+          mode: "build",
+          prompt: "old build prompt",
+        },
+      ];
+
+      await ensureTestDir();
+      const fs = await import("fs/promises");
+      await fs.writeFile(SESSIONS_FILE, JSON.stringify({ sessions: oldSessions }, null, 2));
+
+      const migratedSessions = await readTestSessionsFile();
+
+      expect(migratedSessions).toHaveLength(1);
+      expect(migratedSessions[0].agent).toBe(AgentType.OpenCode);
+      expect(migratedSessions[0].printMode).toBeUndefined();
+    });
+
+    it("should preserve agent field when present in old format", async () => {
+      const oldSessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_claude123",
+          startedAt: "2024-01-01T00:00:00.000Z",
+          mode: "plan",
+          prompt: "claude prompt",
+          agent: AgentType.ClaudeCode,
+        },
+      ];
+
+      await ensureTestDir();
+      const fs = await import("fs/promises");
+      await fs.writeFile(SESSIONS_FILE, JSON.stringify({ sessions: oldSessions }, null, 2));
+
+      const migratedSessions = await readTestSessionsFile();
+
+      expect(migratedSessions).toHaveLength(1);
+      expect(migratedSessions[0].agent).toBe(AgentType.ClaudeCode);
+    });
+
+    it("should preserve printMode field when present in old format", async () => {
+      const oldSessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_print123",
+          startedAt: "2024-01-01T00:00:00.000Z",
+          mode: "plan",
+          prompt: "print mode prompt",
+          agent: AgentType.ClaudeCode,
+          printMode: true,
+        },
+      ];
+
+      await ensureTestDir();
+      const fs = await import("fs/promises");
+      await fs.writeFile(SESSIONS_FILE, JSON.stringify({ sessions: oldSessions }, null, 2));
+
+      const migratedSessions = await readTestSessionsFile();
+
+      expect(migratedSessions).toHaveLength(1);
+      expect(migratedSessions[0].printMode).toBe(true);
     });
   });
 });

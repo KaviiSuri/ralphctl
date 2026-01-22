@@ -4,7 +4,7 @@
 
 **Completed Specs:** 12/12 (JTBD-101-SPEC-001, JTBD-102-SPEC-001, JTBD-102-SPEC-002, JTBD-103-SPEC-001, JBTD-001 through JBTD-007) ✅
 **Remaining Specs:** 0
-**Current Tests:** 86 passing ✅
+**Current Tests:** 95 passing ✅
 **Typecheck:** Passing ✅
 
 ---
@@ -20,7 +20,7 @@ JTBD-101-SPEC-001 (Agent Selection via CLI/Env) ✅ COMPLETE
         ↓
 JTBD-103-SPEC-001 (Claude Code Print Mode) ✅ COMPLETE
         ↓
-JTBD-104-SPEC-001 (Agent-Aware Session Management) ⚠️ IN PROGRESS - P0 complete, P1 tests remaining
+JTBD-104-SPEC-001 (Agent-Aware Session Management) ✅ COMPLETE
 ```
 
 ---
@@ -83,25 +83,25 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management) ⚠️ IN PROGRESS - P0 compl
 
 #### P1: Error Handling Improvements
 
-- [ ] P1: Replace process.exit(1) with graceful degradation in inspectHandler
-  - Log errors to console.error but continue processing
-  - Include summary at end: "Exported {success}/{total} sessions"
-  - List skipped/failed sessions in summary
+- [x] P1: Replace process.exit(1) with graceful degradation in inspectHandler
+   - Log errors to console.error but continue processing
+   - Include summary at end: "Exported {success}/{total} sessions"
+   - List skipped/failed sessions in summary
 
 #### P1: Tests
 
-- [ ] P1: Add tests for lazy migration in readSessionsFile
-  - Test old session file without version field
-  - Test agent defaulting to "opencode"
-  - Test printMode defaulting to undefined
-- [ ] P1: Add tests for runHandler with agent/printMode capture
-  - Verify SessionState includes agent and printMode fields
-  - Test with different agent types and printMode values
+- [x] P1: Add tests for lazy migration in readSessionsFile
+   - Test old session file without version field
+   - Test agent defaulting to "opencode"
+   - Test printMode defaulting to undefined
+- [x] P1: Add tests for runHandler with agent/printMode capture
+   - Verify SessionState includes agent and printMode fields
+   - Test with different agent types and printMode values
 - [x] P1: Add tests for inspectHandler agent routing
-  - Test routing to correct adapter based on session.agent
-  - Test graceful handling of unavailable agent
-  - Test InspectEntry includes agent, printMode, error fields
-- [ ] P1: Test InspectEntry.export type is `unknown | null`
+   - Test routing to correct adapter based on session.agent
+   - Test graceful handling of unavailable agent
+   - Test InspectEntry includes agent, printMode, error fields
+- [x] P1: Test InspectEntry.export type is `unknown | null`
 
 ---
 
@@ -210,3 +210,4 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management) ⚠️ IN PROGRESS - P0 compl
 - ClaudeCodeAdapter export finds most recent chat file, not filtered by sessionId (FIXED)
 - AgentUnavailableError class needed for factory error handling (FIXED)
 - End iteration markers already present in run.ts (--- Iteration N/M ---)
+- JTBD-104-SPEC-001 P1 tasks completed (error handling, test coverage)
