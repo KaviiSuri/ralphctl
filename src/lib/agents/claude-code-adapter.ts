@@ -239,7 +239,7 @@ export class ClaudeCodeAdapter implements AgentAdapter {
     options?: AgentRunOptions,
     interactive: boolean = false
   ): string[] {
-    const args: string[] = [];
+    const args: string[] = ["--dangerously-skip-permissions"];
 
     if (!interactive && this.options.headless) {
       args.push("-p");

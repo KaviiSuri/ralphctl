@@ -132,7 +132,7 @@ class TestableClaudeCodeAdapter {
     interactive: boolean = false,
     headless: boolean = true
   ): string[] {
-    const args: string[] = [];
+    const args: string[] = ["--dangerously-skip-permissions"];
 
     if (!interactive && headless) {
       args.push("-p");
