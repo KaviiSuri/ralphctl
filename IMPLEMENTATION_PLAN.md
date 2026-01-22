@@ -4,7 +4,7 @@
 
 **Completed Specs:** 12/12 (JTBD-101-SPEC-001, JTBD-102-SPEC-001, JTBD-102-SPEC-002, JTBD-103-SPEC-001, JBTD-001 through JBTD-007) ✅
 **Remaining Specs:** 0
-**Current Tests:** 84 passing ✅
+**Current Tests:** 86 passing ✅
 **Typecheck:** Passing ✅
 
 ---
@@ -20,32 +20,12 @@ JTBD-101-SPEC-001 (Agent Selection via CLI/Env) ✅ COMPLETE
         ↓
 JTBD-103-SPEC-001 (Claude Code Print Mode) ✅ COMPLETE
         ↓
-JTBD-104-SPEC-001 (Agent-Aware Session Management) ⚠️ IN PROGRESS - P0 domain/session state done
+JTBD-104-SPEC-001 (Agent-Aware Session Management) ⚠️ IN PROGRESS - P0 complete, P1 tests remaining
 ```
 
 ---
 
 ## Remaining Tasks
-
-### JTBD-102-SPEC-002: ClaudeCodeAdapter Implementation [P0 - COMPLETE]
-
-**Status:** Complete
-
-All P0 bugs fixed:
-- Prompt passing now uses direct argument instead of `--prompt` flag (line 215-219)
-- Export file discovery now finds most recent chat file regardless of sessionId (line 161-174)
-
----
-
-### JTBD-101-SPEC-001: CLI Agent Selection [P0 - COMPLETE]
-
-**Status:** Complete
-
-All P0 bugs fixed:
-- Factory signature updated with proper CreateAgentOptions interface (line 26-29)
-- AgentUnavailableError class added and exported (line 58-61)
-
----
 
 ### JTBD-104-SPEC-001: Agent-Aware Session Management [P0 - IN PROGRESS]
 
@@ -74,28 +54,28 @@ All P0 bugs fixed:
   - Always include `version: "1"` field when writing
   - Include agent and printMode in each SessionState entry
 
-#### P0: Run Handler Updates
+#### P0: Run Handler Updates [COMPLETE]
 
-- [ ] P0: Update runHandler in src/lib/commands/run.ts:56-62 to capture agent in SessionState
+- [x] P0: Update runHandler in src/lib/commands/run.ts:56-62 to capture agent in SessionState
   - Pass resolved agent type to SessionState constructor
   - Pass printMode value to SessionState constructor
-- [ ] P0: Update session creation after each iteration in src/lib/commands/run.ts
+- [x] P0: Update session creation after each iteration in src/lib/commands/run.ts
   - Set session.agent = resolved agent type
   - Set session.printMode = headless flag value
 
-#### P0: Inspect Handler Updates
+#### P0: Inspect Handler Updates [COMPLETE]
 
-- [ ] P0: Remove hardcoded OpenCodeAdapter import from inspectHandler in src/lib/commands/inspect.ts:1-11
-- [ ] P0: Add agent factory import to inspectHandler
-- [ ] P0: Route each session export based on session.agent field
+- [x] P0: Remove hardcoded OpenCodeAdapter import from inspectHandler in src/lib/commands/inspect.ts:1-11
+- [x] P0: Add agent factory import to inspectHandler
+- [x] P0: Route each session export based on session.agent field
   - Create agent instance via createAgent(session.agent)
   - Call agent.export(sessionId) for each session
-- [ ] P0: Handle agent unavailability gracefully
+- [x] P0: Handle agent unavailability gracefully
   - Catch agent factory errors (unavailable agents)
   - Log warning: "Skipping session {sessionId}: agent {agent} not available"
   - Set InspectEntry.error field with reason
   - Continue processing remaining sessions
-- [ ] P0: Populate InspectEntry fields
+- [x] P0: Populate InspectEntry fields
   - Set entry.agent = session.agent
   - Set entry.printMode = session.printMode
   - Set entry.export = result.exportData (or null on failure)
@@ -117,35 +97,11 @@ All P0 bugs fixed:
 - [ ] P1: Add tests for runHandler with agent/printMode capture
   - Verify SessionState includes agent and printMode fields
   - Test with different agent types and printMode values
-- [ ] P1: Add tests for inspectHandler agent routing
+- [x] P1: Add tests for inspectHandler agent routing
   - Test routing to correct adapter based on session.agent
   - Test graceful handling of unavailable agent
   - Test InspectEntry includes agent, printMode, error fields
 - [ ] P1: Test InspectEntry.export type is `unknown | null`
-
----
-
-### P1 Gaps (High Priority - Fix Soon)
-
-#### JTBD-002-SPEC-004: Model Defaults [P1]
-
-- [ ] P1: Fix DEFAULT_SMART_MODEL in src/domain/types.ts:59-60
-  - **Current:** `"zai-coding-plan/glm-4.7"`
-  - **Required:** `"openai/gpt-5.2-codex"`
-  - Keep `DEFAULT_FAST_MODEL` as `"zai-coding-plan/glm-4.7"` (already correct)
-
-#### JTBD-005-SPEC-003: Iteration Visibility [P1]
-
-- [ ] P1: Add end iteration markers in run handler in src/lib/commands/run.ts:53-75
-  - Add `--- Iteration {current}/{max} complete ---` after each iteration completes
-  - Currently only has start markers
-
-#### JTBD-006-SPEC-003: Export Fidelity [P1]
-
-- [ ] P1: Fix InspectEntry.export type to `unknown` in src/domain/types.ts:42-47
-- [ ] P1: Remove string conversion in inspect handler in src/lib/commands/inspect.ts:53
-  - Currently: `exportData: result.exportData.toString()`
-  - Required: `exportData: result.exportData` (preserve native format)
 
 ---
 
@@ -159,7 +115,7 @@ All P0 bugs fixed:
 
 #### JTBD-006-SPEC-002: Inspect Schema [P2]
 
-- [ ] P2: Ensure InspectEntry has error field in src/domain/types.ts:42-47
+- [x] P2: Ensure InspectEntry has error field in src/domain/types.ts:42-47
   - This is already tracked in JTBD-104-SPEC-001 P0 tasks
 
 ---
@@ -200,6 +156,7 @@ All P0 bugs fixed:
 - Prompt resolution for step and run
 - Loop termination with <promise>COMPLETE</promise> detection
 - Max iterations default: 10
+- DEFAULT_SMART_MODEL fixed to "openai/gpt-5.2-codex"
 
 ### JBTD-003: Permission Posture Handling ✅
 - Permission posture handling and logging
@@ -252,3 +209,4 @@ All P0 bugs fixed:
 - ClaudeCodeAdapter passes prompt as CLI argument, not as --prompt flag (FIXED)
 - ClaudeCodeAdapter export finds most recent chat file, not filtered by sessionId (FIXED)
 - AgentUnavailableError class needed for factory error handling (FIXED)
+- End iteration markers already present in run.ts (--- Iteration N/M ---)

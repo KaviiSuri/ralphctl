@@ -392,7 +392,7 @@ describe("Command Handlers", () => {
       const { resolveModelPlaceholders } = await import("../src/lib/models/resolver.js");
       expect(resolveModelPlaceholders).toHaveBeenCalledWith(
         "Use {fast} for this",
-        { smart: "zai-coding-plan/glm-4.7", fast: "custom/fast-model" }
+        { smart: "openai/gpt-5.2-codex", fast: "custom/fast-model" }
       );
     });
 
@@ -500,7 +500,7 @@ describe("Command Handlers", () => {
       const { resolveModelPlaceholders } = await import("../src/lib/models/resolver.js");
       expect(resolveModelPlaceholders).toHaveBeenCalledWith(
         "Use {smart} and {fast}",
-        { smart: "zai-coding-plan/glm-4.7", fast: "zai-coding-plan/glm-4.7" }
+        { smart: "openai/gpt-5.2-codex", fast: "zai-coding-plan/glm-4.7" }
       );
     });
 
@@ -542,7 +542,7 @@ describe("Command Handlers", () => {
         return {
           resolveModelPlaceholders: mock((prompt) =>
             prompt
-              .replace("{smart}", "zai-coding-plan/glm-4.7")
+              .replace("{smart}", "openai/gpt-5.2-codex")
               .replace("{fast}", "zai-coding-plan/glm-4.7")
           ),
         };
@@ -557,8 +557,8 @@ describe("Command Handlers", () => {
 
       expect(resolveModelPlaceholders).toHaveBeenCalled();
       expect(mockRunCalls.length).toBeGreaterThan(0);
-      expect(mockRunCalls[0].prompt).toBe("Use zai-coding-plan/glm-4.7 and zai-coding-plan/glm-4.7");
-      expect(mockRunCalls[0].model).toBe("zai-coding-plan/glm-4.7");
+      expect(mockRunCalls[0].prompt).toBe("Use openai/gpt-5.2-codex and zai-coding-plan/glm-4.7");
+      expect(mockRunCalls[0].model).toBe("openai/gpt-5.2-codex");
     });
 
     it("should enable print mode by default for Claude Code", async () => {
@@ -1062,7 +1062,7 @@ describe("Command Handlers", () => {
       const { resolveModelPlaceholders } = await import("../src/lib/models/resolver.js");
       expect(resolveModelPlaceholders).toHaveBeenCalledWith(
         "Use {fast} for this",
-        { smart: "zai-coding-plan/glm-4.7", fast: "custom/fast-model" }
+        { smart: "openai/gpt-5.2-codex", fast: "custom/fast-model" }
       );
     });
 
@@ -1723,6 +1723,458 @@ describe("Command Handlers", () => {
 
       expect(writeFile).toHaveBeenCalledWith("custom-empty.json", "[]");
       expect(mockLog).toHaveBeenCalledWith("No sessions found in .ralphctl/ralph-sessions.json");
+    });
+
+    it("should log warning and skip unavailable agent types", async () => {
+      const mockSessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_test1",
+          startedAt: "2024-01-01T00:00:00Z",
+          mode: "plan",
+          prompt: "Test prompt",
+          agent: AgentType.OpenCode,
+        },
+        {
+          iteration: 2,
+          sessionId: "ses_test2",
+          startedAt: "2024-01-01T00:01:00Z",
+          mode: "plan",
+          prompt: "Test prompt",
+          agent: AgentType.ClaudeCode,
+        },
+      ];
+
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          writeSessionsFile: mock(() => Promise.resolve()),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
+      const mockAdapter = {
+        export: mock(() =>
+          Promise.resolve({
+            exportData: "Exported data",
+            success: true,
+          })
+        ),
+        runInteractive: mock(() => Promise.resolve()),
+        getMetadata: mock(() => ({
+          name: "opencode",
+          displayName: "OpenCode",
+          cliCommand: "opencode",
+          version: "1.0.0",
+        })),
+        checkAvailability: mock(() => Promise.resolve(true)),
+      };
+
+      class MockAgentUnavailableError extends Error {
+        constructor(message: string) {
+          super(message);
+          this.name = "AgentUnavailableError";
+        }
+      }
+
+      mock.module("../src/lib/agents/factory.js", () => {
+        return {
+          createAgent: mock((agentType) => {
+            if (agentType === AgentType.ClaudeCode) {
+              return Promise.reject(new MockAgentUnavailableError("Claude Code is not available"));
+            }
+            return Promise.resolve(mockAdapter);
+          }),
+          AgentUnavailableError: MockAgentUnavailableError,
+        };
+      });
+
+      const { writeFile } = await import("../src/lib/files/index.js");
+      const mockLog = mock();
+      const mockWarn = mock();
+      global.console.log = mockLog;
+      global.console.warn = mockWarn;
+
+      await inspectHandler();
+
+      expect(mockWarn).toHaveBeenCalledWith("Skipping sessions for claude-code (agent not available)");
+      expect(writeFile).toHaveBeenCalledWith(
+        "inspect.json",
+        JSON.stringify(
+          [
+            {
+              sessionId: "ses_test1",
+              iteration: 1,
+              startedAt: "2024-01-01T00:00:00Z",
+              agent: "opencode",
+              export: "Exported data",
+            },
+            {
+              sessionId: "ses_test2",
+              iteration: 2,
+              startedAt: "2024-01-01T00:01:00Z",
+              agent: "claude-code",
+              export: null,
+              error: "Agent claude-code not available",
+            },
+          ],
+          null,
+          2
+        )
+      );
+    });
+
+    it("should catch runtime errors from adapter.export()", async () => {
+      const mockSessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_test1",
+          startedAt: "2024-01-01T00:00:00Z",
+          mode: "plan",
+          prompt: "Test prompt",
+          agent: AgentType.OpenCode,
+        },
+      ];
+
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          writeSessionsFile: mock(() => Promise.resolve()),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
+      const mockAdapter = {
+        export: mock(() => Promise.reject(new Error("Disk full"))),
+        runInteractive: mock(() => Promise.resolve()),
+        getMetadata: mock(() => ({
+          name: "opencode",
+          displayName: "OpenCode",
+          cliCommand: "opencode",
+          version: "1.0.0",
+        })),
+        checkAvailability: mock(() => Promise.resolve(true)),
+      };
+
+      mock.module("../src/lib/agents/factory.js", () => {
+        return {
+          createAgent: mock(() => Promise.resolve(mockAdapter)),
+          AgentUnavailableError: class extends Error {
+            constructor(message: string) {
+              super(message);
+              this.name = "AgentUnavailableError";
+            }
+          },
+        };
+      });
+
+      const { writeFile } = await import("../src/lib/files/index.js");
+      const mockLog = mock();
+      const mockError = mock();
+      global.console.log = mockLog;
+      global.console.error = mockError;
+
+      await inspectHandler();
+
+      expect(writeFile).toHaveBeenCalledWith(
+        "inspect.json",
+        JSON.stringify(
+          [
+            {
+              sessionId: "ses_test1",
+              iteration: 1,
+              startedAt: "2024-01-01T00:00:00Z",
+              agent: "opencode",
+              export: null,
+              error: "Error: Disk full",
+            },
+          ],
+          null,
+          2
+        )
+      );
+    });
+
+    it("should export sessions from multiple agent types", async () => {
+      const mockSessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_opencode1",
+          startedAt: "2024-01-01T00:00:00Z",
+          mode: "plan",
+          prompt: "Test prompt",
+          agent: AgentType.OpenCode,
+        },
+        {
+          iteration: 2,
+          sessionId: "ses_claude1",
+          startedAt: "2024-01-01T00:01:00Z",
+          mode: "plan",
+          prompt: "Test prompt",
+          agent: AgentType.ClaudeCode,
+          printMode: true,
+        },
+      ];
+
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          writeSessionsFile: mock(() => Promise.resolve()),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
+      let exportCallCount = 0;
+      const mockAdapterCreator = mock((agentType: AgentType) => {
+        const adapter = {
+          export: mock(() => {
+            exportCallCount++;
+            return Promise.resolve({
+              exportData: agentType === AgentType.OpenCode ? "OpenCode export" : "Claude Code export",
+              success: true,
+            });
+          }),
+          runInteractive: mock(() => Promise.resolve()),
+          getMetadata: mock(() => ({
+            name: agentType,
+            displayName: agentType === AgentType.OpenCode ? "OpenCode" : "Claude Code",
+            cliCommand: agentType === AgentType.OpenCode ? "opencode" : "claude",
+            version: "1.0.0",
+          })),
+          checkAvailability: mock(() => Promise.resolve(true)),
+        };
+        return Promise.resolve(adapter);
+      });
+
+      mock.module("../src/lib/agents/factory.js", () => {
+        return {
+          createAgent: mockAdapterCreator,
+          AgentUnavailableError: class extends Error {
+            constructor(message: string) {
+              super(message);
+              this.name = "AgentUnavailableError";
+            }
+          },
+        };
+      });
+
+      const { writeFile } = await import("../src/lib/files/index.js");
+      const mockLog = mock();
+      const mockError = mock();
+      global.console.log = mockLog;
+      global.console.error = mockError;
+
+      await inspectHandler();
+
+      expect(exportCallCount).toBe(2);
+      expect(mockAdapterCreator).toHaveBeenCalledWith(AgentType.OpenCode);
+      expect(mockAdapterCreator).toHaveBeenCalledWith(AgentType.ClaudeCode);
+      expect(writeFile).toHaveBeenCalledWith(
+        "inspect.json",
+        JSON.stringify(
+          [
+            {
+              sessionId: "ses_opencode1",
+              iteration: 1,
+              startedAt: "2024-01-01T00:00:00Z",
+              agent: "opencode",
+              printMode: undefined,
+              export: "OpenCode export",
+            },
+            {
+              sessionId: "ses_claude1",
+              iteration: 2,
+              startedAt: "2024-01-01T00:01:00Z",
+              agent: "claude-code",
+              printMode: true,
+              export: "Claude Code export",
+            },
+          ],
+          null,
+          2
+        )
+      );
+    });
+
+    it("should populate printMode in InspectEntry", async () => {
+      const mockSessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_test1",
+          startedAt: "2024-01-01T00:00:00Z",
+          mode: "plan",
+          prompt: "Test prompt",
+          agent: AgentType.ClaudeCode,
+          printMode: false,
+        },
+      ];
+
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          writeSessionsFile: mock(() => Promise.resolve()),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
+      const mockAdapter = {
+        export: mock(() =>
+          Promise.resolve({
+            exportData: "Exported data",
+            success: true,
+          })
+        ),
+        runInteractive: mock(() => Promise.resolve()),
+        getMetadata: mock(() => ({
+          name: "claude-code",
+          displayName: "Claude Code",
+          cliCommand: "claude",
+          version: "1.0.0",
+        })),
+        checkAvailability: mock(() => Promise.resolve(true)),
+      };
+
+      mock.module("../src/lib/agents/factory.js", () => {
+        return {
+          createAgent: mock(() => Promise.resolve(mockAdapter)),
+          AgentUnavailableError: class extends Error {
+            constructor(message: string) {
+              super(message);
+              this.name = "AgentUnavailableError";
+            }
+          },
+        };
+      });
+
+      const { writeFile } = await import("../src/lib/files/index.js");
+      const mockLog = mock();
+      const mockError = mock();
+      global.console.log = mockLog;
+      global.console.error = mockError;
+
+      await inspectHandler();
+
+      expect(writeFile).toHaveBeenCalledWith(
+        "inspect.json",
+        JSON.stringify(
+          [
+            {
+              sessionId: "ses_test1",
+              iteration: 1,
+              startedAt: "2024-01-01T00:00:00Z",
+              agent: "claude-code",
+              printMode: false,
+              export: "Exported data",
+            },
+          ],
+          null,
+          2
+        )
+      );
+    });
+
+    it("should throw when createAgent fails with unexpected error", async () => {
+      const mockSessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_test1",
+          startedAt: "2024-01-01T00:00:00Z",
+          mode: "plan",
+          prompt: "Test prompt",
+          agent: AgentType.OpenCode,
+        },
+      ];
+
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          writeSessionsFile: mock(() => Promise.resolve()),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
+      mock.module("../src/lib/agents/factory.js", () => {
+        return {
+          createAgent: mock(() => Promise.reject(new Error("Unexpected initialization error"))),
+          AgentUnavailableError: class extends Error {
+            constructor(message: string) {
+              super(message);
+              this.name = "AgentUnavailableError";
+            }
+          },
+        };
+      });
+
+      await expect(inspectHandler()).rejects.toThrow("Unexpected initialization error");
+    });
+
+    it("should handle writeFile failures gracefully", async () => {
+      const mockSessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_test1",
+          startedAt: "2024-01-01T00:00:00Z",
+          mode: "plan",
+          prompt: "Test prompt",
+          agent: AgentType.OpenCode,
+        },
+      ];
+
+      mock.module("../src/lib/state/index.js", () => {
+        return {
+          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          writeSessionsFile: mock(() => Promise.resolve()),
+          ensureRalphctlDir: mock(() => Promise.resolve()),
+        };
+      });
+
+      const mockAdapter = {
+        export: mock(() =>
+          Promise.resolve({
+            exportData: "Exported data",
+            success: true,
+          })
+        ),
+        runInteractive: mock(() => Promise.resolve()),
+        getMetadata: mock(() => ({
+          name: "opencode",
+          displayName: "OpenCode",
+          cliCommand: "opencode",
+          version: "1.0.0",
+        })),
+        checkAvailability: mock(() => Promise.resolve(true)),
+      };
+
+      mock.module("../src/lib/agents/factory.js", () => {
+        return {
+          createAgent: mock(() => Promise.resolve(mockAdapter)),
+          AgentUnavailableError: class extends Error {
+            constructor(message: string) {
+              super(message);
+              this.name = "AgentUnavailableError";
+            }
+          },
+        };
+      });
+
+      mock.module("../src/lib/files/index.js", () => {
+        return {
+          fileExists: mock(() => Promise.resolve(false)),
+          writeFile: mock(() => Promise.reject(new Error("Permission denied"))),
+        };
+      });
+
+      const mockProcessExit = mock((code: number) => {
+        throw new Error(`process.exit(${code})`);
+      });
+      const originalExit = process.exit;
+      process.exit = mockProcessExit;
+
+      try {
+        await expect(inspectHandler()).rejects.toThrow("process.exit(1)");
+      } finally {
+        process.exit = originalExit;
+      }
     });
   });
 
