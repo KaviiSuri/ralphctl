@@ -1,5 +1,6 @@
 import { Mode, type SessionState, createModelConfig } from "../../domain/types.js";
-import { OpenCodeAdapter } from "../opencode/adapter.js";
+import { AgentType } from "../../domain/agent.js";
+import { createAgent } from "../agents/factory.js";
 import { resolvePrompt } from "../prompts/resolver.js";
 import { resolveModelPlaceholders } from "../models/resolver.js";
 import { readSessionsFile, writeSessionsFile } from "../state/index.js";
@@ -10,25 +11,18 @@ export interface RunHandlerOptions {
   permissionPosture?: "allow-all" | "ask";
   smartModel?: string;
   fastModel?: string;
+  agent?: AgentType;
 }
 
 export async function runHandler(options: RunHandlerOptions): Promise<void> {
-  const { mode, maxIterations = 10, permissionPosture = "allow-all", smartModel, fastModel } = options;
-   
+  const { mode, maxIterations = 10, permissionPosture = "allow-all", smartModel, fastModel, agent } = options;
+
   const modelConfig = createModelConfig(smartModel, fastModel);
-   
-  const adapter = new OpenCodeAdapter({ 
-    env: { 
-      ...process.env,
-      OPENCODE_PERMISSION: permissionPosture === "allow-all" ? '{"*":"allow"}' : "ask"
-    } 
+
+  const adapter = await createAgent(agent, {
+    permissionPosture,
+    env: { ...process.env } as Record<string, string>,
   });
-  
-  const available = await adapter.checkAvailability();
-  if (!available) {
-    console.error("OpenCode is not available");
-    process.exit(1);
-  }
 
   console.log(`Running ${mode} mode`);
   console.log(`Permissions: ${permissionPosture}`);

@@ -2,6 +2,7 @@
 import { Cli, Types, friendlyErrorPlugin, notFoundPlugin } from "clerc";
 import path from "path";
 import { Mode, type InitOptions } from "./domain/types.js";
+import { AgentType } from "./domain/agent.js";
 import { runHandler } from "./lib/commands/run.js";
 import { stepHandler } from "./lib/commands/step.js";
 import { inspectHandler } from "./lib/commands/inspect.js";
@@ -48,6 +49,11 @@ const cli = Cli()
         type: String,
         description: "Override fast model (default: zai-coding-plan/glm-4.7)",
       },
+      agent: {
+        type: Types.Enum(AgentType.OpenCode, AgentType.ClaudeCode),
+        description: "Agent to use (default: opencode)",
+        default: AgentType.OpenCode,
+      },
     },
   })
   .on("run", async (ctx) => {
@@ -57,6 +63,7 @@ const cli = Cli()
       permissionPosture: ctx.flags["permission-posture"] as "allow-all" | "ask",
       smartModel: ctx.flags["smart-model"],
       fastModel: ctx.flags["fast-model"],
+      agent: ctx.flags.agent as AgentType,
     });
   })
   .command("step", "Run a single interactive iteration", {
@@ -86,6 +93,11 @@ const cli = Cli()
         type: String,
         description: "Override fast model (default: zai-coding-plan/glm-4.7)",
       },
+      agent: {
+        type: Types.Enum(AgentType.OpenCode, AgentType.ClaudeCode),
+        description: "Agent to use (default: opencode)",
+        default: AgentType.OpenCode,
+      },
     },
   })
   .on("step", async (ctx) => {
@@ -95,6 +107,7 @@ const cli = Cli()
       permissionPosture: ctx.flags["permission-posture"] as "allow-all" | "ask",
       smartModel: ctx.flags["smart-model"],
       fastModel: ctx.flags["fast-model"],
+      agent: ctx.flags.agent as AgentType,
     });
   })
   .command("inspect", "Inspect run exports", {

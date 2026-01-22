@@ -7,9 +7,9 @@ JTBD-102-SPEC-001 (Agent Adapter Interface - FOUNDATION) ✅ COMPLETE
         ↓
 JTBD-102-SPEC-002 (ClaudeCodeAdapter Implementation) ✅ COMPLETE
         ↓
-JTBD-101-SPEC-001 (Agent Selection via CLI/Env) [NEXT]
+JTBD-101-SPEC-001 (Agent Selection via CLI/Env) ✅ COMPLETE
         ↓
-JTBD-103-SPEC-001 (Claude Code Project Mode)
+JTBD-103-SPEC-001 (Claude Code Project Mode) [NEXT]
         ↓
 JTBD-104-SPEC-001 (Agent-Aware Session Management)
 ```
@@ -451,44 +451,44 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management)
 
 ---
 
-## JTBD-101-SPEC-001: Agent Selection [P0 - DEPENDS ON JTBD-102-SPEC-001, JTBD-102-SPEC-002] [NEXT]
+## JTBD-101-SPEC-001: Agent Selection via CLI/Env [P0 - DEPENDS ON JTBD-102-SPEC-001, JTBD-102-SPEC-002] ✅ COMPLETED
 
 **Prerequisites: JTBD-102-SPEC-001 and JTBD-102-SPEC-002 must be completed first.**
 
-- [ ] P0: Add CLI flags for agent selection
-  - [ ] P0: Add `--agent` flag to `run` command (accepts "opencode" or "claude-code")
-  - [ ] P0: Add `--agent` flag to `step` command (accepts "opencode" or "claude-code")
-  - [ ] P0: Validate agent flag values (error on unknown agent)
+- [x] P0: Add CLI flags for agent selection
+  - [x] P0: Add `--agent` flag to `run` command (accepts "opencode" or "claude-code")
+  - [x] P0: Add `--agent` flag to `step` command (accepts "opencode" or "claude-code")
+  - [x] P0: Validate agent flag values (error on unknown agent)
 
-- [ ] P0: Add environment variable support
-  - [ ] P0: Support `RALPHCTL_AGENT` environment variable
-  - [ ] P0: Valid values: "opencode", "claude-code"
-  - [ ] P0: Validate env var value (warn and use default if invalid)
+- [x] P0: Add environment variable support
+  - [x] P0: Support `RALPHCTL_AGENT` environment variable
+  - [x] P0: Valid values: "opencode", "claude-code"
+  - [x] P0: Validate env var value (warn and use default if invalid)
 
-- [ ] P0: Implement priority resolution
-  - [ ] P0: Priority order: CLI flag > environment variable > default ("opencode")
-  - [ ] P0: Document priority in help text for --agent flag
+- [x] P0: Implement priority resolution
+  - [x] P0: Priority order: CLI flag > environment variable > default ("opencode")
+  - [x] P0: Document priority in help text for --agent flag
 
-- [ ] P0: Create agent factory in `src/lib/agents/factory.ts`
-  - [ ] P0: Create `createAgent(type: AgentType, useProjectMode?: boolean): AgentAdapter`
-  - [ ] P0: Implement eager availability check during factory creation
-  - [ ] P0: Throw clear error with installation URL when agent unavailable
+- [x] P0: Create agent factory in `src/lib/agents/factory.ts`
+  - [x] P0: Create `createAgent(type: AgentType, useProjectMode?: boolean): AgentAdapter`
+  - [x] P0: Implement eager availability check during factory creation
+  - [x] P0: Throw clear error with installation URL when agent unavailable
     - OpenCode URL: https://opencode.ai
     - Claude Code URL: https://claude.com/claude-code
 
-- [ ] P0: Update runHandler to use agent factory
-  - [ ] P0: Import createAgent from factory.ts
-  - [ ] P0: Resolve agent type from CLI flag > env > default
-  - [ ] P0: Create agent instance via factory
-  - [ ] P0: Pass agent instance to iteration loop instead of hardcoded OpenCodeAdapter
+- [x] P0: Update runHandler to use agent factory
+  - [x] P0: Import createAgent from factory.ts
+  - [x] P0: Resolve agent type from CLI flag > env > default
+  - [x] P0: Create agent instance via factory
+  - [x] P0: Pass agent instance to iteration loop instead of hardcoded OpenCodeAdapter
 
-- [ ] P0: Update stepHandler to use agent factory
-  - [ ] P0: Same pattern as runHandler
-  - [ ] P0: Pass agent instance to interactive execution
+- [x] P0: Update stepHandler to use agent factory
+  - [x] P0: Same pattern as runHandler
+  - [x] P0: Pass agent instance to interactive execution
 
-- [ ] P0: Add clear error messages for unavailable agents
-  - [ ] P0: Error message format: "{agent} is not installed or not in PATH. Install from: {url}"
-  - [ ] P0: Exit with code 1 on agent unavailability
+- [x] P0: Add clear error messages for unavailable agents
+  - [x] P0: Error message format: "{agent} is not installed or not in PATH. Install from: {url}"
+  - [x] P0: Exit with code 1 on agent unavailability
 
 ### Implementation Notes
 - Default agent should be "opencode" for backward compatibility
@@ -498,7 +498,7 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management)
 
 ---
 
-## JTBD-103-SPEC-001: Claude Code Project Mode [P1 - DEPENDS ON JTBD-102-SPEC-002, JTBD-101-SPEC-001]
+## JTBD-103-SPEC-001: Claude Code Project Mode [P1 - DEPENDS ON JTBD-102-SPEC-002, JTBD-101-SPEC-001] [NEXT]
 
 **Prerequisites: JTBD-102-SPEC-002 and JTBD-101-SPEC-001 must be completed first.**
 
@@ -604,3 +604,6 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management)
 - Agent metadata includes version, availability, and type
 - Session migration defaults old sessions to OpenCode agent
 - Inspect handler routes exports based on session.agent field
+- Agent factory performs eager availability check and provides clear error messages
+- All 78 tests passing for agent selection implementation
+- Typecheck passing for agent selection implementation

@@ -1,5 +1,6 @@
 import { Mode, createModelConfig } from "../../domain/types.js";
-import { OpenCodeAdapter } from "../opencode/adapter.js";
+import { AgentType } from "../../domain/agent.js";
+import { createAgent } from "../agents/factory.js";
 import { resolvePrompt } from "../prompts/resolver.js";
 import { resolveModelPlaceholders } from "../models/resolver.js";
 
@@ -9,25 +10,18 @@ export interface StepHandlerOptions {
   permissionPosture?: "allow-all" | "ask";
   smartModel?: string;
   fastModel?: string;
+  agent?: AgentType;
 }
 
 export async function stepHandler(options: StepHandlerOptions): Promise<void> {
-  const { mode, customPrompt, permissionPosture = "allow-all", smartModel, fastModel } = options;
-   
-  const modelConfig = createModelConfig(smartModel, fastModel);
-   
-  const adapter = new OpenCodeAdapter({ 
-    env: { 
-      ...process.env,
-      OPENCODE_PERMISSION: permissionPosture === "allow-all" ? '{"*":"allow"}' : "ask"
-    } 
-  });
+  const { mode, customPrompt, permissionPosture = "allow-all", smartModel, fastModel, agent } = options;
 
-  const available = await adapter.checkAvailability();
-  if (!available) {
-    console.error("OpenCode is not available");
-    process.exit(1);
-  }
+  const modelConfig = createModelConfig(smartModel, fastModel);
+
+  const adapter = await createAgent(agent, {
+    permissionPosture,
+    env: { ...process.env } as Record<string, string>,
+  });
 
   console.log(`Running ${mode} mode step`);
   console.log(`Permissions: ${permissionPosture}`);
