@@ -1331,7 +1331,10 @@ describe("Command Handlers", () => {
   });
 
   describe("inspectHandler", () => {
+    let exportCallCount = 0;
+
     beforeEach(() => {
+      exportCallCount = 0;
       mock.module("../src/lib/files/index.js", () => {
         return {
           fileExists: mock(() => Promise.resolve(false)),
@@ -1339,6 +1342,28 @@ describe("Command Handlers", () => {
         };
       });
     });
+
+    const createMockFactory = () => {
+      const MockAdapter = class {
+        export = mock(() => {
+          exportCallCount++;
+          return Promise.resolve({
+            exportData: `Exported data ${exportCallCount}`,
+            success: true,
+          });
+        });
+        runInteractive = mock(() => Promise.resolve());
+        getMetadata = mock(() => ({
+          name: "opencode",
+          displayName: "OpenCode",
+          cliCommand: "opencode",
+          version: "1.0.0",
+        }));
+      };
+      return {
+        createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
+      };
+    };
 
     it("should read sessions, export all, and write JSON file", async () => {
       const mockSessions = [
@@ -1348,6 +1373,7 @@ describe("Command Handlers", () => {
           startedAt: "2024-01-01T00:00:00Z",
           mode: "plan",
           prompt: "Test prompt",
+          agent: "opencode",
         },
         {
           iteration: 2,
@@ -1355,38 +1381,19 @@ describe("Command Handlers", () => {
           startedAt: "2024-01-01T00:01:00Z",
           mode: "plan",
           prompt: "Test prompt",
+          agent: "opencode",
         },
       ];
 
       mock.module("../src/lib/state/index.js", () => {
         return {
-          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          readSessionsFile: mock(() => Promise.resolve({ sessions: mockSessions, version: "1.0.0" })),
           writeSessionsFile: mock(() => Promise.resolve()),
           ensureRalphctlDir: mock(() => Promise.resolve()),
         };
       });
 
-      let exportCallCount = 0;
-      mock.module("../src/lib/opencode/adapter.js", () => {
-        return {
-          OpenCodeAdapter: class {
-            export = mock(() => {
-              exportCallCount++;
-              return Promise.resolve({
-                exportData: `Exported data ${exportCallCount}`,
-                success: true,
-              });
-            });
-            runInteractive = mock(() => Promise.resolve());
-            getMetadata = mock(() => ({
-              name: "opencode",
-              displayName: "OpenCode",
-              cliCommand: "opencode",
-              version: "1.0.0",
-            }));
-          },
-        };
-      });
+      mock.module("../src/lib/agents/factory.js", createMockFactory);
 
       const { writeFile } = await import("../src/lib/files/index.js");
       const mockLog = mock();
@@ -1397,34 +1404,34 @@ describe("Command Handlers", () => {
       await inspectHandler();
 
       expect(exportCallCount).toBe(2);
-      expect(writeFile).toHaveBeenCalledWith(
-        "inspect.json",
-        JSON.stringify(
-          [
-            {
-              sessionId: "ses_test1",
-              iteration: 1,
-              startedAt: "2024-01-01T00:00:00Z",
-              export: "Exported data 1",
-            },
-            {
-              sessionId: "ses_test2",
-              iteration: 2,
-              startedAt: "2024-01-01T00:01:00Z",
-              export: "Exported data 2",
-            },
-          ],
-          null,
-          2
-        )
-      );
+      const actualCall = (writeFile as any).mock.calls.find((call: any) => call[0] === "inspect.json");
+      const writtenData = JSON.parse(actualCall[1]);
+
+      expect(writtenData.version).toBe("1.0.0");
+      expect(writtenData.generatedAt).toBeDefined();
+      expect(writtenData.entries).toEqual([
+        {
+          sessionId: "ses_test1",
+          iteration: 1,
+          startedAt: "2024-01-01T00:00:00Z",
+          agent: "opencode",
+          export: "Exported data 1",
+        },
+        {
+          sessionId: "ses_test2",
+          iteration: 2,
+          startedAt: "2024-01-01T00:01:00Z",
+          agent: "opencode",
+          export: "Exported data 2",
+        },
+      ]);
       expect(mockLog).toHaveBeenCalledWith("Exported 2 session(s) to inspect.json");
     });
 
     it("should output empty array for empty sessions", async () => {
       mock.module("../src/lib/state/index.js", () => {
         return {
-          readSessionsFile: mock(() => Promise.resolve([])),
+          readSessionsFile: mock(() => Promise.resolve({ sessions: [], version: "1.0.0" })),
           writeSessionsFile: mock(() => Promise.resolve()),
           ensureRalphctlDir: mock(() => Promise.resolve()),
         };
@@ -1436,7 +1443,12 @@ describe("Command Handlers", () => {
 
       await inspectHandler();
 
-      expect(writeFile).toHaveBeenCalledWith("inspect.json", "[]");
+      const actualCall = (writeFile as any).mock.calls.find((call: any) => call[0] === "inspect.json");
+      const writtenData = JSON.parse(actualCall[1]);
+
+      expect(writtenData.version).toBe("1.0.0");
+      expect(writtenData.generatedAt).toBeDefined();
+      expect(writtenData.entries).toEqual([]);
       expect(mockLog).toHaveBeenCalledWith("No sessions found in .ralphctl/ralph-sessions.json");
     });
 
@@ -1448,6 +1460,7 @@ describe("Command Handlers", () => {
           startedAt: "2024-01-01T00:00:00Z",
           mode: "plan",
           prompt: "Test prompt",
+          agent: "opencode",
         },
         {
           iteration: 2,
@@ -1455,43 +1468,45 @@ describe("Command Handlers", () => {
           startedAt: "2024-01-01T00:01:00Z",
           mode: "plan",
           prompt: "Test prompt",
+          agent: "opencode",
         },
       ];
 
       mock.module("../src/lib/state/index.js", () => {
         return {
-          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          readSessionsFile: mock(() => Promise.resolve({ sessions: mockSessions, version: "1.0.0" })),
           writeSessionsFile: mock(() => Promise.resolve()),
           ensureRalphctlDir: mock(() => Promise.resolve()),
         };
       });
 
       let exportCallCount = 0;
-      mock.module("../src/lib/opencode/adapter.js", () => {
-        return {
-          OpenCodeAdapter: class {
-            export = mock(() => {
-              exportCallCount++;
-              if (exportCallCount === 1) {
-                return Promise.resolve({
-                  exportData: null,
-                  success: false,
-                  error: "Export failed",
-                });
-              }
+      mock.module("../src/lib/agents/factory.js", () => {
+        const MockAdapter = class {
+          export = mock(() => {
+            exportCallCount++;
+            if (exportCallCount === 1) {
               return Promise.resolve({
-                exportData: "Exported data",
-                success: true,
+                exportData: null,
+                success: false,
+                error: "Export failed",
               });
+            }
+            return Promise.resolve({
+              exportData: "Exported data",
+              success: true,
             });
-            runInteractive = mock(() => Promise.resolve());
-            getMetadata = mock(() => ({
-              name: "opencode",
-              displayName: "OpenCode",
-              cliCommand: "opencode",
-              version: "1.0.0",
-            }));
-          },
+          });
+          runInteractive = mock(() => Promise.resolve());
+          getMetadata = mock(() => ({
+            name: "opencode",
+            displayName: "OpenCode",
+            cliCommand: "opencode",
+            version: "1.0.0",
+          }));
+        };
+        return {
+          createAgent: mock(() => Promise.resolve(new MockAdapter() as any)),
         };
       });
 
@@ -1505,24 +1520,31 @@ describe("Command Handlers", () => {
 
       expect(exportCallCount).toBe(2);
       expect(mockError).toHaveBeenCalledWith(
-        "Warning: Failed to export session ses_test1 (iteration 1): Export failed"
+        "Warning: Failed to export session ses_test1: Export failed"
       );
-      expect(writeFile).toHaveBeenCalledWith(
-        "inspect.json",
-        JSON.stringify(
-          [
-            {
-              sessionId: "ses_test2",
-              iteration: 2,
-              startedAt: "2024-01-01T00:01:00Z",
-              export: "Exported data",
-            },
-          ],
-          null,
-          2
-        )
-      );
-      expect(mockLog).toHaveBeenCalledWith("Exported 1 session(s) to inspect.json");
+      const actualCall = (writeFile as any).mock.calls.find((call: any) => call[0] === "inspect.json");
+      const writtenData = JSON.parse(actualCall[1]);
+
+      expect(writtenData.version).toBe("1.0.0");
+      expect(writtenData.generatedAt).toBeDefined();
+      expect(writtenData.entries).toEqual([
+        {
+          sessionId: "ses_test1",
+          iteration: 1,
+          startedAt: "2024-01-01T00:00:00Z",
+          agent: "opencode",
+          export: null,
+          error: "Export failed",
+        },
+        {
+          sessionId: "ses_test2",
+          iteration: 2,
+          startedAt: "2024-01-01T00:01:00Z",
+          agent: "opencode",
+          export: "Exported data",
+        },
+      ]);
+      expect(mockLog).toHaveBeenCalledWith("Exported 2 session(s) to inspect.json");
     });
 
     it("should error when sessionId is missing", async () => {
@@ -1533,36 +1555,19 @@ describe("Command Handlers", () => {
           startedAt: "2024-01-01T00:00:00Z",
           mode: "plan",
           prompt: "Test prompt",
+          agent: "opencode",
         },
       ];
 
       mock.module("../src/lib/state/index.js", () => {
         return {
-          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          readSessionsFile: mock(() => Promise.resolve({ sessions: mockSessions, version: "1.0.0" })),
           writeSessionsFile: mock(() => Promise.resolve()),
           ensureRalphctlDir: mock(() => Promise.resolve()),
         };
       });
 
-      mock.module("../src/lib/opencode/adapter.js", () => {
-        return {
-          OpenCodeAdapter: class {
-            export = mock(() =>
-              Promise.resolve({
-                exportData: "Exported data",
-                success: true,
-              })
-            );
-            runInteractive = mock(() => Promise.resolve());
-            getMetadata = mock(() => ({
-              name: "opencode",
-              displayName: "OpenCode",
-              cliCommand: "opencode",
-              version: "1.0.0",
-            }));
-          },
-        };
-      });
+      mock.module("../src/lib/agents/factory.js", createMockFactory);
 
       const mockExit = mock((code: number) => {
         throw new Error(`process.exit(${code})`);
@@ -1589,36 +1594,19 @@ describe("Command Handlers", () => {
           startedAt: "",
           mode: "plan",
           prompt: "Test prompt",
+          agent: "opencode",
         },
       ];
 
       mock.module("../src/lib/state/index.js", () => {
         return {
-          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          readSessionsFile: mock(() => Promise.resolve({ sessions: mockSessions, version: "1.0.0" })),
           writeSessionsFile: mock(() => Promise.resolve()),
           ensureRalphctlDir: mock(() => Promise.resolve()),
         };
       });
 
-      mock.module("../src/lib/opencode/adapter.js", () => {
-        return {
-          OpenCodeAdapter: class {
-            export = mock(() =>
-              Promise.resolve({
-                exportData: "Exported data",
-                success: true,
-              })
-            );
-            runInteractive = mock(() => Promise.resolve());
-            getMetadata = mock(() => ({
-              name: "opencode",
-              displayName: "OpenCode",
-              cliCommand: "opencode",
-              version: "1.0.0",
-            }));
-          },
-        };
-      });
+      mock.module("../src/lib/agents/factory.js", createMockFactory);
 
       const mockExit = mock((code: number) => {
         throw new Error(`process.exit(${code})`);
@@ -1645,36 +1633,19 @@ describe("Command Handlers", () => {
           startedAt: "2024-01-01T00:00:00Z",
           mode: "plan",
           prompt: "Test prompt",
+          agent: "opencode",
         },
       ];
 
       mock.module("../src/lib/state/index.js", () => {
         return {
-          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          readSessionsFile: mock(() => Promise.resolve({ sessions: mockSessions, version: "1.0.0" })),
           writeSessionsFile: mock(() => Promise.resolve()),
           ensureRalphctlDir: mock(() => Promise.resolve()),
         };
       });
 
-      mock.module("../src/lib/opencode/adapter.js", () => {
-        return {
-          OpenCodeAdapter: class {
-            export = mock(() =>
-              Promise.resolve({
-                exportData: "Exported data",
-                success: true,
-              })
-            );
-            runInteractive = mock(() => Promise.resolve());
-            getMetadata = mock(() => ({
-              name: "opencode",
-              displayName: "OpenCode",
-              cliCommand: "opencode",
-              version: "1.0.0",
-            }));
-          },
-        };
-      });
+      mock.module("../src/lib/agents/factory.js", createMockFactory);
 
       const mockExit = mock((code: number) => {
         throw new Error(`process.exit(${code})`);
@@ -1701,36 +1672,19 @@ describe("Command Handlers", () => {
           startedAt: "2024-01-01T00:00:00Z",
           mode: "plan",
           prompt: "Test prompt",
+          agent: "opencode",
         },
       ];
 
       mock.module("../src/lib/state/index.js", () => {
         return {
-          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          readSessionsFile: mock(() => Promise.resolve({ sessions: mockSessions, version: "1.0.0" })),
           writeSessionsFile: mock(() => Promise.resolve()),
           ensureRalphctlDir: mock(() => Promise.resolve()),
         };
       });
 
-      mock.module("../src/lib/opencode/adapter.js", () => {
-        return {
-          OpenCodeAdapter: class {
-            export = mock(() =>
-              Promise.resolve({
-                exportData: "Exported data",
-                success: true,
-              })
-            );
-            runInteractive = mock(() => Promise.resolve());
-            getMetadata = mock(() => ({
-              name: "opencode",
-              displayName: "OpenCode",
-              cliCommand: "opencode",
-              version: "1.0.0",
-            }));
-          },
-        };
-      });
+      mock.module("../src/lib/agents/factory.js", createMockFactory);
 
       mock.module("../src/lib/files/index.js", () => {
         return {
@@ -1762,36 +1716,19 @@ describe("Command Handlers", () => {
           startedAt: "2024-01-01T00:00:00Z",
           mode: "plan",
           prompt: "Test prompt",
+          agent: "opencode",
         },
       ];
 
       mock.module("../src/lib/state/index.js", () => {
         return {
-          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          readSessionsFile: mock(() => Promise.resolve({ sessions: mockSessions, version: "1.0.0" })),
           writeSessionsFile: mock(() => Promise.resolve()),
           ensureRalphctlDir: mock(() => Promise.resolve()),
         };
       });
 
-      mock.module("../src/lib/opencode/adapter.js", () => {
-        return {
-          OpenCodeAdapter: class {
-            export = mock(() =>
-              Promise.resolve({
-                exportData: "Exported data",
-                success: true,
-              })
-            );
-            runInteractive = mock(() => Promise.resolve());
-            getMetadata = mock(() => ({
-              name: "opencode",
-              displayName: "OpenCode",
-              cliCommand: "opencode",
-              version: "1.0.0",
-            }));
-          },
-        };
-      });
+      mock.module("../src/lib/agents/factory.js", createMockFactory);
 
       const { writeFile } = await import("../src/lib/files/index.js");
       const mockLog = mock();
@@ -1801,21 +1738,20 @@ describe("Command Handlers", () => {
 
       await inspectHandler();
 
-      expect(writeFile).toHaveBeenCalledWith(
-        "inspect.json",
-        JSON.stringify(
-          [
-            {
-              sessionId: "ses_test1",
-              iteration: 1,
-              startedAt: "2024-01-01T00:00:00Z",
-              export: "Exported data",
-            },
-          ],
-          null,
-          2
-        )
-      );
+      const actualCall = (writeFile as any).mock.calls.find((call: any) => call[0] === "inspect.json");
+      const writtenData = JSON.parse(actualCall[1]);
+
+      expect(writtenData.version).toBe("1.0.0");
+      expect(writtenData.generatedAt).toBeDefined();
+      expect(writtenData.entries).toEqual([
+        {
+          sessionId: "ses_test1",
+          iteration: 1,
+          startedAt: "2024-01-01T00:00:00Z",
+          agent: "opencode",
+          export: "Exported data 1",
+        },
+      ]);
       expect(mockLog).toHaveBeenCalledWith("Exported 1 session(s) to inspect.json");
     });
 
@@ -1827,36 +1763,19 @@ describe("Command Handlers", () => {
           startedAt: "2024-01-01T00:00:00Z",
           mode: "plan",
           prompt: "Test prompt",
+          agent: "opencode",
         },
       ];
 
       mock.module("../src/lib/state/index.js", () => {
         return {
-          readSessionsFile: mock(() => Promise.resolve(mockSessions)),
+          readSessionsFile: mock(() => Promise.resolve({ sessions: mockSessions, version: "1.0.0" })),
           writeSessionsFile: mock(() => Promise.resolve()),
           ensureRalphctlDir: mock(() => Promise.resolve()),
         };
       });
 
-      mock.module("../src/lib/opencode/adapter.js", () => {
-        return {
-          OpenCodeAdapter: class {
-            export = mock(() =>
-              Promise.resolve({
-                exportData: "Exported data",
-                success: true,
-              })
-            );
-            runInteractive = mock(() => Promise.resolve());
-            getMetadata = mock(() => ({
-              name: "opencode",
-              displayName: "OpenCode",
-              cliCommand: "opencode",
-              version: "1.0.0",
-            }));
-          },
-        };
-      });
+      mock.module("../src/lib/agents/factory.js", createMockFactory);
 
       const { writeFile } = await import("../src/lib/files/index.js");
       const mockLog = mock();
@@ -1866,28 +1785,27 @@ describe("Command Handlers", () => {
 
       await inspectHandler({ output: "custom-output.json" });
 
-      expect(writeFile).toHaveBeenCalledWith(
-        "custom-output.json",
-        JSON.stringify(
-          [
-            {
-              sessionId: "ses_test1",
-              iteration: 1,
-              startedAt: "2024-01-01T00:00:00Z",
-              export: "Exported data",
-            },
-          ],
-          null,
-          2
-        )
-      );
+      const actualCall = (writeFile as any).mock.calls.find((call: any) => call[0] === "custom-output.json");
+      const writtenData = JSON.parse(actualCall[1]);
+
+      expect(writtenData.version).toBe("1.0.0");
+      expect(writtenData.generatedAt).toBeDefined();
+      expect(writtenData.entries).toEqual([
+        {
+          sessionId: "ses_test1",
+          iteration: 1,
+          startedAt: "2024-01-01T00:00:00Z",
+          agent: "opencode",
+          export: "Exported data 1",
+        },
+      ]);
       expect(mockLog).toHaveBeenCalledWith("Exported 1 session(s) to custom-output.json");
     });
 
     it("should use custom output file for empty sessions", async () => {
       mock.module("../src/lib/state/index.js", () => {
         return {
-          readSessionsFile: mock(() => Promise.resolve([])),
+          readSessionsFile: mock(() => Promise.resolve({ sessions: [], version: "1.0.0" })),
           writeSessionsFile: mock(() => Promise.resolve()),
           ensureRalphctlDir: mock(() => Promise.resolve()),
         };
@@ -1899,7 +1817,12 @@ describe("Command Handlers", () => {
 
       await inspectHandler({ output: "custom-empty.json" });
 
-      expect(writeFile).toHaveBeenCalledWith("custom-empty.json", "[]");
+      const actualCall = (writeFile as any).mock.calls.find((call: any) => call[0] === "custom-empty.json");
+      const writtenData = JSON.parse(actualCall[1]);
+
+      expect(writtenData.version).toBe("1.0.0");
+      expect(writtenData.generatedAt).toBeDefined();
+      expect(writtenData.entries).toEqual([]);
       expect(mockLog).toHaveBeenCalledWith("No sessions found in .ralphctl/ralph-sessions.json");
     });
   });

@@ -36,14 +36,15 @@ export async function runHandler(options: RunHandlerOptions): Promise<void> {
 
   let iteration = 1;
   let completed = false;
-  const sessions = await readSessionsFile();
+  const sessionsFile = await readSessionsFile();
+  const agentType = agent || AgentType.OpenCode;
 
   try {
     while (iteration <= maxIterations && !completed) {
       const prompt = await resolvePrompt({ mode });
       const resolvedPrompt = resolveModelPlaceholders(prompt, modelConfig);
       const result = await adapter.run(resolvedPrompt, modelConfig.smart);
-      
+
       if (result.exitCode !== 0) {
         console.error(result.stderr || "Failed to run iteration");
         process.exit(1);
@@ -59,9 +60,11 @@ export async function runHandler(options: RunHandlerOptions): Promise<void> {
         startedAt: new Date().toISOString(),
         mode,
         prompt,
+        agent: agentType,
+        projectMode: agentType === AgentType.ClaudeCode && mode === Mode.Build ? true : undefined,
       };
-      sessions.push(sessionState);
-      await writeSessionsFile(sessions);
+      sessionsFile.sessions.push(sessionState);
+      await writeSessionsFile(sessionsFile);
 
       if (result.completionDetected) {
         console.log(`\n--- Iteration ${iteration}/${maxIterations} Complete (Session: ${sessionId}) ---`);

@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { AgentType } from "../src/domain/agent.js";
 import type { SessionState } from "../src/domain/types.js";
 
 const uniqueId = Math.random().toString(36).substring(7);
@@ -84,6 +85,7 @@ describe("state utilities", () => {
           startedAt: "2024-01-01T00:00:00.000Z",
           mode: "plan",
           prompt: "test prompt",
+          agent: AgentType.OpenCode,
         },
       ];
 
@@ -101,6 +103,7 @@ describe("state utilities", () => {
           startedAt: "2024-01-01T00:00:00.000Z",
           mode: "plan",
           prompt: "test prompt",
+          agent: AgentType.OpenCode,
         },
       ];
 
@@ -113,6 +116,7 @@ describe("state utilities", () => {
           startedAt: "2024-01-01T00:00:00.000Z",
           mode: "plan",
           prompt: "test prompt",
+          agent: AgentType.OpenCode,
         },
         {
           iteration: 2,
@@ -120,6 +124,7 @@ describe("state utilities", () => {
           startedAt: "2024-01-01T01:00:00.000Z",
           mode: "build",
           prompt: "another prompt",
+          agent: AgentType.OpenCode,
         },
       ];
 
@@ -144,6 +149,7 @@ describe("state utilities", () => {
           startedAt: "2024-01-01T00:00:00.000Z",
           mode: "plan",
           prompt: "test prompt",
+          agent: AgentType.OpenCode,
         },
       ];
 

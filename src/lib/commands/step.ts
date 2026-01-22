@@ -1,8 +1,9 @@
-import { Mode, createModelConfig } from "../../domain/types.js";
+import { Mode, createModelConfig, type SessionState } from "../../domain/types.js";
 import { AgentType } from "../../domain/agent.js";
 import { createAgent } from "../agents/factory.js";
 import { resolvePrompt } from "../prompts/resolver.js";
 import { resolveModelPlaceholders } from "../models/resolver.js";
+import { readSessionsFile, writeSessionsFile } from "../state/index.js";
 
 export interface StepHandlerOptions {
   mode: Mode;
@@ -35,5 +36,30 @@ export async function stepHandler(options: StepHandlerOptions): Promise<void> {
 
   const prompt = await resolvePrompt({ mode, customPrompt });
   const resolvedPrompt = resolveModelPlaceholders(prompt, modelConfig);
-  await adapter.runInteractive(resolvedPrompt, modelConfig.smart);
+
+  const sessionsFile = await readSessionsFile();
+  const sessionId = `step-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+  const agentType = agent || AgentType.OpenCode;
+
+  console.log(`\n--- Step Session: ${sessionId} ---`);
+
+  try {
+    await adapter.runInteractive(resolvedPrompt, modelConfig.smart);
+
+    const sessionState: SessionState = {
+      iteration: sessionsFile.sessions.length + 1,
+      sessionId,
+      startedAt: new Date().toISOString(),
+      mode,
+      prompt,
+      agent: agentType,
+      projectMode: agentType === AgentType.ClaudeCode && mode === Mode.Build ? true : undefined,
+    };
+
+    sessionsFile.sessions.push(sessionState);
+    await writeSessionsFile(sessionsFile);
+  } catch (error) {
+    console.log(`\n--- Step Session Complete ---`);
+    throw error;
+  }
 }

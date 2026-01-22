@@ -10,10 +10,8 @@ JTBD-102-SPEC-002 (ClaudeCodeAdapter Implementation) ✅ COMPLETE
 JTBD-101-SPEC-001 (Agent Selection via CLI/Env) ✅ COMPLETE
          ↓
 JTBD-103-SPEC-001 (Claude Code Print Mode) ✅ COMPLETE
-         ↓
-JTBD-104-SPEC-001 (Agent-Aware Session Management) [NEXT]
-        ↓
-JTBD-104-SPEC-001 (Agent-Aware Session Management)
+          ↓
+JTBD-104-SPEC-001 (Agent-Aware Session Management) ✅ COMPLETE
 ```
 
 ---
@@ -540,49 +538,56 @@ JTBD-104-SPEC-001 (Agent-Aware Session Management)
 
 **Prerequisites: All JTBD-102, JTBD-101, and JTBD-103 specs must be completed first.**
 
-- [ ] P2: Update SessionState interface to include agent information
-  - [ ] P2: Add optional `agent: AgentType` field to SessionState
-  - [ ] P2: Add optional `printMode: boolean` field to SessionState (tracks if `-p` was used)
-  - [ ] P2: Update src/domain/types.ts with new fields
+ - [x] P2: Update SessionState interface to include agent information
+   - [x] P2: Add optional `agent: AgentType` field to SessionState
+   - [x] P2: Add optional `printMode: boolean` field to SessionState (tracks if `-p` was used)
+   - [x] P2: Update src/domain/types.ts with new fields
 
-- [ ] P2: Update SessionsFile interface with version field
-  - [ ] P2: Add `version: number` field (set to 1 for first version)
-  - [ ] P2: Update src/domain/types.ts
+ - [x] P2: Update SessionsFile interface with version field
+   - [x] P2: Add `version: number` field (set to 1 for first version)
+   - [x] P2: Update src/domain/types.ts
 
-- [ ] P2: Implement lazy migration for existing sessions
-  - [ ] P2: In readSessionsFile(), check for version field
-  - [ ] P2: If version missing or old, set default agent to "opencode" for all existing sessions
-  - [ ] P2: Set printMode to undefined for existing sessions (unknown)
+ - [x] P2: Implement lazy migration for existing sessions
+   - [x] P2: In readSessionsFile(), check for version field
+   - [x] P2: If version missing or old, set default agent to "opencode" for all existing sessions
+   - [x] P2: Set printMode to undefined for existing sessions (unknown)
 
-- [ ] P2: Update runHandler to capture agent in SessionState
-  - [ ] P2: Include agent type when creating SessionState after each iteration
-  - [ ] P2: Include printMode setting when creating SessionState
+ - [x] P2: Update runHandler to capture agent in SessionState
+   - [x] P2: Include agent type when creating SessionState after each iteration
+   - [x] P2: Include printMode setting when creating SessionState
 
-- [ ] P2: Update inspectHandler for agent-aware export routing
-  - [ ] P2: InspectEntry should include agent and printMode fields
-  - [ ] P2: Route each session export to correct agent adapter based on session.agent
-  - [ ] P2: If agent unavailable during inspection, log warning and skip that session
+ - [x] P2: Update inspectHandler for agent-aware export routing
+   - [x] P2: InspectEntry should include agent and printMode fields
+   - [x] P2: Route each session export to correct agent adapter based on session.agent
+   - [x] P2: If agent unavailable during inspection, log warning and skip that session
 
-- [ ] P2: Add graceful degradation during inspection
-  - [ ] P2: When exporting session with unknown/ unavailable agent:
-    - Log warning: "Skipping session {sessionId}: agent {agent} not available"
-    - Continue processing other sessions
-    - Include warning in final inspect output summary
+ - [x] P2: Add graceful degradation during inspection
+   - [x] P2: When exporting session with unknown/ unavailable agent:
+     - Log warning: "Skipping session {sessionId}: agent {agent} not available"
+     - Continue processing other sessions
+     - Include warning in final inspect output summary
 
-- [ ] P2: Update writeSessionsFile to include version field
-  - [ ] P2: On write, set version: 1
-  - [ ] P2: Maintain backward compatibility with older readers
+ - [x] P2: Update writeSessionsFile to include version field
+   - [x] P2: On write, set version: 1
+   - [x] P2: Maintain backward compatibility with older readers
 
-- [ ] P2: Include agent info in InspectEntry output
-  - [ ] P2: Add `agent: AgentType` field to InspectEntry
-  - [ ] P2: Add `printMode?: boolean` field to InspectEntry
-  - [ ] P2: Update inspect.json schema documentation
+ - [x] P2: Include agent info in InspectEntry output
+   - [x] P2: Add `agent: AgentType` field to InspectEntry
+   - [x] P2: Add `printMode?: boolean` field to InspectEntry
+   - [x] P2: Update inspect.json schema documentation
 
 ### Implementation Notes
 - Existing sessions without agent field should default to "opencode" (lazy migration)
 - inspect.json should include agent info for each session for debugging/reproducibility
 - Consider adding validation that session.agent matches current selected agent during export
 - Print mode stored per-session allows replay with same settings
+
+### Learnings
+- Agent field is now tracked per session
+- Lazy migration defaults old sessions to OpenCode agent
+- Inspect handler routes exports to correct agent adapter
+- Version field enables future schema migrations
+- All 84 tests pass after implementation
 
 ---
 
