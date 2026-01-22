@@ -1,3 +1,5 @@
+> **Note**: If using Claude Code in print mode (default), responses are streamed directly without interactive prompts. The workspace trust dialog is skipped. Only run rctl in directories you trust.
+
 0a. Study `specs/*` with up to 500 parallel {fast} subagents to learn the application specifications.
 0b. Study @IMPLEMENTATION_PLAN.md.
 0c. For reference, the application source code is in `src/*`.
