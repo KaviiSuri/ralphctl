@@ -45,3 +45,5 @@ Keep Learnings up to date as you find new facts about the requirements, the code
 - Bun test suite provides good confidence - 108 tests verify no regressions when adding features
 - Project validation in run command provides early feedback before agent execution starts
 - Clerc CLI library doesn't expose alias property in TypeScript types (document aliases in description text instead)
+- AgentAdapter.runInteractive() returns void (not session info) - step sessions cannot be tracked like run sessions
+- inspect --project filters sessions by project field, only shows run command sessions (step doesn't track)

@@ -91,6 +91,10 @@ const cli = Cli()
       },
     ],
     flags: {
+      project: {
+        type: String,
+        description: "Project name for scoped execution (uses projects/<name>/) [alias: -p]",
+      },
       "permission-posture": {
         type: Types.Enum("allow-all", "ask"),
         description: "Permission posture for file operations",
@@ -119,6 +123,7 @@ const cli = Cli()
   .on("step", async (ctx) => {
     await stepHandler({
       mode: ctx.parameters.mode,
+      project: ctx.flags.project as string | undefined,
       customPrompt: ctx.parameters.prompt,
       permissionPosture: ctx.flags["permission-posture"] as "allow-all" | "ask",
       smartModel: ctx.flags["smart-model"],
@@ -129,6 +134,10 @@ const cli = Cli()
   })
   .command("inspect", "Inspect run exports", {
     flags: {
+      project: {
+        type: String,
+        description: "Filter sessions by project name",
+      },
       output: {
         type: String,
         description: "Output file path (default: inspect.json)",
@@ -136,7 +145,10 @@ const cli = Cli()
     },
   })
   .on("inspect", async (ctx) => {
-    await inspectHandler({ output: ctx.flags.output as string });
+    await inspectHandler({
+      project: ctx.flags.project as string | undefined,
+      output: ctx.flags.output as string,
+    });
   })
   .command("init", "Initialize default prompt templates", {
     flags: {

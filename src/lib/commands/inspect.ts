@@ -7,13 +7,26 @@ import type { SessionState } from "../../domain/types.js";
 
 const DEFAULT_OUTPUT_FILE = "inspect.json";
 
-export async function inspectHandler(options?: { output?: string }): Promise<void> {
+export async function inspectHandler(options?: { project?: string; output?: string }): Promise<void> {
   const outputFile = options?.output ?? DEFAULT_OUTPUT_FILE;
+  const projectFilter = options?.project;
 
-  const sessions = await readSessionsFile();
+  const allSessions = await readSessionsFile();
 
-  if (sessions.length === 0) {
+  // Filter sessions by project if specified
+  const sessions = projectFilter
+    ? allSessions.filter(s => s.project === projectFilter)
+    : allSessions;
+
+  if (allSessions.length === 0) {
     console.log("No sessions found in .ralphctl/ralph-sessions.json");
+    await writeFile(outputFile, JSON.stringify([], null, 2));
+    return;
+  }
+
+  if (sessions.length === 0 && projectFilter) {
+    console.log(`No sessions found for project '${projectFilter}'`);
+    console.log(`\nTip: Run 'ralphctl run plan --project ${projectFilter}' to start a new session.`);
     await writeFile(outputFile, JSON.stringify([], null, 2));
     return;
   }
