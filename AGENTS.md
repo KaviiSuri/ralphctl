@@ -56,3 +56,6 @@ Keep Learnings up to date as you find new facts about the requirements, the code
 - fs.access() with constants.W_OK verifies directory writability after creation
 - Semantic field naming matters for API clarity: "ready" vs "created" better represents idempotent operations
 - Edge case handling: check if parent exists as file instead of directory using statSync().isDirectory()
+- fs.mkdir with recursive: true creates parent directories automatically (projects/ created when making projects/<name>/specs/)
+- Distinguishing new vs partial structure completion: isNew flag indicates whether project folder existed before operation
+- Node.js error codes for filesystem operations: EACCES/EPERM (permissions), ENOSPC (disk space)
