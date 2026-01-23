@@ -43,3 +43,5 @@ Keep Learnings up to date as you find new facts about the requirements, the code
 - String replacement with replaceAll() is simple and effective for placeholder resolution
 - Mock.module in Bun tests affects all tests globally - mocks must implement the same logic as real code to avoid test interference
 - Bun test suite provides good confidence - 108 tests verify no regressions when adding features
+- Project validation in run command provides early feedback before agent execution starts
+- Clerc CLI library doesn't expose alias property in TypeScript types (document aliases in description text instead)
