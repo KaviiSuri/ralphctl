@@ -29,13 +29,9 @@ You are helping the user create a new project folder for ralphctl.
    - \`projects/$1/\`
    - \`projects/$1/specs/\`
 
-5. **Generate template files** in \`projects/$1/\`:
-   - \`01-research.md\` - Research template with sections for problem statement, existing solutions, constraints, open questions
-   - \`02-prd.md\` - PRD template with sections for overview, goals, non-goals, user stories
-   - \`03-jtbd.md\` - JTBD template with placeholder for high-level jobs
-   - \`04-tasks.md\` - Tasks template with placeholder for granular tasks
-   - \`05-hld.md\` - HLD template with sections for architecture, components, data flow
-   - \`IMPLEMENTATION_PLAN.md\` - Empty implementation plan
+5. **Generate ONLY** \`IMPLEMENTATION_PLAN.md\` with placeholder content:
+   - Do NOT create 01-research.md, 02-prd.md, 03-jtbd.md, 04-tasks.md, 05-hld.md
+   - Those files will be created by their respective commands (/project:research, /project:prd, etc.)
 
 6. **Print success message**:
 \`\`\`
@@ -44,11 +40,6 @@ You are helping the user create a new project folder for ralphctl.
 Folder structure:
   projects/$1/
   ├── specs/
-  ├── 01-research.md
-  ├── 02-prd.md
-  ├── 03-jtbd.md
-  ├── 04-tasks.md
-  ├── 05-hld.md
   └── IMPLEMENTATION_PLAN.md
 
 Next step: Run \`/project:research $1\` to start capturing research
@@ -62,7 +53,7 @@ argument-hint: <project-name>
 
 # Capture Project Research
 
-You are helping the user document research for a project.
+You are helping the user document research for a project through conversation.
 
 ## Instructions
 
@@ -72,21 +63,28 @@ You are helping the user document research for a project.
    - If \`projects/$1/\` doesn't exist, error: "Project '$1' not found. Run \`/project:new $1\` first."
 
 3. **Check for existing research**:
-   - If \`projects/$1/01-research.md\` exists, ask: "(A)ppend, (R)eplace, or (C)ancel?"
-   - Append: Add to end of file
-   - Replace: Overwrite entire file
+   - If \`projects/$1/01-research.md\` exists, read it first and ask: "(A)ppend, (R)eplace, or (C)ancel?"
+   - Append: Continue conversation, add to end
+   - Replace: Start fresh, overwrite entire file
    - Cancel: Stop without changes
 
-4. **Capture research sections** through conversation:
+4. **CONVERSATE FIRST, WRITE LAST**:
+   - Ask questions to gather information
+   - Discuss findings and implications
+   - Only write the file after all questions are resolved
+   - Do NOT write a file immediately when the command is called
+
+5. **Capture research sections** through conversation:
    - **Problem Statement**: What problem are we solving? Why does it matter?
    - **Research Sources**: What existing solutions, docs, or tools did we review?
    - **Constraints**: Technical limitations, business requirements, timeline constraints
    - **Open Questions**: What's still unclear or needs investigation?
    - **Key Decisions** (optional): Any early decisions made during research
 
-5. **Save to** \`projects/$1/01-research.md\` in markdown format with clear section headers
+6. **Save to** \`projects/$1/01-research.md\` in markdown format with clear section headers
+   - This is the FINAL step, after conversation is complete
 
-6. **Print next step**:
+7. **Print next step**:
 \`\`\`
 ✓ Research saved to: projects/$1/01-research.md
 
@@ -101,7 +99,7 @@ argument-hint: <project-name>
 
 # Create Product Requirements Document
 
-You are helping the user create a PRD (Product Requirements Document).
+You are helping the user create a PRD (Product Requirements Document) through conversation.
 
 ## Instructions
 
@@ -115,9 +113,18 @@ You are helping the user create a PRD (Product Requirements Document).
    - If missing, warn: "Research file not found. It's recommended to run \`/project:research $1\` first, but you can proceed without it."
 
 4. **Check for existing PRD**:
-   - If \`projects/$1/02-prd.md\` exists, ask: "(A)ppend, (R)eplace, or (C)ancel?"
+   - If \`projects/$1/02-prd.md\` exists, read it first and ask: "(A)ppend, (R)eplace, or (C)ancel?"
+   - Append: Continue conversation, add to end
+   - Replace: Start fresh, overwrite entire file
+   - Cancel: Stop without changes
 
-5. **Capture PRD sections** through conversation:
+5. **CONVERSATE FIRST, WRITE LAST**:
+   - Ask questions to understand what we're building
+   - Discuss goals, non-goals, and user stories
+   - Only write the file after all questions are resolved
+   - Do NOT write a file immediately when the command is called
+
+6. **Capture PRD sections** through conversation:
    - **Overview**: Brief description of what we're building
    - **Goals**: Numbered list of what we want to achieve
    - **Non-Goals**: Numbered list of what we're explicitly NOT doing
@@ -126,14 +133,15 @@ You are helping the user create a PRD (Product Requirements Document).
      - Minimum 1 user story required
      - Validate completeness before saving
 
-6. **Validate before saving**:
+7. **Validate before saving**:
    - At least 1 goal exists
    - At least 1 user story with acceptance criteria
    - No empty sections
 
-7. **Save to** \`projects/$1/02-prd.md\`
+8. **Save to** \`projects/$1/02-prd.md\`
+   - This is the FINAL step, after conversation is complete
 
-8. **Print next step**:
+9. **Print next step**:
 \`\`\`
 ✓ PRD saved to: projects/$1/02-prd.md
 
@@ -148,7 +156,7 @@ argument-hint: <project-name>
 
 # Create Jobs to Be Done (JTBD)
 
-You are helping the user break down the PRD into 2-5 high-level jobs.
+You are helping the user break down the PRD into 2-5 high-level jobs through conversation.
 
 ## What is a JTBD?
 
@@ -171,9 +179,18 @@ A "Job to Be Done" is a high-level user capability or goal. It's more granular t
    - If missing, warn but allow proceeding
 
 4. **Check for existing JTBD file**:
-   - If \`projects/$1/03-jtbd.md\` exists, ask: "(A)ppend, (R)eplace, or (C)ancel?"
+   - If \`projects/$1/03-jtbd.md\` exists, read it first and ask: "(A)ppend, (R)eplace, or (C)ancel?"
+   - Append: Continue conversation, add to end
+   - Replace: Start fresh, overwrite entire file
+   - Cancel: Stop without changes
 
-5. **Guide JTBD creation**:
+5. **CONVERSATE FIRST, WRITE LAST**:
+   - Ask questions to understand the breakdown
+   - Discuss each JTBD's scope and success criteria
+   - Only write the file after all JTBDs are defined
+   - Do NOT write a file immediately when the command is called
+
+6. **Guide JTBD creation**:
    - Suggest 2-5 JTBDs based on PRD goals
    - For each JTBD capture:
      - **JTBD-NNN**: Title (sequential numbering: 001, 002, etc.)
@@ -181,14 +198,15 @@ A "Job to Be Done" is a high-level user capability or goal. It's more granular t
      - **Context**: Background, constraints, scope
      - **Success Criteria**: Measurable outcomes for this job
 
-6. **Validate JTBDs**:
+7. **Validate JTBDs**:
    - Each JTBD should be distinct and non-overlapping
    - Each should pass the "one job without 'and'" test (not too broad)
    - Should map back to PRD goals
 
-7. **Save to** \`projects/$1/03-jtbd.md\` with numbered sections
+8. **Save to** \`projects/$1/03-jtbd.md\` with numbered sections
+   - This is the FINAL step, after conversation is complete
 
-8. **Print next step**:
+9. **Print next step**:
 \`\`\`
 ✓ JTBD saved to: projects/$1/03-jtbd.md
 
@@ -203,7 +221,7 @@ argument-hint: <project-name>
 
 # Create Task Breakdown
 
-You are helping the user decompose JTBDs into granular, implementable tasks.
+You are helping the user decompose JTBDs into granular, implementable tasks through conversation.
 
 ## Instructions
 
@@ -216,19 +234,31 @@ You are helping the user decompose JTBDs into granular, implementable tasks.
    - Read \`projects/$1/03-jtbd.md\` (error if missing)
    - Parse JTBD numbering (JTBD-001, JTBD-002, etc.)
 
-4. **For each JTBD, create tasks**:
+4. **Check for existing tasks file**:
+   - If \`projects/$1/04-tasks.md\` exists, read it first and ask: "(A)ppend, (R)eplace, or (C)ancel?"
+   - Append: Continue conversation, add to end
+   - Replace: Start fresh, overwrite entire file
+   - Cancel: Stop without changes
+
+5. **CONVERSATE FIRST, WRITE LAST**:
+   - Ask questions to understand task breakdown
+   - Discuss dependencies and implementation order
+   - Only write the file after all tasks are defined
+   - Do NOT write a file immediately when the command is called
+
+6. **For each JTBD, create tasks**:
    - **Task ID format**: \`NNN-MMM\` where NNN=JTBD number, MMM=task number
      - Example: JTBD-001 → tasks 001-001, 001-002, 001-003
    - **Task description**: One sentence without 'and' (enforce granularity)
    - **Dependencies**: List task IDs this depends on, or "None"
 
-5. **Validate tasks**:
+7. **Validate tasks**:
    - Task IDs follow format \`NNN-MMM\`
    - Descriptions are single, clear sentences
    - Dependencies reference valid task IDs
    - No circular dependencies
 
-6. **Generate three outputs**:
+8. **Generate three outputs**:
 
    **A. ASCII Dependency Graph**:
    \`\`\`
@@ -249,9 +279,10 @@ You are helping the user decompose JTBDs into granular, implementable tasks.
    Wave 3: 002-001, 002-002
    \`\`\`
 
-7. **Save to** \`projects/$1/04-tasks.md\` with all three outputs
+9. **Save to** \`projects/$1/04-tasks.md\` with all three outputs
+   - This is the FINAL step, after conversation is complete
 
-8. **Print next step**:
+10. **Print next step**:
 \`\`\`
 ✓ Tasks saved to: projects/$1/04-tasks.md
 
@@ -268,7 +299,7 @@ argument-hint: <project-name>
 
 # Create High-Level Design (Optional)
 
-You are helping the user document high-level design decisions.
+You are helping the user document high-level design decisions through conversation.
 
 **Note**: This step is optional. You can skip to \`/project:specs\` if architectural decisions are straightforward.
 
@@ -284,9 +315,18 @@ You are helping the user document high-level design decisions.
    - Warn if either is missing, allow proceeding
 
 4. **Check for existing HLD**:
-   - If \`projects/$1/05-hld.md\` exists, ask: "(A)ppend, (R)eplace, or (C)ancel?"
+   - If \`projects/$1/05-hld.md\` exists, read it first and ask: "(A)ppend, (R)eplace, or (C)ancel?"
+   - Append: Continue conversation, add to end
+   - Replace: Start fresh, overwrite entire file
+   - Cancel: Stop without changes
 
-5. **Capture HLD sections**:
+5. **CONVERSATE FIRST, WRITE LAST**:
+   - Ask questions to understand design decisions
+   - Discuss architecture, components, and trade-offs
+   - Only write the file after design is clarified
+   - Do NOT write a file immediately when the command is called
+
+6. **Capture HLD sections**:
    - **Overview**: Brief architecture summary
    - **Components**: Major system components and their responsibilities
    - **Data Flow**: How data moves through the system
@@ -295,11 +335,12 @@ You are helping the user document high-level design decisions.
    - **Dependencies**: External libraries, services, frameworks
    - **Open Questions**: Unresolved architectural concerns
 
-6. **Link to JTBDs/Tasks**: Reference which components support which JTBDs
+7. **Link to JTBDs/Tasks**: Reference which components support which JTBDs
 
-7. **Save to** \`projects/$1/05-hld.md\`
+8. **Save to** \`projects/$1/05-hld.md\`
+   - This is the FINAL step, after conversation is complete
 
-8. **Print next step**:
+9. **Print next step**:
 \`\`\`
 ✓ HLD saved to: projects/$1/05-hld.md
 
@@ -315,6 +356,8 @@ argument-hint: <project-name>
 # Generate Spec Files
 
 You are generating individual spec files for each task using isolated subagents.
+
+**Note**: This command spawns multiple subagents. Confirm before proceeding.
 
 ## Instructions
 
@@ -332,7 +375,12 @@ You are generating individual spec files for each task using isolated subagents.
    - Extract task descriptions
    - Extract dependencies
 
-5. **For each task, spawn isolated subagent** (Sonnet model):
+5. **CONFIRM before generating**:
+   - Show summary: "Found X tasks. This will spawn X subagents to generate spec files."
+   - Ask: "Proceed with spec generation? (Y/n)"
+   - Only proceed if user confirms
+
+6. **For each task, spawn isolated subagent** (Sonnet model):
    - **Critical**: Subagent reads ONLY from filesystem artifacts (01-research.md, 02-prd.md, 03-jtbd.md, 04-tasks.md, 05-hld.md if present)
    - **No conversation context** - validates artifacts are complete
    - Generate spec file with:
@@ -343,17 +391,17 @@ You are generating individual spec files for each task using isolated subagents.
      - Implementation notes (technical guidance)
      - Dependencies (from task breakdown)
 
-6. **Create spec files**:
+7. **Create spec files**:
    - Save to \`projects/$1/specs/jtbd-NNN-task-MMM.md\`
    - Show progress: "Generating spec N/TOTAL..."
    - Continue on error (log failed specs)
 
-7. **Create/update IMPLEMENTATION_PLAN.md**:
+8. **Create/update IMPLEMENTATION_PLAN.md**:
    - List all tasks in wave order
    - Mark status (Pending/In Progress/Complete)
    - Include dependencies and blocks
 
-8. **Print completion**:
+9. **Print completion**:
 \`\`\`
 ✓ Generated X specs in: projects/$1/specs/
 ✓ Created/updated: projects/$1/IMPLEMENTATION_PLAN.md

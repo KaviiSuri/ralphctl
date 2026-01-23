@@ -10,6 +10,8 @@
 
 Create a command that automatically generates one spec file per task defined in `04-tasks.md`. The command spawns isolated subagents (using Sonnet model) for each spec, where each subagent reads ONLY from filesystem artifacts (01-research.md, 02-prd.md, 03-jtbd.md, 04-tasks.md) with no access to conversation context. This validates that the planning artifacts are self-contained and complete enough for spec generation.
 
+**Critical behavior**: Since this command spawns multiple subagents, it must CONFIRM with the user BEFORE generating. Show a summary like "Found X tasks. This will spawn X subagents to generate spec files." and ask "Proceed with spec generation? (Y/n)". Only proceed if user confirms.
+
 ---
 
 ## Scope

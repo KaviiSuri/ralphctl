@@ -7,6 +7,8 @@ argument-hint: <project-name>
 
 You are generating individual spec files for each task using isolated subagents.
 
+**Note**: This command spawns multiple subagents. Confirm before proceeding.
+
 ## Instructions
 
 1. **Get project name**: Use $1 as the project name. If missing, ask the user.
@@ -23,7 +25,12 @@ You are generating individual spec files for each task using isolated subagents.
    - Extract task descriptions
    - Extract dependencies
 
-5. **For each task, spawn isolated subagent** (Sonnet model):
+5. **CONFIRM before generating**:
+   - Show summary: "Found X tasks. This will spawn X subagents to generate spec files."
+   - Ask: "Proceed with spec generation? (Y/n)"
+   - Only proceed if user confirms
+
+6. **For each task, spawn isolated subagent** (Sonnet model):
    - **Critical**: Subagent reads ONLY from filesystem artifacts (01-research.md, 02-prd.md, 03-jtbd.md, 04-tasks.md, 05-hld.md if present)
    - **No conversation context** - validates artifacts are complete
    - Generate spec file with:
@@ -34,17 +41,17 @@ You are generating individual spec files for each task using isolated subagents.
      - Implementation notes (technical guidance)
      - Dependencies (from task breakdown)
 
-6. **Create spec files**:
+7. **Create spec files**:
    - Save to `projects/$1/specs/jtbd-NNN-task-MMM.md`
    - Show progress: "Generating spec N/TOTAL..."
    - Continue on error (log failed specs)
 
-7. **Create/update IMPLEMENTATION_PLAN.md**:
+8. **Create/update IMPLEMENTATION_PLAN.md**:
    - List all tasks in wave order
    - Mark status (Pending/In Progress/Complete)
    - Include dependencies and blocks
 
-8. **Print completion**:
+9. **Print completion**:
 ```
 ✓ Generated X specs in: projects/$1/specs/
 ✓ Created/updated: projects/$1/IMPLEMENTATION_PLAN.md

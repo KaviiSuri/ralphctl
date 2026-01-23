@@ -5,7 +5,7 @@ argument-hint: <project-name>
 
 # Create High-Level Design (Optional)
 
-You are helping the user document high-level design decisions.
+You are helping the user document high-level design decisions through conversation.
 
 **Note**: This step is optional. You can skip to `/project:specs` if architectural decisions are straightforward.
 
@@ -21,9 +21,18 @@ You are helping the user document high-level design decisions.
    - Warn if either is missing, allow proceeding
 
 4. **Check for existing HLD**:
-   - If `projects/$1/05-hld.md` exists, ask: "(A)ppend, (R)eplace, or (C)ancel?"
+   - If `projects/$1/05-hld.md` exists, read it first and ask: "(A)ppend, (R)eplace, or (C)ancel?"
+   - Append: Continue conversation, add to end
+   - Replace: Start fresh, overwrite entire file
+   - Cancel: Stop without changes
 
-5. **Capture HLD sections**:
+5. **CONVERSATE FIRST, WRITE LAST**:
+   - Ask questions to understand design decisions
+   - Discuss architecture, components, and trade-offs
+   - Only write the file after design is clarified
+   - Do NOT write a file immediately when the command is called
+
+6. **Capture HLD sections**:
    - **Overview**: Brief architecture summary
    - **Components**: Major system components and their responsibilities
    - **Data Flow**: How data moves through the system
@@ -32,11 +41,12 @@ You are helping the user document high-level design decisions.
    - **Dependencies**: External libraries, services, frameworks
    - **Open Questions**: Unresolved architectural concerns
 
-6. **Link to JTBDs/Tasks**: Reference which components support which JTBDs
+7. **Link to JTBDs/Tasks**: Reference which components support which JTBDs
 
-7. **Save to** `projects/$1/05-hld.md`
+8. **Save to** `projects/$1/05-hld.md`
+   - This is the FINAL step, after conversation is complete
 
-8. **Print next step**:
+9. **Print next step**:
 ```
 ✓ HLD saved to: projects/$1/05-hld.md
 

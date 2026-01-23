@@ -8,7 +8,9 @@
 
 ## Purpose
 
-Create a Claude Code and OpenCode command (`/project:prd <project-name>`) that guides users through creating a Product Requirements Document (PRD) for their project. The command should prompt for key PRD sections (goals, non-goals, user stories with acceptance criteria), save the content to `02-prd.md`, and inform the user of the next step in the planning workflow.
+Create a Claude Code and OpenCode command (`/project:prd <project-name>`) that guides users through creating a Product Requirements Document (PRD) for their project.
+
+**Critical behavior**: The command is "conversational-first, write-last". The agent should engage in discussion with the user, ask questions about goals and user stories, explore the requirements - and ONLY write the `02-prd.md` file as the FINAL step after all questions are resolved. The file must NOT be written immediately when the command is invoked.
 
 ---
 
@@ -75,19 +77,26 @@ The command guides the user through these sections:
 - If `01-research.md` exists, the command should read it and use context to suggest relevant PRD sections
 - Example: research mentions "authentication" → suggest user story about login
 
-### 6. PRD Validation
+### 6. Conversational-First, Write-Last Behavior
+- Agent engages in conversation BEFORE writing any file
+- Asks questions about goals, non-goals, user stories
+- Discusses and refines requirements
+- ONLY writes `02-prd.md` after conversation is complete
+- File is NOT written immediately when command is invoked
+
+### 7. PRD Validation
 Before saving, validate:
 - Goals section is not empty
 - At least one user story exists
 - Each user story has acceptance criteria
 - If validation fails, prompt user to add missing content
 
-### 7. File Writing
-- Writes content to `projects/<project-name>/02-prd.md`
-- If file already exists, prompts user: "PRD file already exists. Overwrite or append?"
+### 8. File Writing
+- Writes content to `projects/<project-name>/02-prd.md` as the FINAL step
+- If file already exists, READ IT FIRST then prompts user: "PRD file already exists. Overwrite or append?"
 - Uses markdown format with clear heading structure
 
-### 8. Next Step Messaging
+### 9. Next Step Messaging
 After successful save, prints:
 ```
 PRD created successfully at projects/<project-name>/02-prd.md
@@ -95,7 +104,7 @@ PRD created successfully at projects/<project-name>/02-prd.md
 Next: Run `/project:jtbd <project-name>` to break into jobs to be done
 ```
 
-### 9. Error Handling
+### 10. Error Handling
 - Invalid project name (doesn't exist) → clear error message
 - Write failure → show error with path that failed
 - User cancellation → clean exit with message

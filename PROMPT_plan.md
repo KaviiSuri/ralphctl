@@ -16,3 +16,7 @@ ULTIMATE GOAL: Add project-scoped Ralph loops to ralphctl. This includes:
 4. JTBD-003: Project-scoped execution (--project flag for run/step/inspect, {project} placeholder, session tagging)
 
 Consider the dependency graph in projects/project-scoped-ralph/04-tasks.md for implementation order. If an element is missing, search first to confirm it doesn't exist, then if needed author the specification. Document the plan in @projects/project-scoped-ralph/IMPLEMENTATION_PLAN.md using a subagent.
+
+COMPLETION: When you have finished analyzing the codebase and updating @projects/project-scoped-ralph/IMPLEMENTATION_PLAN.md with a complete prioritized task list, output exactly:
+<promise>COMPLETE</promise>
+This signals the loop to stop. Do not output this marker until the planning work is genuinely complete.

@@ -10,6 +10,8 @@
 
 Provide a guided conversational command that helps users document high-level design decisions for their project. This is an optional stage between task breakdown and spec generation, allowing users to think through architecture, components, data flow, and technical decisions before implementation begins.
 
+**Critical behavior**: The command is "conversational-first, write-last". The agent should engage in discussion with the user about design decisions, explore architecture - and ONLY write the `05-hld.md` file as the FINAL step after all questions are resolved. The file must NOT be written immediately when the command is invoked.
+
 ---
 
 ## Scope

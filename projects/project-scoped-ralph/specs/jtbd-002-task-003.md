@@ -8,7 +8,9 @@
 
 ## Purpose
 
-Create a command that analyzes the PRD and helps the user break it into high-level "Jobs to Be Done" (JTBDs). Each JTBD represents a distinct user goal or major capability area. The command saves the output to `03-jtbd.md` and prints the next step.
+Create a command that analyzes the PRD and helps the user break it into high-level "Jobs to Be Done" (JTBDs). Each JTBD represents a distinct user goal or major capability area.
+
+**Critical behavior**: The command is "conversational-first, write-last". The agent should engage in discussion with the user about JTBD breakdown, explore the goals - and ONLY write the `03-jtbd.md` file as the FINAL step after all questions are resolved. The file must NOT be written immediately when the command is invoked.
 
 ---
 

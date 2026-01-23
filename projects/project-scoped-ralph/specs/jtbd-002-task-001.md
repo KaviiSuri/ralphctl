@@ -8,7 +8,9 @@
 
 ## Purpose
 
-This task creates the `/project:research` command that guides users through capturing initial research and context for a project. The command provides an interactive conversation that helps users document problem statements, existing solutions, constraints, and open questions, saving the output to `01-research.md` in the project folder.
+This task creates the `/project:research` command that guides users through capturing initial research and context for a project.
+
+**Critical behavior**: The command is "conversational-first, write-last". The agent should engage in discussion with the user, ask questions, explore the topic - and ONLY write the `01-research.md` file as the FINAL step after all questions are resolved. The file must NOT be written immediately when the command is invoked.
 
 ---
 
@@ -59,9 +61,16 @@ This task creates the `/project:research` command that guides users through capt
 - If `projects/` folder doesn't exist at repo root, create it
 - No error if folder already exists
 
-### AC-4: Research File Creation
-- Create or update `projects/<name>/01-research.md`
-- If file exists, agent offers to:
+### AC-4: Conversational-First, Write-Last Behavior
+- Agent engages in conversation BEFORE writing any file
+- Asks questions to gather information
+- Discusses findings and implications
+- ONLY writes `01-research.md` after conversation is complete
+- File is NOT written immediately when command is invoked
+
+### AC-5: Research File Creation
+- Create or update `projects/<name>/01-research.md` as the FINAL step
+- If file exists, READ IT FIRST then agent offers to:
   - Append new research
   - Replace existing research
   - Cancel operation
@@ -72,7 +81,7 @@ This task creates the `/project:research` command that guides users through capt
   - Open Questions
   - Optional: Key Decisions section
 
-### AC-5: Interactive Prompts
+### AC-6: Interactive Prompts
 - Agent guides user through each section with focused questions:
   - "What problem are you trying to solve?"
   - "What existing solutions or prior art have you found?"
@@ -81,7 +90,7 @@ This task creates the `/project:research` command that guides users through capt
 - Agent validates that each section has substantive content
 - Agent suggests when research is sufficient to move forward
 
-### AC-6: Next Step Messaging
+### AC-7: Next Step Messaging
 - After saving file, print clear message:
   ```
   Research saved to: projects/<name>/01-research.md
@@ -89,7 +98,7 @@ This task creates the `/project:research` command that guides users through capt
   Next step: Run `/project:prd <name>` to define requirements
   ```
 
-### AC-7: Error Handling
+### AC-8: Error Handling
 - Invalid project name: Clear error with valid format examples
 - File system errors: Descriptive message with troubleshooting hints
 - Permission errors: Suggest checking folder permissions

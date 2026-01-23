@@ -5,7 +5,7 @@ argument-hint: <project-name>
 
 # Create Task Breakdown
 
-You are helping the user decompose JTBDs into granular, implementable tasks.
+You are helping the user decompose JTBDs into granular, implementable tasks through conversation.
 
 ## Instructions
 
@@ -18,19 +18,31 @@ You are helping the user decompose JTBDs into granular, implementable tasks.
    - Read `projects/$1/03-jtbd.md` (error if missing)
    - Parse JTBD numbering (JTBD-001, JTBD-002, etc.)
 
-4. **For each JTBD, create tasks**:
+4. **Check for existing tasks file**:
+   - If `projects/$1/04-tasks.md` exists, read it first and ask: "(A)ppend, (R)eplace, or (C)ancel?"
+   - Append: Continue conversation, add to end
+   - Replace: Start fresh, overwrite entire file
+   - Cancel: Stop without changes
+
+5. **CONVERSATE FIRST, WRITE LAST**:
+   - Ask questions to understand task breakdown
+   - Discuss dependencies and implementation order
+   - Only write the file after all tasks are defined
+   - Do NOT write a file immediately when the command is called
+
+6. **For each JTBD, create tasks**:
    - **Task ID format**: `NNN-MMM` where NNN=JTBD number, MMM=task number
      - Example: JTBD-001 → tasks 001-001, 001-002, 001-003
    - **Task description**: One sentence without 'and' (enforce granularity)
    - **Dependencies**: List task IDs this depends on, or "None"
 
-5. **Validate tasks**:
+7. **Validate tasks**:
    - Task IDs follow format `NNN-MMM`
    - Descriptions are single, clear sentences
    - Dependencies reference valid task IDs
    - No circular dependencies
 
-6. **Generate three outputs**:
+8. **Generate three outputs**:
 
    **A. ASCII Dependency Graph**:
    ```
@@ -51,9 +63,10 @@ You are helping the user decompose JTBDs into granular, implementable tasks.
    Wave 3: 002-001, 002-002
    ```
 
-7. **Save to** `projects/$1/04-tasks.md` with all three outputs
+9. **Save to** `projects/$1/04-tasks.md` with all three outputs
+   - This is the FINAL step, after conversation is complete
 
-8. **Print next step**:
+10. **Print next step**:
 ```
 ✓ Tasks saved to: projects/$1/04-tasks.md
 

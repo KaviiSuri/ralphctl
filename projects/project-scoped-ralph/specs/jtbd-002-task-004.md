@@ -9,6 +9,8 @@ JTBD-002: Guided Planning Workflow
 ## Purpose
 Create a Claude Code/OpenCode command that helps users break down their Jobs to Be Done (JTBDs) into granular, atomic tasks with clear dependencies, a visual dependency graph, and a linearized implementation order.
 
+**Critical behavior**: The command is "conversational-first, write-last". The agent should engage in discussion with the user about task breakdown, discuss dependencies - and ONLY write the `04-tasks.md` file as the FINAL step after all questions are resolved. The file must NOT be written immediately when the command is invoked.
+
 ## Context
 After users have defined their high-level JTBDs in `03-jtbd.md`, they need to decompose each JTBD into granular work units that:
 - Pass the "one sentence without 'and'" test

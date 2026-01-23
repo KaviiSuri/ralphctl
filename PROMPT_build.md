@@ -8,7 +8,9 @@
 2. After implementing functionality or resolving problems, run the tests for that unit of code that was improved. If functionality is missing then it's your job to add it as per the application specifications. Ultrathink.
 3. When you discover issues, immediately update @projects/project-scoped-ralph/IMPLEMENTATION_PLAN.md with your findings using a subagent. When resolved, update and remove the item.
 4. When the tests pass, update @projects/project-scoped-ralph/IMPLEMENTATION_PLAN.md, then `git add -A` then `git commit` with a message describing the changes. After the commit, `git push`.
-5. Stop after the spec is done. You do not need to keep going to other specs.
+5. Stop after the spec is done. You do not need to keep going to other specs. When the spec is complete (tests pass, committed, pushed), output exactly:
+<promise>COMPLETE</promise>
+This signals the loop to stop. Do not output this marker until the work is genuinely complete.
 
 99999. Important: When authoring documentation, capture the why — tests and implementation importance.
 999999. Important: Single sources of truth, no migrations/adapters. If tests unrelated to your work fail, resolve them as part of the increment.
