@@ -4,7 +4,7 @@
 
 This implementation plan tracks work to add project-scoped Ralph loops to ralphctl, enabling multiple independent feature tracks with their own specs, implementation plans, and progress tracking.
 
-**Current State:** ralphctl v0.0.0 has solid architecture for global (flat) Ralph loops. Project-scoped functionality is in progress with **2 of 23 tasks complete** (foundation layer: session tagging and placeholder resolution).
+**Current State:** ralphctl v0.0.0 has solid architecture for global (flat) Ralph loops. Project-scoped functionality is in progress with **3 of 23 tasks complete** (foundation layer: session tagging, placeholder resolution, and prompt template updates).
 
 **Architecture:** Domain-driven design with adapter pattern, clean separation of concerns, Bun-based execution, and TypeScript throughout.
 
@@ -59,6 +59,31 @@ This implementation plan tracks work to add project-scoped Ralph loops to ralphc
 - Implemented clear error messages when placeholder found without --project flag
 - Supports multiple occurrences of {project} placeholder in same prompt
 - All tests passing, TypeScript type checking validates ResolvePromptOptions correctly
+
+---
+
+#### 003-006: Update Global Prompt Templates
+**Status:** ✅ COMPLETED
+**Priority:** MEDIUM
+**Effort:** Small
+**Description:** Update `ralphctl init` command templates to use `{project}` placeholder for specs and implementation plan paths instead of hardcoded paths.
+**Files Modified:**
+- `src/lib/templates/index.ts` - Updated PLAN_TEMPLATE and BUILD_TEMPLATE to use {project} placeholder
+**Acceptance Criteria:**
+- [x] PROMPT_plan.md template uses `{project}/specs/`
+- [x] PROMPT_plan.md template uses `{project}/IMPLEMENTATION_PLAN.md`
+- [x] PROMPT_build.md template uses `{project}/specs/`
+- [x] PROMPT_build.md template uses `{project}/IMPLEMENTATION_PLAN.md`
+- [x] Works in global mode (resolves to `.`)
+- [x] Works in project mode (resolves to `projects/<name>/`)
+**Dependencies:** 003-004
+**Blocks:** 003-001, 003-002, 003-003
+**Learnings:**
+- Templates now use {project} placeholder which gets resolved by resolvePromptPlaceholders() in src/lib/prompts/resolver.ts
+- When no --project flag: {project} → `.` (global mode)
+- When --project flag: {project} → `projects/<name>` (project mode)
+- All 108 tests passing after changes
+- TypeScript compilation successful
 
 ---
 
@@ -169,24 +194,6 @@ These tasks depend on Wave 1 foundation being complete.
 
 ---
 
-#### 003-006: Update Global Prompt Templates
-**Status:** Not Started
-**Priority:** MEDIUM
-**Effort:** Small
-**Description:** Update `ralphctl init` command templates to use `{project}` placeholder for specs and implementation plan paths instead of hardcoded paths.
-**Files to Modify:**
-- `src/lib/templates/index.ts` - Update PLAN_TEMPLATE and BUILD_TEMPLATE
-**Acceptance Criteria:**
-- [ ] PROMPT_plan.md template uses `{project}/specs/`
-- [ ] PROMPT_plan.md template uses `{project}/IMPLEMENTATION_PLAN.md`
-- [ ] PROMPT_build.md template uses `{project}/specs/`
-- [ ] PROMPT_build.md template uses `{project}/IMPLEMENTATION_PLAN.md`
-- [ ] Works in global mode (resolves to `.`)
-- [ ] Works in project mode (resolves to `projects/<name>/`)
-**Dependencies:** 003-004
-**Blocks:** 003-001, 003-002, 003-003
-
----
 
 #### 004-006: Install Command Files
 **Status:** Not Started
@@ -466,8 +473,9 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 - [ ] Tags sessions with project name
 - [ ] Backward compatible (no flag = global mode)
 - [ ] Clear error if project doesn't exist
-**Dependencies:** 003-004, 003-005, 003-006
+**Dependencies:** ✅ 003-004, ✅ 003-005, ✅ 003-006
 **Blocks:** None (leaf task)
+**Note:** Unblocked - all dependencies (003-004, 003-005, 003-006) now complete
 
 ---
 
@@ -488,8 +496,9 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 - [ ] Tags sessions with project name
 - [ ] Works for both plan and build modes
 - [ ] Backward compatible (no flag = global mode)
-**Dependencies:** 003-004, 003-005, 003-006
+**Dependencies:** ✅ 003-004, ✅ 003-005, ✅ 003-006
 **Blocks:** None (leaf task)
+**Note:** Unblocked - all dependencies (003-004, 003-005, 003-006) now complete
 
 ---
 
@@ -508,53 +517,56 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 - [ ] Unfiltered sessions excluded from project view
 - [ ] Backward compatible (no flag = show all sessions)
 - [ ] Export respects filter (if implemented)
-**Dependencies:** 003-005
+**Dependencies:** ✅ 003-004, ✅ 003-005, ✅ 003-006
 **Blocks:** None (leaf task)
+**Note:** Unblocked - all dependencies (003-004, 003-005, 003-006) now complete
 
 ---
 
 ## Summary
 
 **Total Tasks:** 23
-**Completed:** 2 ✅
+**Completed:** 3 ✅
 **In Progress:** 0
-**Pending:** 21
+**Pending:** 20
 
 **Implementation Waves:**
-- Wave 1: 2 of 4 foundation tasks complete (50% done)
+- Wave 1: 3 of 4 foundation tasks complete (75% done)
   - ✅ 003-005: Session tagging with project name
   - ✅ 003-004: {project} placeholder support in prompts
+  - ✅ 003-006: Update global prompt templates
   - ⏳ 004-001: Detect available CLI tools
   - ⏳ 004-003: Verify repo root
 - Wave 2: 5 tasks (depend on Wave 1)
 - Wave 3: 3 tasks (depend on Wave 2)
 - Wave 4: 7 tasks (depend on Wave 3)
-- Wave 5: 3 tasks (depend on Wave 1) - 003-006 unblocked, can start now
+- Wave 5: 3 tasks (depend on Wave 1) - NOW UNBLOCKED ✅ 003-001, 003-002, 003-003 ready to implement
 
 **Critical Path:**
-✅ 003-005 (session tagging) → ✅ 003-004 (placeholder support) → 003-006 (update templates) → 003-001 (run --project) → user can run project-scoped loops
+✅ 003-005 (session tagging) → ✅ 003-004 (placeholder support) → ✅ 003-006 (update templates) → 003-001 (run --project) → user can run project-scoped loops
 
 **Parallelization Opportunities:**
 - Wave 1: 2 remaining tasks (004-001, 004-003) can be done in parallel
 - Wave 4: All 7 planning commands can be done in parallel after Wave 3
-- Task 003-006 is now unblocked and can be implemented
+- Wave 5: Tasks 003-001, 003-002, 003-003 are now unblocked and can be implemented in parallel
 
 ---
 
 ## Next Steps
 
-1. ✅ ~~Wave 1 foundation tasks (003-005, 003-004)~~ - COMPLETED
+1. ✅ ~~Wave 1 foundation tasks (003-005, 003-004, 003-006)~~ - COMPLETED
 2. **Complete remaining Wave 1 tasks** (004-001, 004-003) - can run in parallel
-3. **Implement 003-006** (Update global prompt templates) - now unblocked
+3. **Implement Wave 5 tasks** (003-001, 003-002, 003-003) - now unblocked, can run in parallel
 4. **Move to Wave 2** once Wave 1 complete
 5. **Implement Wave 3** (folder creation + template generation)
 6. **Create all Wave 4 command files** in parallel
-7. **Complete Wave 5** for project-scoped execution
 
 **Immediate Next Actions:**
 - Task 004-001: Detect available CLI tools (claude/opencode)
 - Task 004-003: Verify repo root with git
-- Task 003-006: Update PROMPT templates to use {project} placeholder
+- Task 003-001: Add --project flag to run command (UNBLOCKED)
+- Task 003-002: Add --project flag to step command (UNBLOCKED)
+- Task 003-003: Add --project flag to inspect command (UNBLOCKED)
 
 **Testing Strategy:**
 - Use bun:test with mock.module() for adapters
@@ -568,4 +580,5 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 ---
 
 **Last Updated:** 2026-01-23
-**Version:** 1.0
+**Version:** 1.1
+**Recent Changes:** Completed 003-006, updated Wave 5 status to unblocked
