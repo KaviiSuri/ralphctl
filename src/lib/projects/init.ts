@@ -726,14 +726,12 @@ export function printInitializationSummary(
     return a.localeCompare(b);
   });
 
-  // Print files with tree characters
+  // Print files with tree characters (all files use ├── since specs/ comes after)
   for (let i = 0; i < sortedFiles.length; i++) {
-    const isLast = i === sortedFiles.length - 1;
-    const treeChar = isLast ? "└──" : "├──";
-    printer(`${treeChar} ${sortedFiles[i]}`);
+    printer(`├── ${sortedFiles[i]}`);
   }
 
-  // Always show specs/ directory at the end
+  // Show specs/ directory at the end (last item uses └──)
   printer("└── specs/\n");
 
   // Next step guidance

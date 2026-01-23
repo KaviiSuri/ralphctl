@@ -59,3 +59,6 @@ Keep Learnings up to date as you find new facts about the requirements, the code
 - fs.mkdir with recursive: true creates parent directories automatically (projects/ created when making projects/<name>/specs/)
 - Distinguishing new vs partial structure completion: isNew flag indicates whether project folder existed before operation
 - Node.js error codes for filesystem operations: EACCES/EPERM (permissions), ENOSPC (disk space)
+- Dependency injection pattern with OutputPrinter type enables testing console.log output without mocking global console
+- Unicode tree characters (├──, └──) work cross-platform for CLI folder structure display
+- File sorting with numeric prefix extraction (parseInt on /^(\d+)-/) provides intuitive ordering for numbered files
