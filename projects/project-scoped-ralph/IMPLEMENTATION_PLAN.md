@@ -41,22 +41,26 @@ This implementation plan tracks work to add project-scoped Ralph loops to ralphc
 **Status:** ✅ COMPLETED
 **Priority:** HIGH (blocks prompt updates)
 **Effort:** Small
-**Description:** Modify prompt resolver to detect `{project}` placeholder and replace with `projects/<name>` when `--project` is used. Error if placeholder exists but no `--project` flag.
+**Description:** Modify prompt resolver to detect `{project}` placeholder and replace with `projects/<name>` when `--project` is used. Resolve to `.` in global mode (no --project flag).
 **Files Modified:**
 - `src/lib/prompts/resolver.ts` - Added `resolvePromptPlaceholders()` function and placeholder detection logic
 - `src/domain/types.ts` - Added `project?: string` to ResolvePromptOptions interface
-- `tests/prompt-resolver.spec.ts` - Added 13 comprehensive tests for placeholder resolution
+- `tests/prompt-resolver.spec.ts` - Added 13 comprehensive tests for placeholder resolution, including global mode fallback
 - `tests/handlers.spec.ts` - Updated mocks to include placeholder resolution
 **Acceptance Criteria:**
 - [x] Detects `{project}` in prompt content
 - [x] Replaces with `projects/<name>` when flag provided
-- [x] Errors if placeholder but no `--project` flag
+- [x] Resolves to `.` when no `--project` flag (global mode fallback)
 - [x] Works with both PROMPT_plan.md and PROMPT_build.md
 - [x] Multiple placeholders handled correctly
 **Dependencies:** None
 **Blocks:** 003-006
 **Learnings:**
-- Implemented clear error messages when placeholder found without --project flag
+- Spec 003-004 AC-3 was corrected to align with spec 003-006 global mode behavior
+- {project} placeholder now correctly resolves to `.` in global mode, not error
+- This is critical for backward compatibility: templates in src/lib/templates/index.ts ALWAYS use {project}
+- Without this fix, templates would fail in global mode; correction enables same templates to work in both global and project modes
+- Implemented clear error messages when placeholder found without --project flag (original incorrect behavior)
 - Supports multiple occurrences of {project} placeholder in same prompt
 - All tests passing, TypeScript type checking validates ResolvePromptOptions correctly
 
@@ -79,10 +83,13 @@ This implementation plan tracks work to add project-scoped Ralph loops to ralphc
 **Dependencies:** 003-004
 **Blocks:** 003-001, 003-002, 003-003
 **Learnings:**
-- Templates now use {project} placeholder which gets resolved by resolvePromptPlaceholders() in src/lib/prompts/resolver.ts
-- When no --project flag: {project} → `.` (global mode)
-- When --project flag: {project} → `projects/<name>` (project mode)
-- All 108 tests passing after changes
+- Architectural design: All templates ALWAYS use {project} placeholder for flexible path resolution
+- Templates now get resolved by resolvePromptPlaceholders() in src/lib/prompts/resolver.ts with smart fallback behavior
+- When no --project flag: {project} → `.` (global mode, resolves to current directory)
+- When --project flag: {project} → `projects/<name>` (project-scoped mode)
+- This allows identical templates to work seamlessly in both global and project modes without duplication
+- Original architectural intent: single template definition works for all execution contexts
+- All 271 tests passing after correction
 - TypeScript compilation successful
 
 ---
@@ -681,6 +688,36 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 
 ---
 
+## Bug Fixes and Corrections
+
+### Issue: {project} Placeholder Error Behavior (2026-01-23)
+
+**Problem Identified:**
+- Spec 003-004 AC-3 incorrectly specified that {project} placeholder should error when no --project flag provided
+- Spec 003-006 correctly specified {project} should resolve to `.` in global mode
+- Implementation was following incorrect spec 003-004 behavior, causing templates to fail in global mode
+
+**Why This Matters:**
+- All templates in src/lib/templates/index.ts ALWAYS use {project} placeholder
+- Without this fix, templates would fail when running `ralphctl run` or `ralphctl init` without --project flag
+- The corrected implementation allows same templates to work seamlessly in both:
+  - Global mode (no --project flag): {project} → `.`
+  - Project mode (with --project flag): {project} → `projects/<name>`
+- This fulfills original architectural intent per spec 003-006 and PRD
+
+**Changes Made:**
+1. Updated src/lib/prompts/resolver.ts: {project} resolves to `.` when no --project flag (global mode fallback)
+2. Updated tests/prompt-resolver.spec.ts: Validate global mode fallback behavior instead of error throwing
+3. Updated tests/handlers.spec.ts: Mock implementations updated to match corrected behavior
+4. Updated spec 003-004: Corrected AC-3, algorithm, and verification steps to align with correct behavior
+
+**Test Results:**
+- All 271 tests passing after fix
+- TypeScript compilation successful
+- Backward compatibility maintained
+
+---
+
 ## Summary
 
 **Total Tasks:** 23
@@ -770,5 +807,34 @@ The project-scoped Ralph loops feature is now fully implemented with all 23 task
 ---
 
 **Last Updated:** 2026-01-23
-**Version:** 1.12
+**Version:** 1.13
 **Recent Changes:** Completed Wave 4 - All 8 planning command tasks (002-001 through 002-008) marked as complete! Command templates already existed in src/lib/templates/commands.ts and were installed via `ralphctl setup` to .claude/commands/ and .opencode/commands/. All prerequisite warning systems and next step messaging already implemented in command templates. All 271 tests passing, TypeScript compilation successful. Total progress: 23 of 23 tasks complete (100%). All waves complete! Project-scoped Ralph loops feature is now fully implemented and ready for use.
+
+---
+
+## Verification Session (2026-01-23)
+
+**Status:** ✅ COMPLETE - All functionality verified and operational
+
+**Verification Results:**
+- All 8 core components implemented and functional:
+  1. ✅ Session tagging with project field (src/domain/types.ts)
+  2. ✅ Placeholder resolution for {project} (src/lib/prompts/resolver.ts)
+  3. ✅ --project flag in run, step, and inspect commands (src/cli.ts)
+  4. ✅ Tool detection (src/lib/tools/detection.ts)
+  5. ✅ Repo verification (src/lib/repo/verification.ts)
+  6. ✅ Command infrastructure (src/lib/command-infrastructure.ts)
+  7. ✅ Project initialization (src/lib/projects/init.ts)
+  8. ✅ Command templates (src/lib/templates/commands.ts)
+
+**Test Results:**
+- ✅ All 271 tests passing
+- ✅ TypeScript compilation successful (no errors)
+- ✅ No regressions detected
+
+**Release:**
+- ✅ Git tag 0.0.28 created and pushed to origin
+- ✅ Tag message: "All project-scoped ralph implementation complete - 271 tests passing"
+
+**Conclusion:**
+The project-scoped Ralph loops feature is fully implemented, tested, and ready for production use. All waves (1-5) are complete with 23/23 tasks finished (100% complete).

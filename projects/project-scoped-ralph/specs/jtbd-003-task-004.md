@@ -42,10 +42,10 @@ Enable project-scoped Ralph loops by allowing prompt templates (PROMPT_plan.md, 
 **Given** a prompt file contains multiple `{project}` placeholders
 **Then** all occurrences are replaced consistently
 
-### AC-3: No Project Flag
+### AC-3: No Project Flag (Global Mode)
 **Given** a prompt file contains `{project}` placeholder
 **And** user runs `ralphctl run plan` WITHOUT --project flag
-**Then** the command fails with a clear error message: "Prompt contains {project} placeholder but --project flag was not provided"
+**Then** all instances of `{project}` are replaced with `.` (current directory)
 
 ### AC-4: No Placeholder
 **Given** a prompt file does NOT contain `{project}` placeholder
@@ -85,14 +85,12 @@ function resolvePromptPlaceholders(
   const hasProjectPlaceholder = promptContent.includes('{project}');
 
   if (hasProjectPlaceholder && !options.project) {
-    throw new Error(
-      'Prompt contains {project} placeholder but --project flag was not provided. ' +
-      'Either provide --project flag or remove {project} from your prompt templates.'
-    );
+    // Global mode: resolve to current directory
+    return promptContent.replaceAll('{project}', '.');
   }
 
   if (options.project) {
-    // Replace all occurrences
+    // Project mode: replace all occurrences with projects/<name>
     const projectPath = `projects/${options.project}`;
     return promptContent.replaceAll('{project}', projectPath);
   }
@@ -163,7 +161,7 @@ Update `projects/auth-system/IMPLEMENTATION_PLAN.md` with task status.
 2. Run `ralphctl run plan --project test-proj`
 3. Verify placeholder is replaced with `projects/test-proj`
 4. Run `ralphctl run plan` (no --project flag) with same prompt
-5. Verify clear error message is shown
+5. Verify placeholder is replaced with `.` (global mode)
 6. Create a prompt without `{project}` placeholder
 7. Run both with and without --project flag
 8. Verify both work correctly

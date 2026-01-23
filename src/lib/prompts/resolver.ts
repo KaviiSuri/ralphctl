@@ -16,10 +16,8 @@ function resolvePromptPlaceholders(promptContent: string, options: { project?: s
   const hasProjectPlaceholder = promptContent.includes("{project}");
 
   if (hasProjectPlaceholder && !options.project) {
-    throw new Error(
-      "Prompt contains {project} placeholder but --project flag was not provided. " +
-        "Either provide --project flag or remove {project} from your prompt templates."
-    );
+    // Global mode: resolve to current directory
+    return promptContent.replaceAll("{project}", ".");
   }
 
   if (options.project) {

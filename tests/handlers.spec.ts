@@ -56,12 +56,8 @@ describe("Command Handlers", () => {
             // Apply placeholder resolution
             const hasProjectPlaceholder = promptContent.includes("{project}");
             if (hasProjectPlaceholder && !project) {
-              return Promise.reject(
-                new Error(
-                  "Prompt contains {project} placeholder but --project flag was not provided. " +
-                    "Either provide --project flag or remove {project} from your prompt templates."
-                )
-              );
+              // Global mode: resolve to current directory
+              promptContent = promptContent.replaceAll("{project}", ".");
             }
 
             if (project) {
@@ -153,12 +149,8 @@ describe("Command Handlers", () => {
             // Apply placeholder resolution
             const hasProjectPlaceholder = promptContent.includes("{project}");
             if (hasProjectPlaceholder && !project) {
-              return Promise.reject(
-                new Error(
-                  "Prompt contains {project} placeholder but --project flag was not provided. " +
-                    "Either provide --project flag or remove {project} from your prompt templates."
-                )
-              );
+              // Global mode: resolve to current directory
+              promptContent = promptContent.replaceAll("{project}", ".");
             }
 
             if (project) {
@@ -239,12 +231,8 @@ describe("Command Handlers", () => {
             // Apply placeholder resolution
             const hasProjectPlaceholder = promptContent.includes("{project}");
             if (hasProjectPlaceholder && !project) {
-              return Promise.reject(
-                new Error(
-                  "Prompt contains {project} placeholder but --project flag was not provided. " +
-                    "Either provide --project flag or remove {project} from your prompt templates."
-                )
-              );
+              // Global mode: resolve to current directory
+              promptContent = promptContent.replaceAll("{project}", ".");
             }
 
             if (project) {
@@ -324,12 +312,8 @@ describe("Command Handlers", () => {
             // Apply placeholder resolution
             const hasProjectPlaceholder = promptContent.includes("{project}");
             if (hasProjectPlaceholder && !project) {
-              return Promise.reject(
-                new Error(
-                  "Prompt contains {project} placeholder but --project flag was not provided. " +
-                    "Either provide --project flag or remove {project} from your prompt templates."
-                )
-              );
+              // Global mode: resolve to current directory
+              promptContent = promptContent.replaceAll("{project}", ".");
             }
 
             if (project) {
@@ -400,12 +384,8 @@ describe("Command Handlers", () => {
             // Apply placeholder resolution
             const hasProjectPlaceholder = promptContent.includes("{project}");
             if (hasProjectPlaceholder && !project) {
-              return Promise.reject(
-                new Error(
-                  "Prompt contains {project} placeholder but --project flag was not provided. " +
-                    "Either provide --project flag or remove {project} from your prompt templates."
-                )
-              );
+              // Global mode: resolve to current directory
+              promptContent = promptContent.replaceAll("{project}", ".");
             }
 
             if (project) {
@@ -770,12 +750,8 @@ describe("Command Handlers", () => {
             // Apply placeholder resolution
             const hasProjectPlaceholder = promptContent.includes("{project}");
             if (hasProjectPlaceholder && !project) {
-              return Promise.reject(
-                new Error(
-                  "Prompt contains {project} placeholder but --project flag was not provided. " +
-                    "Either provide --project flag or remove {project} from your prompt templates."
-                )
-              );
+              // Global mode: resolve to current directory
+              promptContent = promptContent.replaceAll("{project}", ".");
             }
 
             if (project) {
@@ -845,12 +821,8 @@ describe("Command Handlers", () => {
             // Apply placeholder resolution
             const hasProjectPlaceholder = promptContent.includes("{project}");
             if (hasProjectPlaceholder && !project) {
-              return Promise.reject(
-                new Error(
-                  "Prompt contains {project} placeholder but --project flag was not provided. " +
-                    "Either provide --project flag or remove {project} from your prompt templates."
-                )
-              );
+              // Global mode: resolve to current directory
+              promptContent = promptContent.replaceAll("{project}", ".");
             }
 
             if (project) {
@@ -917,12 +889,8 @@ describe("Command Handlers", () => {
             // Apply placeholder resolution
             const hasProjectPlaceholder = promptContent.includes("{project}");
             if (hasProjectPlaceholder && !project) {
-              return Promise.reject(
-                new Error(
-                  "Prompt contains {project} placeholder but --project flag was not provided. " +
-                    "Either provide --project flag or remove {project} from your prompt templates."
-                )
-              );
+              // Global mode: resolve to current directory
+              promptContent = promptContent.replaceAll("{project}", ".");
             }
 
             if (project) {
@@ -993,12 +961,8 @@ describe("Command Handlers", () => {
             // Apply placeholder resolution
             const hasProjectPlaceholder = promptContent.includes("{project}");
             if (hasProjectPlaceholder && !project) {
-              return Promise.reject(
-                new Error(
-                  "Prompt contains {project} placeholder but --project flag was not provided. " +
-                    "Either provide --project flag or remove {project} from your prompt templates."
-                )
-              );
+              // Global mode: resolve to current directory
+              promptContent = promptContent.replaceAll("{project}", ".");
             }
 
             if (project) {
@@ -1082,12 +1046,8 @@ describe("Command Handlers", () => {
             // Apply placeholder resolution
             const hasProjectPlaceholder = promptContent.includes("{project}");
             if (hasProjectPlaceholder && !project) {
-              return Promise.reject(
-                new Error(
-                  "Prompt contains {project} placeholder but --project flag was not provided. " +
-                    "Either provide --project flag or remove {project} from your prompt templates."
-                )
-              );
+              // Global mode: resolve to current directory
+              promptContent = promptContent.replaceAll("{project}", ".");
             }
 
             if (project) {
@@ -1171,12 +1131,8 @@ describe("Command Handlers", () => {
             // Apply placeholder resolution
             const hasProjectPlaceholder = promptContent.includes("{project}");
             if (hasProjectPlaceholder && !project) {
-              return Promise.reject(
-                new Error(
-                  "Prompt contains {project} placeholder but --project flag was not provided. " +
-                    "Either provide --project flag or remove {project} from your prompt templates."
-                )
-              );
+              // Global mode: resolve to current directory
+              promptContent = promptContent.replaceAll("{project}", ".");
             }
 
             if (project) {
@@ -1265,12 +1221,8 @@ describe("Command Handlers", () => {
             // Apply placeholder resolution
             const hasProjectPlaceholder = promptContent.includes("{project}");
             if (hasProjectPlaceholder && !project) {
-              return Promise.reject(
-                new Error(
-                  "Prompt contains {project} placeholder but --project flag was not provided. " +
-                    "Either provide --project flag or remove {project} from your prompt templates."
-                )
-              );
+              // Global mode: resolve to current directory
+              promptContent = promptContent.replaceAll("{project}", ".");
             }
 
             if (project) {
@@ -1377,12 +1329,8 @@ describe("Command Handlers", () => {
             // Apply placeholder resolution
             const hasProjectPlaceholder = promptContent.includes("{project}");
             if (hasProjectPlaceholder && !project) {
-              return Promise.reject(
-                new Error(
-                  "Prompt contains {project} placeholder but --project flag was not provided. " +
-                    "Either provide --project flag or remove {project} from your prompt templates."
-                )
-              );
+              // Global mode: resolve to current directory
+              promptContent = promptContent.replaceAll("{project}", ".");
             }
 
             if (project) {
@@ -1529,12 +1477,8 @@ describe("Command Handlers", () => {
             // Apply placeholder resolution
             const hasProjectPlaceholder = promptContent.includes("{project}");
             if (hasProjectPlaceholder && !project) {
-              return Promise.reject(
-                new Error(
-                  "Prompt contains {project} placeholder but --project flag was not provided. " +
-                    "Either provide --project flag or remove {project} from your prompt templates."
-                )
-              );
+              // Global mode: resolve to current directory
+              promptContent = promptContent.replaceAll("{project}", ".");
             }
 
             if (project) {
@@ -1849,12 +1793,8 @@ describe("Command Handlers", () => {
             // Apply placeholder resolution
             const hasProjectPlaceholder = promptContent.includes("{project}");
             if (hasProjectPlaceholder && !project) {
-              return Promise.reject(
-                new Error(
-                  "Prompt contains {project} placeholder but --project flag was not provided. " +
-                    "Either provide --project flag or remove {project} from your prompt templates."
-                )
-              );
+              // Global mode: resolve to current directory
+              promptContent = promptContent.replaceAll("{project}", ".");
             }
 
             if (project) {
@@ -1924,12 +1864,8 @@ describe("Command Handlers", () => {
             // Apply placeholder resolution
             const hasProjectPlaceholder = promptContent.includes("{project}");
             if (hasProjectPlaceholder && !project) {
-              return Promise.reject(
-                new Error(
-                  "Prompt contains {project} placeholder but --project flag was not provided. " +
-                    "Either provide --project flag or remove {project} from your prompt templates."
-                )
-              );
+              // Global mode: resolve to current directory
+              promptContent = promptContent.replaceAll("{project}", ".");
             }
 
             if (project) {
@@ -1996,12 +1932,8 @@ describe("Command Handlers", () => {
             // Apply placeholder resolution
             const hasProjectPlaceholder = promptContent.includes("{project}");
             if (hasProjectPlaceholder && !project) {
-              return Promise.reject(
-                new Error(
-                  "Prompt contains {project} placeholder but --project flag was not provided. " +
-                    "Either provide --project flag or remove {project} from your prompt templates."
-                )
-              );
+              // Global mode: resolve to current directory
+              promptContent = promptContent.replaceAll("{project}", ".");
             }
 
             if (project) {

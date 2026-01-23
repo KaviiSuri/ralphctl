@@ -84,23 +84,21 @@ describe("resolvePrompt", () => {
     });
   });
 
-  describe("error handling", () => {
-    it("should throw error when prompt contains {project} but no project flag provided", async () => {
+  describe("global mode fallback", () => {
+    it("should resolve {project} to . when no project flag provided", async () => {
       const customPrompt = "Study specs in {project}/specs/";
 
-      await expect(
-        resolvePrompt({ mode: Mode.Plan, customPrompt })
-      ).rejects.toThrow(
-        "Prompt contains {project} placeholder but --project flag was not provided"
-      );
+      const result = await resolvePrompt({ mode: Mode.Plan, customPrompt });
+
+      expect(result).toBe("Study specs in ./specs/");
     });
 
-    it("should include helpful error message", async () => {
-      const customPrompt = "Update {project}/IMPLEMENTATION_PLAN.md";
+    it("should resolve multiple {project} placeholders to . in global mode", async () => {
+      const customPrompt = "Study {project}/specs/ and update {project}/IMPLEMENTATION_PLAN.md";
 
-      await expect(
-        resolvePrompt({ mode: Mode.Plan, customPrompt })
-      ).rejects.toThrow("Either provide --project flag or remove {project}");
+      const result = await resolvePrompt({ mode: Mode.Plan, customPrompt });
+
+      expect(result).toBe("Study ./specs/ and update ./IMPLEMENTATION_PLAN.md");
     });
   });
 
