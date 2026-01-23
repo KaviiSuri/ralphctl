@@ -2,9 +2,9 @@
 
 ## Overall Status
 
-**Completed Specs:** 12/12 (JTBD-101-SPEC-001, JTBD-102-SPEC-001, JTBD-102-SPEC-002, JTBD-103-SPEC-001, JTBD-104-SPEC-001, JBTD-001 through JBTD-007) ✅
+**Completed Specs:** 13/13 (JTBD-101-SPEC-001, JTBD-102-SPEC-001, JTBD-102-SPEC-002, JTBD-103-SPEC-001, JTBD-104-SPEC-001, JBTD-001 through JBTD-007, 004-001) ✅
 **Remaining Specs:** 0
-**Current Tests:** 91 passing ✅
+**Current Tests:** 133 passing ✅
 **Typecheck:** Passing ✅
 **P2 Gaps:** All complete ✅
 
@@ -170,6 +170,17 @@ All tasks complete! ✅
 - Graceful handling of unavailable agents during inspection
 - P2 gap: ClaudeCodeAdapter returns null for sessionId (file-based session tracking)
 
+### 004-001: Detect Available CLI Tools ✅
+- Created src/lib/tools/detection.ts with detectAvailableTools() function and isCommandAvailable() helper
+- Uses dependency injection pattern (CommandExecutor) for testability
+- Works cross-platform: uses 'which' on Unix/macOS, 'where' on Windows
+- Returns ToolDetectionResult with claude, opencode, hasAny, hasBoth fields
+- Gracefully handles errors (command not found, timeout, permission errors)
+- Created comprehensive tests in tests/tool-detection.spec.ts with 10 test cases
+- All 133 tests passing, no TypeScript errors
+- Performance: <100ms per tool check with 1-second timeout
+- Files created: src/lib/tools/detection.ts, tests/tool-detection.spec.ts
+
 ---
 
 ## Learnings
@@ -199,3 +210,7 @@ All tasks complete! ✅
 - End iteration markers already present in run.ts (--- Iteration N/M ---)
 - JTBD-104-SPEC-001 P1 tasks completed (error handling, test coverage)
 - ClaudeCodeAdapter returns null for sessionId because session tracking is file-based, not CLI output-based
+- Dependency injection with CommandExecutor type enables testing without mock.module() global state issues
+- Bun test's mock.module() affects all tests globally - better to use dependency injection for testability
+- execSync with stdio: "pipe" suppresses command output cleanly
+- Cross-platform command checking works well with platform-based conditional logic
