@@ -51,6 +51,9 @@ export async function runProcessInteractive(
   const process = Bun.spawn(command, {
     cwd,
     env,
+    stdin: "inherit",
+    stdout: "inherit",
+    stderr: "inherit",
   });
 
   const exitCode = await process.exited;
