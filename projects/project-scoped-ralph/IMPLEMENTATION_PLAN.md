@@ -256,23 +256,34 @@ These tasks depend on Wave 1 foundation being complete.
 
 
 #### 004-006: Install Command Files
-**Status:** Not Started
+**Status:** ✅ COMPLETED
 **Priority:** HIGH
 **Effort:** Medium
 **Description:** Copy all 7 project command files (project:new through project:specs) to `.claude/commands/` and/or `.opencode/commands/` based on tool detection/selection.
-**Files to Create:**
-- `src/lib/commands/install-project-commands.ts` - New command to install command files
-- `templates/commands/*.md` - 7 command file templates
+**Files Modified:**
+- `src/lib/templates/commands.ts` - New file with 7 command templates
+- `src/lib/command-infrastructure.ts` - Added installCommandFiles() and installCommandFilesToTarget() functions
+- `tests/command-infrastructure.spec.ts` - Added 13 comprehensive test cases
 **Acceptance Criteria:**
-- [ ] 7 command files exist as templates
-- [ ] Copies to `.claude/commands/` when available
-- [ ] Copies to `.opencode/commands/` when available
-- [ ] Copies to both when both available
-- [ ] Idempotent (safe to run multiple times)
-- [ ] Reports installation summary
-- [ ] Uses markdown with proper YAML frontmatter
-**Dependencies:** 004-004, 004-005
+- [x] 7 command files exist as templates
+- [x] Copies to `.claude/commands/` when available
+- [x] Copies to `.opencode/commands/` when available
+- [x] Copies to both when both available
+- [x] Idempotent (safe to run multiple times)
+- [x] Reports installation summary
+- [x] Uses markdown with proper YAML frontmatter
+**Dependencies:** ✅ 004-004, ✅ 004-005
 **Blocks:** None (leaf task for command infrastructure)
+**Learnings:**
+- Command templates stored as string constants with YAML frontmatter for easy embedding
+- COMMAND_FILES array uses `as const` for type safety and immutability guarantees
+- installCommandFiles() accepts CommandFolderResult from createCommandFolders() for clean integration
+- Dependency injection pattern with FileWriter type enables unit testing without filesystem side effects
+- Installation is idempotent - overwrites existing files safely on re-run
+- Partial installation failures throw with aggregated error messages listing all failures
+- Console logging for installation progress provides user feedback during operation
+- All 219 tests passing (13 new tests for command installation)
+- TypeScript compilation successful with no errors
 
 ---
 
@@ -572,9 +583,9 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 ## Summary
 
 **Total Tasks:** 23
-**Completed:** 11 ✅
+**Completed:** 12 ✅
 **In Progress:** 0
-**Pending:** 12
+**Pending:** 11
 
 **Implementation Waves:**
 - Wave 1: 5 of 5 foundation tasks complete (100% done) ✅
@@ -583,11 +594,11 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
   - ✅ 003-006: Update global prompt templates
   - ✅ 004-001: Detect available CLI tools
   - ✅ 004-003: Verify repo root
-- Wave 2: 3 of 5 tasks complete (60% done)
+- Wave 2: 5 of 5 tasks complete (100% done) ✅
   - ✅ 004-002: Prompt user when no tools detected
   - ✅ 004-004: Create local .claude/commands/ folder
   - ✅ 004-005: Create local .opencode/commands/ folder
-  - Pending: 004-006 (Install command files)
+  - ✅ 004-006: Install command files
 - Wave 3: 3 tasks (depend on Wave 2)
 - Wave 4: 7 tasks (depend on Wave 3)
 - Wave 5: 3 of 3 tasks complete (100% done) ✅
@@ -612,12 +623,12 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 3. ✅ ~~Implement remaining Wave 5 tasks (003-002, 003-003)~~ - COMPLETED
 4. ✅ ~~Task 004-001: Detect available CLI tools~~ - COMPLETED
 5. ✅ ~~Wave 1 complete~~ - COMPLETED
-6. **Move to Wave 2** - tool prompting and folder creation
-7. **Implement Wave 3** (folder creation + template generation)
+6. ✅ ~~Wave 2 tool prompting and folder creation~~ - COMPLETED
+7. **Implement Wave 3** (project folder creation + template generation)
 8. **Create all Wave 4 command files** in parallel
 
 **Immediate Next Actions:**
-- Wave 2: Task 004-006 (Install command files) - final Wave 2 task
+- Wave 3: Task 001-001 (Create Project Folder Structure)
 
 **Testing Strategy:**
 - Use bun:test with dependency injection pattern (avoid mock.module() for better test isolation)
@@ -631,5 +642,5 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 ---
 
 **Last Updated:** 2026-01-23
-**Version:** 1.7
-**Recent Changes:** Completed tasks 004-004 (Create local .claude/commands/ folder) and 004-005 (Create local .opencode/commands/ folder). Implemented src/lib/command-infrastructure.ts with createClaudeCommandsFolder(), createOpenCodeCommandsFolder(), and createCommandFolders() functions using dependency injection pattern for testability. Added comprehensive test suite (26 tests) with full coverage of creation, idempotency, error handling, and writability verification. All 203 tests passing. Wave 2 now 3 of 5 tasks complete (60% done) - only 004-006 (Install command files) remains. Total progress: 11 of 23 tasks complete (47.8%).
+**Version:** 1.8
+**Recent Changes:** Completed task 004-006 (Install Command Files) - final Wave 2 task! Implemented src/lib/templates/commands.ts with 7 command templates and added installCommandFiles() and installCommandFilesToTarget() functions to src/lib/command-infrastructure.ts. Added 13 comprehensive test cases for command installation. Wave 2 now complete with all 5 tasks done (100%). Total progress: 12 of 23 tasks complete (52.2%). Next: Wave 3 project folder structure creation (task 001-001).

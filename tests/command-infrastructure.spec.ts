@@ -3,11 +3,15 @@ import {
   createClaudeCommandsFolder,
   createOpenCodeCommandsFolder,
   createCommandFolders,
+  installCommandFiles,
   type DirectoryCreator,
   type FileSystemChecker,
   type FileStatChecker,
   type WritabilityChecker,
+  type FileWriter,
+  type CommandFolderResult,
 } from "../src/lib/command-infrastructure.js";
+import { COMMAND_FILES } from "../src/lib/templates/commands.js";
 
 describe("Command Infrastructure", () => {
   describe("createClaudeCommandsFolder", () => {
@@ -624,6 +628,300 @@ describe("Command Infrastructure", () => {
 
       expect(createdPaths[0]).toContain(".claude");
       expect(createdPaths[1]).toContain(".opencode");
+    });
+  });
+
+  describe("installCommandFiles", () => {
+    it("should install all 7 commands to Claude directory when claudeReady is true", async () => {
+      const writtenFiles: Map<string, string> = new Map();
+
+      const mockFileWriter: FileWriter = async (filePath: string, content: string) => {
+        writtenFiles.set(filePath, content);
+      };
+
+      const mockFsChecker: FileSystemChecker = () => true; // Directory exists
+
+      const folderResult: CommandFolderResult = {
+        claudeReady: true,
+        opencodeReady: false,
+        claudePath: "/test/repo/.claude/commands",
+      };
+
+      const result = await installCommandFiles(folderResult, mockFileWriter, mockFsChecker);
+
+      expect(result.claudeInstalled).toBe(7);
+      expect(result.opencodeInstalled).toBe(0);
+      expect(result.claudePath).toBe("/test/repo/.claude/commands");
+      expect(result.errors).toEqual([]);
+      expect(writtenFiles.size).toBe(7);
+
+      // Verify all 7 command files were written
+      const expectedFiles = COMMAND_FILES.map(f => f.name);
+      for (const fileName of expectedFiles) {
+        const fullPath = `/test/repo/.claude/commands/${fileName}`;
+        expect(writtenFiles.has(fullPath)).toBe(true);
+      }
+    });
+
+    it("should install all 7 commands to OpenCode directory when opencodeReady is true", async () => {
+      const writtenFiles: Map<string, string> = new Map();
+
+      const mockFileWriter: FileWriter = async (filePath: string, content: string) => {
+        writtenFiles.set(filePath, content);
+      };
+
+      const mockFsChecker: FileSystemChecker = () => true; // Directory exists
+
+      const folderResult: CommandFolderResult = {
+        claudeReady: false,
+        opencodeReady: true,
+        opencodePath: "/test/repo/.opencode/commands",
+      };
+
+      const result = await installCommandFiles(folderResult, mockFileWriter, mockFsChecker);
+
+      expect(result.claudeInstalled).toBe(0);
+      expect(result.opencodeInstalled).toBe(7);
+      expect(result.opencodePath).toBe("/test/repo/.opencode/commands");
+      expect(result.errors).toEqual([]);
+      expect(writtenFiles.size).toBe(7);
+    });
+
+    it("should install commands to both directories when both are ready", async () => {
+      const writtenFiles: Map<string, string> = new Map();
+
+      const mockFileWriter: FileWriter = async (filePath: string, content: string) => {
+        writtenFiles.set(filePath, content);
+      };
+
+      const mockFsChecker: FileSystemChecker = () => true;
+
+      const folderResult: CommandFolderResult = {
+        claudeReady: true,
+        opencodeReady: true,
+        claudePath: "/test/repo/.claude/commands",
+        opencodePath: "/test/repo/.opencode/commands",
+      };
+
+      const result = await installCommandFiles(folderResult, mockFileWriter, mockFsChecker);
+
+      expect(result.claudeInstalled).toBe(7);
+      expect(result.opencodeInstalled).toBe(7);
+      expect(result.errors).toEqual([]);
+      expect(writtenFiles.size).toBe(14); // 7 files × 2 directories
+    });
+
+    it("should throw error when no directories are ready", async () => {
+      const mockFileWriter: FileWriter = async () => {
+        throw new Error("Should not be called");
+      };
+
+      const mockFsChecker: FileSystemChecker = () => true;
+
+      const folderResult: CommandFolderResult = {
+        claudeReady: false,
+        opencodeReady: false,
+      };
+
+      await expect(
+        installCommandFiles(folderResult, mockFileWriter, mockFsChecker)
+      ).rejects.toThrow(/No command directories found/);
+    });
+
+    it("should throw error if target directory does not exist", async () => {
+      const mockFileWriter: FileWriter = async () => {
+        throw new Error("Should not be called");
+      };
+
+      const mockFsChecker: FileSystemChecker = () => false; // Directory doesn't exist
+
+      const folderResult: CommandFolderResult = {
+        claudeReady: true,
+        opencodeReady: false,
+        claudePath: "/test/repo/.claude/commands",
+      };
+
+      await expect(
+        installCommandFiles(folderResult, mockFileWriter, mockFsChecker)
+      ).rejects.toThrow(/Command directory does not exist/);
+    });
+
+    it("should throw error if file write fails", async () => {
+      const mockFileWriter: FileWriter = async (filePath: string) => {
+        if (filePath.includes("project:prd.md")) {
+          throw new Error("Permission denied");
+        }
+      };
+
+      const mockFsChecker: FileSystemChecker = () => true;
+
+      const folderResult: CommandFolderResult = {
+        claudeReady: true,
+        opencodeReady: false,
+        claudePath: "/test/repo/.claude/commands",
+      };
+
+      await expect(
+        installCommandFiles(folderResult, mockFileWriter, mockFsChecker)
+      ).rejects.toThrow(/Failed to install.*command file/);
+    });
+
+    it("should verify each command file has correct content", async () => {
+      const writtenFiles: Map<string, string> = new Map();
+
+      const mockFileWriter: FileWriter = async (filePath: string, content: string) => {
+        writtenFiles.set(filePath, content);
+      };
+
+      const mockFsChecker: FileSystemChecker = () => true;
+
+      const folderResult: CommandFolderResult = {
+        claudeReady: true,
+        opencodeReady: false,
+        claudePath: "/test/repo/.claude/commands",
+      };
+
+      await installCommandFiles(folderResult, mockFileWriter, mockFsChecker);
+
+      // Check project:new.md
+      const newCommandPath = "/test/repo/.claude/commands/project:new.md";
+      const newCommandContent = writtenFiles.get(newCommandPath);
+      expect(newCommandContent).toContain("description: Create a new project");
+      expect(newCommandContent).toContain("argument-hint: <project-name>");
+
+      // Check project:research.md
+      const researchCommandPath = "/test/repo/.claude/commands/project:research.md";
+      const researchCommandContent = writtenFiles.get(researchCommandPath);
+      expect(researchCommandContent).toContain("description: Guide research capture");
+
+      // Check project:specs.md
+      const specsCommandPath = "/test/repo/.claude/commands/project:specs.md";
+      const specsCommandContent = writtenFiles.get(specsCommandPath);
+      expect(specsCommandContent).toContain("description: Generate spec files");
+    });
+
+    it("should be idempotent (allow overwriting existing files)", async () => {
+      const writeCount: Map<string, number> = new Map();
+
+      const mockFileWriter: FileWriter = async (filePath: string) => {
+        const count = writeCount.get(filePath) || 0;
+        writeCount.set(filePath, count + 1);
+      };
+
+      const mockFsChecker: FileSystemChecker = () => true;
+
+      const folderResult: CommandFolderResult = {
+        claudeReady: true,
+        opencodeReady: false,
+        claudePath: "/test/repo/.claude/commands",
+      };
+
+      // Install once
+      await installCommandFiles(folderResult, mockFileWriter, mockFsChecker);
+
+      // Install again (simulating re-run)
+      await installCommandFiles(folderResult, mockFileWriter, mockFsChecker);
+
+      // Each file should have been written twice
+      for (const [_path, count] of writeCount.entries()) {
+        expect(count).toBe(2);
+      }
+    });
+
+    it("should use UTF-8 encoding for all files", async () => {
+      const fileEncodings: Map<string, string> = new Map();
+
+      const mockFileWriter: FileWriter = async (filePath: string, _content: string, encoding: BufferEncoding) => {
+        fileEncodings.set(filePath, encoding);
+      };
+
+      const mockFsChecker: FileSystemChecker = () => true;
+
+      const folderResult: CommandFolderResult = {
+        claudeReady: true,
+        opencodeReady: false,
+        claudePath: "/test/repo/.claude/commands",
+      };
+
+      await installCommandFiles(folderResult, mockFileWriter, mockFsChecker);
+
+      // All files should use UTF-8 encoding
+      for (const [_path, encoding] of fileEncodings.entries()) {
+        expect(encoding).toBe("utf-8");
+      }
+    });
+
+    it("should continue installing to OpenCode if Claude installation fails", async () => {
+      const writtenFiles: Map<string, string> = new Map();
+
+      const mockFileWriter: FileWriter = async (filePath: string, content: string) => {
+        if (filePath.includes(".claude")) {
+          throw new Error("Claude directory write failed");
+        }
+        writtenFiles.set(filePath, content);
+      };
+
+      const mockFsChecker: FileSystemChecker = () => true;
+
+      const folderResult: CommandFolderResult = {
+        claudeReady: true,
+        opencodeReady: true,
+        claudePath: "/test/repo/.claude/commands",
+        opencodePath: "/test/repo/.opencode/commands",
+      };
+
+      await expect(
+        installCommandFiles(folderResult, mockFileWriter, mockFsChecker)
+      ).rejects.toThrow(/Command installation failed/);
+
+      // Verify OpenCode files were written even though Claude failed
+      const opencodeFiles = Array.from(writtenFiles.keys()).filter(p => p.includes(".opencode"));
+      expect(opencodeFiles.length).toBe(7);
+    });
+
+    it("should include all 7 command files in correct order", async () => {
+      const writtenPaths: string[] = [];
+
+      const mockFileWriter: FileWriter = async (filePath: string) => {
+        writtenPaths.push(filePath);
+      };
+
+      const mockFsChecker: FileSystemChecker = () => true;
+
+      const folderResult: CommandFolderResult = {
+        claudeReady: true,
+        opencodeReady: false,
+        claudePath: "/test/repo/.claude/commands",
+      };
+
+      await installCommandFiles(folderResult, mockFileWriter, mockFsChecker);
+
+      // Verify order matches COMMAND_FILES order
+      const expectedOrder = COMMAND_FILES.map(f => `/test/repo/.claude/commands/${f.name}`);
+      expect(writtenPaths).toEqual(expectedOrder);
+    });
+
+    it("should report correct error count when multiple files fail", async () => {
+      const mockFileWriter: FileWriter = async (filePath: string) => {
+        // Fail on 3 specific files
+        if (filePath.includes("project:prd.md") ||
+            filePath.includes("project:jtbd.md") ||
+            filePath.includes("project:hld.md")) {
+          throw new Error("Write failed");
+        }
+      };
+
+      const mockFsChecker: FileSystemChecker = () => true;
+
+      const folderResult: CommandFolderResult = {
+        claudeReady: true,
+        opencodeReady: false,
+        claudePath: "/test/repo/.claude/commands",
+      };
+
+      await expect(
+        installCommandFiles(folderResult, mockFileWriter, mockFsChecker)
+      ).rejects.toThrow(/Failed to install 3 command file/);
     });
   });
 });

@@ -7,9 +7,10 @@
  */
 
 import { existsSync, statSync, constants } from "node:fs";
-import { access } from "node:fs/promises";
+import { access, writeFile } from "node:fs/promises";
 import * as path from "node:path";
 import type { ToolChoice } from "./tools/prompting.js";
+import { COMMAND_FILES } from "./templates/commands.js";
 
 /**
  * Directory creator function type for dependency injection in tests
@@ -30,6 +31,11 @@ export type FileStatChecker = (filePath: string) => { isDirectory: () => boolean
  * Writability checker function type for dependency injection in tests
  */
 export type WritabilityChecker = (filePath: string, mode: number) => Promise<void>;
+
+/**
+ * File writer function type for dependency injection in tests
+ */
+export type FileWriter = (filePath: string, content: string, encoding: BufferEncoding) => Promise<void>;
 
 /**
  * Default directory creator using fs/promises
@@ -58,6 +64,13 @@ const defaultFileStatChecker: FileStatChecker = (filePath: string) => {
  */
 const defaultWritabilityChecker: WritabilityChecker = async (filePath: string, mode: number) => {
   await access(filePath, mode);
+};
+
+/**
+ * Default file writer using fs/promises.writeFile
+ */
+const defaultFileWriter: FileWriter = async (filePath: string, content: string, encoding: BufferEncoding) => {
+  await writeFile(filePath, content, encoding);
 };
 
 /**
@@ -291,6 +304,155 @@ export async function createCommandFolders(
       result.opencodeReady = true;
       result.opencodePath = opencodePath;
     }
+  }
+
+  return result;
+}
+
+/**
+ * Result of command file installation operation
+ */
+export interface InstallCommandFilesResult {
+  claudeInstalled: number;
+  opencodeInstalled: number;
+  claudePath?: string;
+  opencodePath?: string;
+  errors: string[];
+}
+
+/**
+ * Install command files to a specific target directory
+ *
+ * @param targetPath - Absolute path to the commands directory (e.g., .claude/commands)
+ * @param toolName - Tool name for logging ("claude" or "opencode")
+ * @param fileWriter - Optional file writer for testing
+ * @param fsChecker - Optional filesystem checker for testing
+ * @returns Promise resolving to number of files installed
+ * @throws Error if target directory doesn't exist or isn't writable
+ *
+ * @example
+ * ```typescript
+ * const count = await installCommandFilesToTarget('/path/to/.claude/commands', 'claude');
+ * console.log(`Installed ${count} commands`);
+ * ```
+ */
+async function installCommandFilesToTarget(
+  targetPath: string,
+  toolName: "claude" | "opencode",
+  fileWriter: FileWriter = defaultFileWriter,
+  fsChecker: FileSystemChecker = defaultFileSystemChecker
+): Promise<number> {
+  // Verify target directory exists
+  if (!fsChecker(targetPath)) {
+    throw new Error(
+      `Command directory does not exist: ${targetPath}. ` +
+      `Run folder creation first.`
+    );
+  }
+
+  let installedCount = 0;
+  const errors: string[] = [];
+
+  for (const { name, content } of COMMAND_FILES) {
+    const filePath = path.join(targetPath, name);
+    try {
+      await fileWriter(filePath, content, "utf-8");
+      installedCount++;
+    } catch (error: any) {
+      const errorMsg = `Failed to write ${name}: ${error.message}`;
+      errors.push(errorMsg);
+      console.error(`  ✗ ${errorMsg}`);
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new Error(
+      `Failed to install ${errors.length} command file(s) to ${toolName}. Errors:\n` +
+      errors.join("\n")
+    );
+  }
+
+  console.log(`  ✓ Installed ${installedCount} commands to .${toolName}/commands/`);
+  return installedCount;
+}
+
+/**
+ * Install command files to appropriate directories based on CommandFolderResult
+ *
+ * This function installs all 7 project command files to the directories that were
+ * successfully created by createCommandFolders().
+ *
+ * @param folderResult - Result from createCommandFolders() indicating which directories are ready
+ * @param fileWriter - Optional file writer for testing
+ * @param fsChecker - Optional filesystem checker for testing
+ * @returns Promise resolving to InstallCommandFilesResult with installation details
+ *
+ * @example
+ * ```typescript
+ * import { createCommandFolders, installCommandFiles } from './command-infrastructure';
+ *
+ * const folderResult = await createCommandFolders('both');
+ * const installResult = await installCommandFiles(folderResult);
+ *
+ * console.log(`Claude: ${installResult.claudeInstalled} commands`);
+ * console.log(`OpenCode: ${installResult.opencodeInstalled} commands`);
+ * ```
+ */
+export async function installCommandFiles(
+  folderResult: CommandFolderResult,
+  fileWriter?: FileWriter,
+  fsChecker?: FileSystemChecker
+): Promise<InstallCommandFilesResult> {
+  const result: InstallCommandFilesResult = {
+    claudeInstalled: 0,
+    opencodeInstalled: 0,
+    errors: [],
+  };
+
+  console.log("\nInstalling command files...");
+
+  // Install to Claude Code if directory is ready
+  if (folderResult.claudeReady && folderResult.claudePath) {
+    try {
+      result.claudeInstalled = await installCommandFilesToTarget(
+        folderResult.claudePath,
+        "claude",
+        fileWriter,
+        fsChecker
+      );
+      result.claudePath = folderResult.claudePath;
+    } catch (error: any) {
+      result.errors.push(`Claude Code: ${error.message}`);
+    }
+  }
+
+  // Install to OpenCode if directory is ready
+  if (folderResult.opencodeReady && folderResult.opencodePath) {
+    try {
+      result.opencodeInstalled = await installCommandFilesToTarget(
+        folderResult.opencodePath,
+        "opencode",
+        fileWriter,
+        fsChecker
+      );
+      result.opencodePath = folderResult.opencodePath;
+    } catch (error: any) {
+      result.errors.push(`OpenCode: ${error.message}`);
+    }
+  }
+
+  // Handle case where no directories were ready
+  if (!folderResult.claudeReady && !folderResult.opencodeReady) {
+    const errorMsg = "No command directories found. Run folder creation first.";
+    result.errors.push(errorMsg);
+    throw new Error(errorMsg);
+  }
+
+  // Throw if there were any errors during installation
+  if (result.errors.length > 0) {
+    throw new Error(
+      `Command installation failed:\n${result.errors.join("\n")}`
+    );
   }
 
   return result;
