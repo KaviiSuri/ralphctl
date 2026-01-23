@@ -50,7 +50,27 @@ describe("Command Handlers", () => {
 
       mock.module("../src/lib/prompts/resolver.js", () => {
         return {
-          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+          resolvePrompt: mock(({ mode, customPrompt, project }: any) => {
+            let promptContent = customPrompt || "Mocked prompt";
+
+            // Apply placeholder resolution
+            const hasProjectPlaceholder = promptContent.includes("{project}");
+            if (hasProjectPlaceholder && !project) {
+              return Promise.reject(
+                new Error(
+                  "Prompt contains {project} placeholder but --project flag was not provided. " +
+                    "Either provide --project flag or remove {project} from your prompt templates."
+                )
+              );
+            }
+
+            if (project) {
+              const projectPath = `projects/${project}`;
+              promptContent = promptContent.replaceAll("{project}", projectPath);
+            }
+
+            return Promise.resolve(promptContent);
+          }),
         };
       });
     });
@@ -127,7 +147,27 @@ describe("Command Handlers", () => {
 
       mock.module("../src/lib/prompts/resolver.js", () => {
         return {
-          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+          resolvePrompt: mock(({ mode, customPrompt, project }: any) => {
+            let promptContent = customPrompt || "Mocked prompt";
+
+            // Apply placeholder resolution
+            const hasProjectPlaceholder = promptContent.includes("{project}");
+            if (hasProjectPlaceholder && !project) {
+              return Promise.reject(
+                new Error(
+                  "Prompt contains {project} placeholder but --project flag was not provided. " +
+                    "Either provide --project flag or remove {project} from your prompt templates."
+                )
+              );
+            }
+
+            if (project) {
+              const projectPath = `projects/${project}`;
+              promptContent = promptContent.replaceAll("{project}", projectPath);
+            }
+
+            return Promise.resolve(promptContent);
+          }),
         };
       });
 
@@ -193,7 +233,27 @@ describe("Command Handlers", () => {
 
       mock.module("../src/lib/prompts/resolver.js", () => {
         return {
-          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+          resolvePrompt: mock(({ mode, customPrompt, project }: any) => {
+            let promptContent = customPrompt || "Mocked prompt";
+
+            // Apply placeholder resolution
+            const hasProjectPlaceholder = promptContent.includes("{project}");
+            if (hasProjectPlaceholder && !project) {
+              return Promise.reject(
+                new Error(
+                  "Prompt contains {project} placeholder but --project flag was not provided. " +
+                    "Either provide --project flag or remove {project} from your prompt templates."
+                )
+              );
+            }
+
+            if (project) {
+              const projectPath = `projects/${project}`;
+              promptContent = promptContent.replaceAll("{project}", projectPath);
+            }
+
+            return Promise.resolve(promptContent);
+          }),
         };
       });
 
@@ -258,7 +318,27 @@ describe("Command Handlers", () => {
 
       mock.module("../src/lib/prompts/resolver.js", () => {
         return {
-          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+          resolvePrompt: mock(({ mode, customPrompt, project }: any) => {
+            let promptContent = customPrompt || "Mocked prompt";
+
+            // Apply placeholder resolution
+            const hasProjectPlaceholder = promptContent.includes("{project}");
+            if (hasProjectPlaceholder && !project) {
+              return Promise.reject(
+                new Error(
+                  "Prompt contains {project} placeholder but --project flag was not provided. " +
+                    "Either provide --project flag or remove {project} from your prompt templates."
+                )
+              );
+            }
+
+            if (project) {
+              const projectPath = `projects/${project}`;
+              promptContent = promptContent.replaceAll("{project}", projectPath);
+            }
+
+            return Promise.resolve(promptContent);
+          }),
         };
       });
 
@@ -314,7 +394,27 @@ describe("Command Handlers", () => {
 
       mock.module("../src/lib/prompts/resolver.js", () => {
         return {
-          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+          resolvePrompt: mock(({ mode, customPrompt, project }: any) => {
+            let promptContent = customPrompt || "Mocked prompt";
+
+            // Apply placeholder resolution
+            const hasProjectPlaceholder = promptContent.includes("{project}");
+            if (hasProjectPlaceholder && !project) {
+              return Promise.reject(
+                new Error(
+                  "Prompt contains {project} placeholder but --project flag was not provided. " +
+                    "Either provide --project flag or remove {project} from your prompt templates."
+                )
+              );
+            }
+
+            if (project) {
+              const projectPath = `projects/${project}`;
+              promptContent = promptContent.replaceAll("{project}", projectPath);
+            }
+
+            return Promise.resolve(promptContent);
+          }),
         };
       });
 
@@ -664,7 +764,27 @@ describe("Command Handlers", () => {
 
       mock.module("../src/lib/prompts/resolver.js", () => {
         return {
-          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+          resolvePrompt: mock(({ mode, customPrompt, project }: any) => {
+            let promptContent = customPrompt || "Mocked prompt";
+
+            // Apply placeholder resolution
+            const hasProjectPlaceholder = promptContent.includes("{project}");
+            if (hasProjectPlaceholder && !project) {
+              return Promise.reject(
+                new Error(
+                  "Prompt contains {project} placeholder but --project flag was not provided. " +
+                    "Either provide --project flag or remove {project} from your prompt templates."
+                )
+              );
+            }
+
+            if (project) {
+              const projectPath = `projects/${project}`;
+              promptContent = promptContent.replaceAll("{project}", projectPath);
+            }
+
+            return Promise.resolve(promptContent);
+          }),
         };
       });
 
@@ -719,7 +839,27 @@ describe("Command Handlers", () => {
 
       mock.module("../src/lib/prompts/resolver.js", () => {
         return {
-          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+          resolvePrompt: mock(({ mode, customPrompt, project }: any) => {
+            let promptContent = customPrompt || "Mocked prompt";
+
+            // Apply placeholder resolution
+            const hasProjectPlaceholder = promptContent.includes("{project}");
+            if (hasProjectPlaceholder && !project) {
+              return Promise.reject(
+                new Error(
+                  "Prompt contains {project} placeholder but --project flag was not provided. " +
+                    "Either provide --project flag or remove {project} from your prompt templates."
+                )
+              );
+            }
+
+            if (project) {
+              const projectPath = `projects/${project}`;
+              promptContent = promptContent.replaceAll("{project}", projectPath);
+            }
+
+            return Promise.resolve(promptContent);
+          }),
         };
       });
 
@@ -771,7 +911,27 @@ describe("Command Handlers", () => {
 
       mock.module("../src/lib/prompts/resolver.js", () => {
         return {
-          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+          resolvePrompt: mock(({ mode, customPrompt, project }: any) => {
+            let promptContent = customPrompt || "Mocked prompt";
+
+            // Apply placeholder resolution
+            const hasProjectPlaceholder = promptContent.includes("{project}");
+            if (hasProjectPlaceholder && !project) {
+              return Promise.reject(
+                new Error(
+                  "Prompt contains {project} placeholder but --project flag was not provided. " +
+                    "Either provide --project flag or remove {project} from your prompt templates."
+                )
+              );
+            }
+
+            if (project) {
+              const projectPath = `projects/${project}`;
+              promptContent = promptContent.replaceAll("{project}", projectPath);
+            }
+
+            return Promise.resolve(promptContent);
+          }),
         };
       });
 
@@ -827,7 +987,27 @@ describe("Command Handlers", () => {
 
       mock.module("../src/lib/prompts/resolver.js", () => {
         return {
-          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+          resolvePrompt: mock(({ mode, customPrompt, project }: any) => {
+            let promptContent = customPrompt || "Mocked prompt";
+
+            // Apply placeholder resolution
+            const hasProjectPlaceholder = promptContent.includes("{project}");
+            if (hasProjectPlaceholder && !project) {
+              return Promise.reject(
+                new Error(
+                  "Prompt contains {project} placeholder but --project flag was not provided. " +
+                    "Either provide --project flag or remove {project} from your prompt templates."
+                )
+              );
+            }
+
+            if (project) {
+              const projectPath = `projects/${project}`;
+              promptContent = promptContent.replaceAll("{project}", projectPath);
+            }
+
+            return Promise.resolve(promptContent);
+          }),
         };
       });
 
@@ -896,7 +1076,27 @@ describe("Command Handlers", () => {
 
       mock.module("../src/lib/prompts/resolver.js", () => {
         return {
-          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+          resolvePrompt: mock(({ mode, customPrompt, project }: any) => {
+            let promptContent = customPrompt || "Mocked prompt";
+
+            // Apply placeholder resolution
+            const hasProjectPlaceholder = promptContent.includes("{project}");
+            if (hasProjectPlaceholder && !project) {
+              return Promise.reject(
+                new Error(
+                  "Prompt contains {project} placeholder but --project flag was not provided. " +
+                    "Either provide --project flag or remove {project} from your prompt templates."
+                )
+              );
+            }
+
+            if (project) {
+              const projectPath = `projects/${project}`;
+              promptContent = promptContent.replaceAll("{project}", projectPath);
+            }
+
+            return Promise.resolve(promptContent);
+          }),
         };
       });
 
@@ -965,7 +1165,27 @@ describe("Command Handlers", () => {
 
       mock.module("../src/lib/prompts/resolver.js", () => {
         return {
-          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+          resolvePrompt: mock(({ mode, customPrompt, project }: any) => {
+            let promptContent = customPrompt || "Mocked prompt";
+
+            // Apply placeholder resolution
+            const hasProjectPlaceholder = promptContent.includes("{project}");
+            if (hasProjectPlaceholder && !project) {
+              return Promise.reject(
+                new Error(
+                  "Prompt contains {project} placeholder but --project flag was not provided. " +
+                    "Either provide --project flag or remove {project} from your prompt templates."
+                )
+              );
+            }
+
+            if (project) {
+              const projectPath = `projects/${project}`;
+              promptContent = promptContent.replaceAll("{project}", projectPath);
+            }
+
+            return Promise.resolve(promptContent);
+          }),
         };
       });
 
@@ -1039,7 +1259,27 @@ describe("Command Handlers", () => {
 
       mock.module("../src/lib/prompts/resolver.js", () => {
         return {
-          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+          resolvePrompt: mock(({ mode, customPrompt, project }: any) => {
+            let promptContent = customPrompt || "Mocked prompt";
+
+            // Apply placeholder resolution
+            const hasProjectPlaceholder = promptContent.includes("{project}");
+            if (hasProjectPlaceholder && !project) {
+              return Promise.reject(
+                new Error(
+                  "Prompt contains {project} placeholder but --project flag was not provided. " +
+                    "Either provide --project flag or remove {project} from your prompt templates."
+                )
+              );
+            }
+
+            if (project) {
+              const projectPath = `projects/${project}`;
+              promptContent = promptContent.replaceAll("{project}", projectPath);
+            }
+
+            return Promise.resolve(promptContent);
+          }),
         };
       });
 
@@ -1131,7 +1371,27 @@ describe("Command Handlers", () => {
 
       mock.module("../src/lib/prompts/resolver.js", () => {
         return {
-          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+          resolvePrompt: mock(({ mode, customPrompt, project }: any) => {
+            let promptContent = customPrompt || "Mocked prompt";
+
+            // Apply placeholder resolution
+            const hasProjectPlaceholder = promptContent.includes("{project}");
+            if (hasProjectPlaceholder && !project) {
+              return Promise.reject(
+                new Error(
+                  "Prompt contains {project} placeholder but --project flag was not provided. " +
+                    "Either provide --project flag or remove {project} from your prompt templates."
+                )
+              );
+            }
+
+            if (project) {
+              const projectPath = `projects/${project}`;
+              promptContent = promptContent.replaceAll("{project}", projectPath);
+            }
+
+            return Promise.resolve(promptContent);
+          }),
         };
       });
 
@@ -1263,7 +1523,27 @@ describe("Command Handlers", () => {
 
       mock.module("../src/lib/prompts/resolver.js", () => {
         return {
-          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+          resolvePrompt: mock(({ mode, customPrompt, project }: any) => {
+            let promptContent = customPrompt || "Mocked prompt";
+
+            // Apply placeholder resolution
+            const hasProjectPlaceholder = promptContent.includes("{project}");
+            if (hasProjectPlaceholder && !project) {
+              return Promise.reject(
+                new Error(
+                  "Prompt contains {project} placeholder but --project flag was not provided. " +
+                    "Either provide --project flag or remove {project} from your prompt templates."
+                )
+              );
+            }
+
+            if (project) {
+              const projectPath = `projects/${project}`;
+              promptContent = promptContent.replaceAll("{project}", projectPath);
+            }
+
+            return Promise.resolve(promptContent);
+          }),
         };
       });
 
@@ -1563,7 +1843,27 @@ describe("Command Handlers", () => {
 
       mock.module("../src/lib/prompts/resolver.js", () => {
         return {
-          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+          resolvePrompt: mock(({ mode, customPrompt, project }: any) => {
+            let promptContent = customPrompt || "Mocked prompt";
+
+            // Apply placeholder resolution
+            const hasProjectPlaceholder = promptContent.includes("{project}");
+            if (hasProjectPlaceholder && !project) {
+              return Promise.reject(
+                new Error(
+                  "Prompt contains {project} placeholder but --project flag was not provided. " +
+                    "Either provide --project flag or remove {project} from your prompt templates."
+                )
+              );
+            }
+
+            if (project) {
+              const projectPath = `projects/${project}`;
+              promptContent = promptContent.replaceAll("{project}", projectPath);
+            }
+
+            return Promise.resolve(promptContent);
+          }),
         };
       });
 
@@ -1618,7 +1918,27 @@ describe("Command Handlers", () => {
 
       mock.module("../src/lib/prompts/resolver.js", () => {
         return {
-          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+          resolvePrompt: mock(({ mode, customPrompt, project }: any) => {
+            let promptContent = customPrompt || "Mocked prompt";
+
+            // Apply placeholder resolution
+            const hasProjectPlaceholder = promptContent.includes("{project}");
+            if (hasProjectPlaceholder && !project) {
+              return Promise.reject(
+                new Error(
+                  "Prompt contains {project} placeholder but --project flag was not provided. " +
+                    "Either provide --project flag or remove {project} from your prompt templates."
+                )
+              );
+            }
+
+            if (project) {
+              const projectPath = `projects/${project}`;
+              promptContent = promptContent.replaceAll("{project}", projectPath);
+            }
+
+            return Promise.resolve(promptContent);
+          }),
         };
       });
 
@@ -1670,7 +1990,27 @@ describe("Command Handlers", () => {
 
       mock.module("../src/lib/prompts/resolver.js", () => {
         return {
-          resolvePrompt: mock(() => Promise.resolve("Mocked prompt")),
+          resolvePrompt: mock(({ mode, customPrompt, project }: any) => {
+            let promptContent = customPrompt || "Mocked prompt";
+
+            // Apply placeholder resolution
+            const hasProjectPlaceholder = promptContent.includes("{project}");
+            if (hasProjectPlaceholder && !project) {
+              return Promise.reject(
+                new Error(
+                  "Prompt contains {project} placeholder but --project flag was not provided. " +
+                    "Either provide --project flag or remove {project} from your prompt templates."
+                )
+              );
+            }
+
+            if (project) {
+              const projectPath = `projects/${project}`;
+              promptContent = promptContent.replaceAll("{project}", projectPath);
+            }
+
+            return Promise.resolve(promptContent);
+          }),
         };
       });
 

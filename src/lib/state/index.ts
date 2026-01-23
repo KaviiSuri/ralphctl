@@ -33,6 +33,7 @@ export async function readSessionsFile(): Promise<SessionState[]> {
       ...session,
       agent: session.agent || AgentType.OpenCode,
       printMode: session.printMode,
+      project: session.project,
     }));
 
     return migratedSessions;

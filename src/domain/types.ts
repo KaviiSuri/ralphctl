@@ -35,6 +35,7 @@ export interface SessionState {
   prompt: string;
   agent: AgentType;
   printMode?: boolean;
+  project?: string;
 }
 
 export interface SessionsFile {

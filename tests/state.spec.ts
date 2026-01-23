@@ -259,5 +259,103 @@ describe("state utilities", () => {
       expect(migratedSessions).toHaveLength(1);
       expect(migratedSessions[0].printMode).toBe(true);
     });
+
+    it("should write and read sessions with project field", async () => {
+      const sessions: SessionState[] = [
+        {
+          iteration: 1,
+          sessionId: "ses_project123",
+          startedAt: "2024-01-01T00:00:00.000Z",
+          mode: "plan",
+          prompt: "test prompt",
+          agent: AgentType.OpenCode,
+          project: "my-project",
+        },
+      ];
+
+      await writeTestSessionsFile(sessions);
+      const readSessions = await readTestSessionsFile();
+
+      expect(readSessions).toEqual(sessions);
+      expect(readSessions[0].project).toBe("my-project");
+    });
+
+    it("should handle sessions without project field (backward compatibility)", async () => {
+      const oldSessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_noproject123",
+          startedAt: "2024-01-01T00:00:00.000Z",
+          mode: "plan",
+          prompt: "test prompt",
+          agent: AgentType.OpenCode,
+        },
+      ];
+
+      await ensureTestDir();
+      const fs = await import("fs/promises");
+      await fs.writeFile(SESSIONS_FILE, JSON.stringify({ sessions: oldSessions }, null, 2));
+
+      const migratedSessions = await readTestSessionsFile();
+
+      expect(migratedSessions).toHaveLength(1);
+      expect(migratedSessions[0].project).toBeUndefined();
+      expect(migratedSessions[0].sessionId).toBe("ses_noproject123");
+    });
+
+    it("should preserve project field when present", async () => {
+      const sessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_withproject123",
+          startedAt: "2024-01-01T00:00:00.000Z",
+          mode: "plan",
+          prompt: "test prompt",
+          agent: AgentType.ClaudeCode,
+          project: "feature-x",
+        },
+      ];
+
+      await ensureTestDir();
+      const fs = await import("fs/promises");
+      await fs.writeFile(SESSIONS_FILE, JSON.stringify({ sessions }, null, 2));
+
+      const migratedSessions = await readTestSessionsFile();
+
+      expect(migratedSessions).toHaveLength(1);
+      expect(migratedSessions[0].project).toBe("feature-x");
+    });
+
+    it("should handle mixed sessions with and without project field", async () => {
+      const sessions = [
+        {
+          iteration: 1,
+          sessionId: "ses_noproject456",
+          startedAt: "2024-01-01T00:00:00.000Z",
+          mode: "plan",
+          prompt: "test prompt 1",
+          agent: AgentType.OpenCode,
+        },
+        {
+          iteration: 2,
+          sessionId: "ses_withproject456",
+          startedAt: "2024-01-01T01:00:00.000Z",
+          mode: "build",
+          prompt: "test prompt 2",
+          agent: AgentType.ClaudeCode,
+          project: "my-feature",
+        },
+      ];
+
+      await ensureTestDir();
+      const fs = await import("fs/promises");
+      await fs.writeFile(SESSIONS_FILE, JSON.stringify({ sessions }, null, 2));
+
+      const migratedSessions = await readTestSessionsFile();
+
+      expect(migratedSessions).toHaveLength(2);
+      expect(migratedSessions[0].project).toBeUndefined();
+      expect(migratedSessions[1].project).toBe("my-feature");
+    });
   });
 });

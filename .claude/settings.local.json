@@ -8,7 +8,16 @@
       "Bash(bun test:*)",
       "Bash(opencode agent:*)",
       "Bash(opencode models:*)",
-      "Bash(bun run typecheck:*)"
+      "Bash(bun run typecheck:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:x.com)",
+      "WebFetch(domain:claytonfarr.github.io)",
+      "WebFetch(domain:ghuntley.com)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:www.aihero.dev)",
+      "WebFetch(domain:blog.sivaramp.com)",
+      "WebFetch(domain:opencode.ai)",
+      "WebFetch(domain:gist.github.com)"
     ]
   }
 }
