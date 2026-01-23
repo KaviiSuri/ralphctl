@@ -4,9 +4,11 @@ import { createAgent, AgentUnavailableError } from "../agents/factory.js";
 import { resolvePrompt } from "../prompts/resolver.js";
 import { resolveModelPlaceholders } from "../models/resolver.js";
 import { readSessionsFile, writeSessionsFile } from "../state/index.js";
+import { resolveProjectPaths, validateProject } from "../projects/validation.js";
 
 export interface RunHandlerOptions {
   mode: Mode;
+  project?: string;
   maxIterations?: number;
   permissionPosture?: "allow-all" | "ask";
   smartModel?: string;
@@ -16,7 +18,30 @@ export interface RunHandlerOptions {
 }
 
 export async function runHandler(options: RunHandlerOptions): Promise<void> {
-  const { mode, maxIterations = 10, permissionPosture = "allow-all", smartModel, fastModel, agent, noPrint = false } = options;
+  const { mode, project, maxIterations = 10, permissionPosture = "allow-all", smartModel, fastModel, agent, noPrint = false } = options;
+
+  // Validate and resolve project paths
+  let projectContext: { projectName?: string };
+  try {
+    const paths = resolveProjectPaths(project);
+    projectContext = { projectName: paths.projectName };
+
+    // Show warnings if project validation found issues
+    if (project) {
+      const validation = validateProject(project);
+      if (validation.warnings) {
+        for (const warning of validation.warnings) {
+          console.warn(`⚠ ${warning}`);
+        }
+      }
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(`Error: ${error.message}`);
+      process.exit(1);
+    }
+    throw error;
+  }
 
   const headless = !noPrint;
   const resolvedAgent = agent ?? AgentType.OpenCode;
@@ -42,7 +67,7 @@ export async function runHandler(options: RunHandlerOptions): Promise<void> {
     fastModel ?? adapterDefaults.fast
   );
 
-  console.log(`Running ${mode} mode`);
+  console.log(`Running ${mode} mode${project ? ` (project: ${project})` : ""}`);
   console.log(`Permissions: ${permissionPosture}`);
 
   if (agent === AgentType.ClaudeCode) {
@@ -55,7 +80,7 @@ export async function runHandler(options: RunHandlerOptions): Promise<void> {
 
   try {
     while (iteration <= maxIterations && !completed) {
-      const prompt = await resolvePrompt({ mode });
+      const prompt = await resolvePrompt({ mode, project });
       const resolvedPrompt = resolveModelPlaceholders(prompt, modelConfig);
       const result = await adapter.run(resolvedPrompt, modelConfig.smart);
       
@@ -76,6 +101,7 @@ export async function runHandler(options: RunHandlerOptions): Promise<void> {
         prompt,
         agent: resolvedAgent,
         printMode: headless,
+        ...(projectContext.projectName && { project: projectContext.projectName }),
       };
       sessions.push(sessionState);
       await writeSessionsFile(sessions);

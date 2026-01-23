@@ -31,6 +31,10 @@ const cli = Cli()
       },
     ],
     flags: {
+      project: {
+        type: String,
+        description: "Project name for scoped execution (uses projects/<name>/) [alias: -p]",
+      },
       "max-iterations": {
         type: Number,
         description: "Maximum number of iterations before stopping",
@@ -64,6 +68,7 @@ const cli = Cli()
   .on("run", async (ctx) => {
     await runHandler({
       mode: ctx.parameters.mode,
+      project: ctx.flags.project as string | undefined,
       maxIterations: ctx.flags["max-iterations"],
       permissionPosture: ctx.flags["permission-posture"] as "allow-all" | "ask",
       smartModel: ctx.flags["smart-model"],

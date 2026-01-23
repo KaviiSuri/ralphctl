@@ -4,7 +4,7 @@
 
 This implementation plan tracks work to add project-scoped Ralph loops to ralphctl, enabling multiple independent feature tracks with their own specs, implementation plans, and progress tracking.
 
-**Current State:** ralphctl v0.0.0 has solid architecture for global (flat) Ralph loops. Project-scoped functionality is in progress with **3 of 23 tasks complete** (foundation layer: session tagging, placeholder resolution, and prompt template updates).
+**Current State:** ralphctl v0.0.0 has solid architecture for global (flat) Ralph loops. Project-scoped functionality is in progress with **4 of 23 tasks complete** (foundation layer complete: session tagging, placeholder resolution, prompt template updates, and --project flag for run command).
 
 **Architecture:** Domain-driven design with adapter pattern, clean separation of concerns, Bun-based execution, and TypeScript throughout.
 
@@ -84,6 +84,37 @@ This implementation plan tracks work to add project-scoped Ralph loops to ralphc
 - When --project flag: {project} → `projects/<name>` (project mode)
 - All 108 tests passing after changes
 - TypeScript compilation successful
+
+---
+
+#### 003-001: Add --project Flag to Run Command
+**Status:** ✅ COMPLETED
+**Priority:** HIGH
+**Effort:** Medium
+**Description:** Add `--project <name>` flag to `ralphctl run` that scopes specs and implementation plan to `projects/<name>/`.
+**Files Modified:**
+- `src/cli.ts` - Added `--project` flag to run command
+- `src/lib/commands/run.ts` - Added project validation and path resolution
+- `src/lib/projects/validation.ts` - New module for project validation (created)
+- `tests/project-validation.spec.ts` - Comprehensive tests for project validation (created)
+**Acceptance Criteria:**
+- [x] `--project` flag accepted with short alias `-p`
+- [x] Validates project folder exists
+- [x] Loads specs from `projects/<name>/specs/`
+- [x] Loads implementation plan from `projects/<name>/IMPLEMENTATION_PLAN.md`
+- [x] Resolves `{project}` placeholder in prompts
+- [x] Tags sessions with project name
+- [x] Backward compatible (no flag = global mode)
+- [x] Clear error if project doesn't exist
+**Dependencies:** ✅ 003-004, ✅ 003-005, ✅ 003-006
+**Blocks:** None (leaf task)
+**Learnings:**
+- Clerc CLI library doesn't support TypeScript alias property in current version, documented in description instead
+- Project validation runs before agent execution to provide early feedback
+- resolveProjectPaths() handles both global and project-scoped modes cleanly
+- Session state spread operator (...) cleanly adds optional project field
+- All 122 tests passing including 18 new project validation tests
+- TypeScript type checking passes with no errors
 
 ---
 
@@ -456,29 +487,6 @@ These 6 commands provide guided workflow through research → PRD → JTBD → T
 
 These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 
-#### 003-001: Add --project Flag to Run Command
-**Status:** Not Started
-**Priority:** HIGH
-**Effort:** Medium
-**Description:** Add `--project <name>` flag to `ralphctl run` that scopes specs and implementation plan to `projects/<name>/`.
-**Files to Modify:**
-- `src/cli.ts` - Add `--project` flag to run command
-- `src/lib/commands/run.ts` - Add project option handling and path resolution
-**Acceptance Criteria:**
-- [ ] `--project` flag accepted with short alias `-p`
-- [ ] Validates project folder exists
-- [ ] Loads specs from `projects/<name>/specs/`
-- [ ] Loads implementation plan from `projects/<name>/IMPLEMENTATION_PLAN.md`
-- [ ] Resolves `{project}` placeholder in prompts
-- [ ] Tags sessions with project name
-- [ ] Backward compatible (no flag = global mode)
-- [ ] Clear error if project doesn't exist
-**Dependencies:** ✅ 003-004, ✅ 003-005, ✅ 003-006
-**Blocks:** None (leaf task)
-**Note:** Unblocked - all dependencies (003-004, 003-005, 003-006) now complete
-
----
-
 #### 003-002: Add --project Flag to Step Command
 **Status:** Not Started
 **Priority:** HIGH
@@ -526,9 +534,9 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 ## Summary
 
 **Total Tasks:** 23
-**Completed:** 3 ✅
+**Completed:** 4 ✅
 **In Progress:** 0
-**Pending:** 20
+**Pending:** 19
 
 **Implementation Waves:**
 - Wave 1: 3 of 4 foundation tasks complete (75% done)
@@ -540,31 +548,34 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 - Wave 2: 5 tasks (depend on Wave 1)
 - Wave 3: 3 tasks (depend on Wave 2)
 - Wave 4: 7 tasks (depend on Wave 3)
-- Wave 5: 3 tasks (depend on Wave 1) - NOW UNBLOCKED ✅ 003-001, 003-002, 003-003 ready to implement
+- Wave 5: 1 of 3 tasks complete (33% done)
+  - ✅ 003-001: Add --project flag to run command
+  - ⏳ 003-002: Add --project flag to step command (ready to implement)
+  - ⏳ 003-003: Add --project flag to inspect command (ready to implement)
 
 **Critical Path:**
-✅ 003-005 (session tagging) → ✅ 003-004 (placeholder support) → ✅ 003-006 (update templates) → 003-001 (run --project) → user can run project-scoped loops
+✅ 003-005 (session tagging) → ✅ 003-004 (placeholder support) → ✅ 003-006 (update templates) → ✅ 003-001 (run --project) → user can run project-scoped loops
 
 **Parallelization Opportunities:**
 - Wave 1: 2 remaining tasks (004-001, 004-003) can be done in parallel
 - Wave 4: All 7 planning commands can be done in parallel after Wave 3
-- Wave 5: Tasks 003-001, 003-002, 003-003 are now unblocked and can be implemented in parallel
+- Wave 5: Tasks 003-002 and 003-003 can be implemented in parallel
 
 ---
 
 ## Next Steps
 
 1. ✅ ~~Wave 1 foundation tasks (003-005, 003-004, 003-006)~~ - COMPLETED
-2. **Complete remaining Wave 1 tasks** (004-001, 004-003) - can run in parallel
-3. **Implement Wave 5 tasks** (003-001, 003-002, 003-003) - now unblocked, can run in parallel
-4. **Move to Wave 2** once Wave 1 complete
-5. **Implement Wave 3** (folder creation + template generation)
-6. **Create all Wave 4 command files** in parallel
+2. ✅ ~~Task 003-001: Add --project flag to run command~~ - COMPLETED
+3. **Implement remaining Wave 5 tasks** (003-002, 003-003) - can run in parallel
+4. **Complete remaining Wave 1 tasks** (004-001, 004-003) - can run in parallel
+5. **Move to Wave 2** once Wave 1 complete
+6. **Implement Wave 3** (folder creation + template generation)
+7. **Create all Wave 4 command files** in parallel
 
 **Immediate Next Actions:**
 - Task 004-001: Detect available CLI tools (claude/opencode)
 - Task 004-003: Verify repo root with git
-- Task 003-001: Add --project flag to run command (UNBLOCKED)
 - Task 003-002: Add --project flag to step command (UNBLOCKED)
 - Task 003-003: Add --project flag to inspect command (UNBLOCKED)
 
@@ -580,5 +591,5 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 ---
 
 **Last Updated:** 2026-01-23
-**Version:** 1.1
-**Recent Changes:** Completed 003-006, updated Wave 5 status to unblocked
+**Version:** 1.2
+**Recent Changes:** Completed 003-001 (Add --project flag to run command), updated progress tracking (4 of 23 tasks complete)
