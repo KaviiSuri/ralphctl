@@ -5,11 +5,13 @@ import {
   isValidProjectName,
   createProjectStructure,
   generateTemplates,
+  printInitializationSummary,
   type DirectoryCreator,
   type FileSystemChecker,
   type FileStatChecker,
   type WritabilityChecker,
   type FileWriter,
+  type OutputPrinter,
 } from "../src/lib/projects/init.js";
 
 describe("Project Initialization", () => {
@@ -574,6 +576,257 @@ describe("Project Initialization", () => {
       expect(existsSync(join(projectPath, "04-tasks.md"))).toBe(true);
       expect(existsSync(join(projectPath, "05-hld.md"))).toBe(true);
       expect(existsSync(join(projectPath, "IMPLEMENTATION_PLAN.md"))).toBe(true);
+    });
+  });
+
+  describe("printInitializationSummary", () => {
+    it("should print success message with project name", async () => {
+      await createProjectStructure("summary-test", testRoot);
+      const templateResult = await generateTemplates("summary-test", testRoot);
+
+      const output: string[] = [];
+      const mockPrinter: OutputPrinter = (message: string) => {
+        output.push(message);
+      };
+
+      const result = printInitializationSummary(
+        "summary-test",
+        templateResult,
+        testRoot,
+        mockPrinter
+      );
+
+      const fullOutput = output.join("\n");
+      expect(fullOutput).toContain("✓ Project 'summary-test' created successfully!");
+      expect(result.projectName).toBe("summary-test");
+    });
+
+    it("should display folder structure with tree characters", async () => {
+      await createProjectStructure("tree-test", testRoot);
+      const templateResult = await generateTemplates("tree-test", testRoot);
+
+      const output: string[] = [];
+      const mockPrinter: OutputPrinter = (message: string) => {
+        output.push(message);
+      };
+
+      printInitializationSummary("tree-test", templateResult, testRoot, mockPrinter);
+
+      const fullOutput = output.join("\n");
+      expect(fullOutput).toContain("projects/tree-test/");
+      expect(fullOutput).toContain("├──");
+      expect(fullOutput).toContain("└──");
+      expect(fullOutput).toContain("specs/");
+    });
+
+    it("should list all template files in sorted order", async () => {
+      await createProjectStructure("sorted-test", testRoot);
+      const templateResult = await generateTemplates("sorted-test", testRoot);
+
+      const output: string[] = [];
+      const mockPrinter: OutputPrinter = (message: string) => {
+        output.push(message);
+      };
+
+      const result = printInitializationSummary(
+        "sorted-test",
+        templateResult,
+        testRoot,
+        mockPrinter
+      );
+
+      // Check files are in result
+      expect(result.files).toContain("01-research.md");
+      expect(result.files).toContain("02-prd.md");
+      expect(result.files).toContain("03-jtbd.md");
+      expect(result.files).toContain("04-tasks.md");
+      expect(result.files).toContain("05-hld.md");
+      expect(result.files).toContain("IMPLEMENTATION_PLAN.md");
+
+      // Check ordering: numbered files first, then IMPLEMENTATION_PLAN.md
+      const implementationPlanIndex = result.files.indexOf("IMPLEMENTATION_PLAN.md");
+      const researchIndex = result.files.indexOf("01-research.md");
+      const hldIndex = result.files.indexOf("05-hld.md");
+
+      expect(researchIndex).toBeLessThan(implementationPlanIndex);
+      expect(hldIndex).toBeLessThan(implementationPlanIndex);
+    });
+
+    it("should include next step command", async () => {
+      await createProjectStructure("nextstep-test", testRoot);
+      const templateResult = await generateTemplates("nextstep-test", testRoot);
+
+      const output: string[] = [];
+      const mockPrinter: OutputPrinter = (message: string) => {
+        output.push(message);
+      };
+
+      const result = printInitializationSummary(
+        "nextstep-test",
+        templateResult,
+        testRoot,
+        mockPrinter
+      );
+
+      const fullOutput = output.join("\n");
+      expect(fullOutput).toContain("/project:research nextstep-test");
+      expect(fullOutput).toContain("Next step:");
+      expect(fullOutput).toContain("problem statement");
+      expect(result.nextCommand).toBe("/project:research nextstep-test");
+    });
+
+    it("should handle projects with both created and skipped files", async () => {
+      await createProjectStructure("mixed-test", testRoot);
+
+      // Create some files manually
+      const projectPath = join(testRoot, "projects", "mixed-test");
+      writeFileSync(join(projectPath, "01-research.md"), "Existing");
+      writeFileSync(join(projectPath, "03-jtbd.md"), "Existing");
+
+      const templateResult = await generateTemplates("mixed-test", testRoot);
+
+      const output: string[] = [];
+      const mockPrinter: OutputPrinter = (message: string) => {
+        output.push(message);
+      };
+
+      const result = printInitializationSummary(
+        "mixed-test",
+        templateResult,
+        testRoot,
+        mockPrinter
+      );
+
+      // Should show all files (both created and skipped)
+      expect(result.files.length).toBe(6);
+      expect(result.files).toContain("01-research.md");
+      expect(result.files).toContain("02-prd.md");
+      expect(result.files).toContain("03-jtbd.md");
+    });
+
+    it("should display correct relative path from repo root", async () => {
+      await createProjectStructure("path-test", testRoot);
+      const templateResult = await generateTemplates("path-test", testRoot);
+
+      const output: string[] = [];
+      const mockPrinter: OutputPrinter = (message: string) => {
+        output.push(message);
+      };
+
+      const result = printInitializationSummary("path-test", templateResult, testRoot, mockPrinter);
+
+      expect(result.projectPath).toBe("projects/path-test");
+
+      const fullOutput = output.join("\n");
+      expect(fullOutput).toContain("projects/path-test/");
+    });
+
+    it("should handle project names with special characters", async () => {
+      const projectName = "my-feature_v2.0";
+      await createProjectStructure(projectName, testRoot);
+      const templateResult = await generateTemplates(projectName, testRoot);
+
+      const output: string[] = [];
+      const mockPrinter: OutputPrinter = (message: string) => {
+        output.push(message);
+      };
+
+      const result = printInitializationSummary(
+        projectName,
+        templateResult,
+        testRoot,
+        mockPrinter
+      );
+
+      const fullOutput = output.join("\n");
+      expect(fullOutput).toContain(`✓ Project '${projectName}' created successfully!`);
+      expect(fullOutput).toContain(`/project:research ${projectName}`);
+      expect(result.nextCommand).toBe(`/project:research ${projectName}`);
+    });
+
+    it("should include all required sections in output", async () => {
+      await createProjectStructure("sections-test", testRoot);
+      const templateResult = await generateTemplates("sections-test", testRoot);
+
+      const output: string[] = [];
+      const mockPrinter: OutputPrinter = (message: string) => {
+        output.push(message);
+      };
+
+      printInitializationSummary("sections-test", templateResult, testRoot, mockPrinter);
+
+      const fullOutput = output.join("\n");
+
+      // AC1: Success message
+      expect(fullOutput).toContain("✓ Project 'sections-test' created successfully!");
+
+      // AC2: Folder structure
+      expect(fullOutput).toContain("Structure:");
+      expect(fullOutput).toContain("projects/sections-test/");
+
+      // AC3: Next step guidance
+      expect(fullOutput).toContain("Next step:");
+      expect(fullOutput).toContain("Run the following command");
+      expect(fullOutput).toContain("/project:research sections-test");
+    });
+
+    it("should display specs/ directory at the end", async () => {
+      await createProjectStructure("specs-last-test", testRoot);
+      const templateResult = await generateTemplates("specs-last-test", testRoot);
+
+      const output: string[] = [];
+      const mockPrinter: OutputPrinter = (message: string) => {
+        output.push(message);
+      };
+
+      printInitializationSummary("specs-last-test", templateResult, testRoot, mockPrinter);
+
+      const fullOutput = output.join("\n");
+
+      // Find the line with specs/
+      const lines = fullOutput.split("\n");
+      const specsLineIndex = lines.findIndex((line) => line.includes("specs/"));
+      const implementationPlanLineIndex = lines.findIndex((line) =>
+        line.includes("IMPLEMENTATION_PLAN.md")
+      );
+
+      // specs/ should come after IMPLEMENTATION_PLAN.md
+      expect(specsLineIndex).toBeGreaterThan(implementationPlanLineIndex);
+
+      // specs/ should use └── (last item)
+      expect(lines[specsLineIndex]).toContain("└──");
+    });
+
+    it("should return all required fields in result object", async () => {
+      await createProjectStructure("result-test", testRoot);
+      const templateResult = await generateTemplates("result-test", testRoot);
+
+      const output: string[] = [];
+      const mockPrinter: OutputPrinter = (message: string) => {
+        output.push(message);
+      };
+
+      const result = printInitializationSummary(
+        "result-test",
+        templateResult,
+        testRoot,
+        mockPrinter
+      );
+
+      expect(result.projectName).toBe("result-test");
+      expect(result.projectPath).toBe("projects/result-test");
+      expect(result.files).toHaveLength(6);
+      expect(result.nextCommand).toBe("/project:research result-test");
+    });
+
+    it("should work with default printer (console.log)", async () => {
+      await createProjectStructure("default-printer-test", testRoot);
+      const templateResult = await generateTemplates("default-printer-test", testRoot);
+
+      // This should not throw - using default printer
+      expect(() => {
+        printInitializationSummary("default-printer-test", templateResult, testRoot);
+      }).not.toThrow();
     });
   });
 });

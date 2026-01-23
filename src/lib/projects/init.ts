@@ -642,6 +642,116 @@ const TEMPLATE_FILES: readonly TemplateFile[] = [
 ] as const;
 
 /**
+ * Output printer function type for dependency injection in tests
+ */
+export type OutputPrinter = (message: string) => void;
+
+/**
+ * Default output printer using console.log
+ */
+const defaultOutputPrinter: OutputPrinter = (message: string) => {
+  console.log(message);
+};
+
+/**
+ * Result of initialization summary printing
+ */
+export interface InitializationSummaryResult {
+  /** Project name */
+  projectName: string;
+  /** Relative path to project from repo root */
+  projectPath: string;
+  /** List of files in the summary */
+  files: string[];
+  /** Next command to run */
+  nextCommand: string;
+}
+
+/**
+ * Prints initialization summary after project creation
+ *
+ * This function displays:
+ * - Success message with project name
+ * - Folder structure tree showing created files
+ * - Next step guidance with exact command to run
+ *
+ * @param name - Project name
+ * @param templateResult - Result from generateTemplates with created/skipped files
+ * @param repoRoot - Repository root directory (defaults to process.cwd())
+ * @param printer - Optional output printer for testing
+ * @returns InitializationSummaryResult with summary details
+ *
+ * @example
+ * ```typescript
+ * const templateResult = await generateTemplates("my-feature");
+ * printInitializationSummary("my-feature", templateResult);
+ * // Prints:
+ * // ✓ Project 'my-feature' created successfully!
+ * //
+ * // Structure:
+ * // projects/my-feature/
+ * // ├── 01-research.md
+ * // ...
+ * ```
+ */
+export function printInitializationSummary(
+  name: string,
+  templateResult: TemplateGenerationResult,
+  repoRoot: string = process.cwd(),
+  printer: OutputPrinter = defaultOutputPrinter
+): InitializationSummaryResult {
+  const relativePath = path.relative(repoRoot, templateResult.projectPath);
+  const displayPath = relativePath || "projects/" + name;
+
+  // Success header
+  printer(`\n✓ Project '${name}' created successfully!\n`);
+
+  // Structure section
+  printer("Structure:");
+  printer(`${displayPath}/`);
+
+  // Sort files: numbered files first (01-05), then IMPLEMENTATION_PLAN.md, then specs/
+  const allFiles = [...templateResult.created, ...templateResult.skipped];
+  const sortedFiles = allFiles.sort((a, b) => {
+    // Extract numbers from filenames like "01-research.md"
+    const aNum = parseInt(a.match(/^(\d+)-/)?.[1] || "999");
+    const bNum = parseInt(b.match(/^(\d+)-/)?.[1] || "999");
+
+    if (aNum !== bNum) return aNum - bNum;
+
+    // IMPLEMENTATION_PLAN.md comes after numbered files
+    if (a === "IMPLEMENTATION_PLAN.md") return 1;
+    if (b === "IMPLEMENTATION_PLAN.md") return -1;
+
+    return a.localeCompare(b);
+  });
+
+  // Print files with tree characters
+  for (let i = 0; i < sortedFiles.length; i++) {
+    const isLast = i === sortedFiles.length - 1;
+    const treeChar = isLast ? "└──" : "├──";
+    printer(`${treeChar} ${sortedFiles[i]}`);
+  }
+
+  // Always show specs/ directory at the end
+  printer("└── specs/\n");
+
+  // Next step guidance
+  printer("Next step:");
+  printer("Run the following command to begin research:\n");
+  printer(`  /project:research ${name}\n`);
+  printer("This will guide you through capturing the problem statement,");
+  printer("existing solutions, constraints, and open questions.");
+
+  return {
+    projectName: name,
+    projectPath: displayPath,
+    files: sortedFiles,
+    nextCommand: `/project:research ${name}`,
+  };
+}
+
+/**
  * Generates template files for a project
  *
  * This function creates all planning template files (01-research.md through 05-hld.md

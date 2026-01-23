@@ -4,7 +4,7 @@
 
 This implementation plan tracks work to add project-scoped Ralph loops to ralphctl, enabling multiple independent feature tracks with their own specs, implementation plans, and progress tracking.
 
-**Current State:** ralphctl v0.0.0 has solid architecture for global (flat) Ralph loops. Project-scoped functionality is in progress with **14 of 23 tasks complete** (60.9%) (Wave 1 foundation tasks complete: session tagging, placeholder resolution, prompt template updates, --project flag for run, step, and inspect commands, CLI tool detection, repo verification, user prompting for tool selection, and command folder infrastructure for both Claude Code and OpenCode).
+**Current State:** ralphctl v0.0.0 has solid architecture for global (flat) Ralph loops. Project-scoped functionality is in progress with **15 of 23 tasks complete** (65.2%) (Wave 1 foundation tasks complete: session tagging, placeholder resolution, prompt template updates, --project flag for run, step, and inspect commands, CLI tool detection, repo verification, user prompting for tool selection, and command folder infrastructure for both Claude Code and OpenCode).
 
 **Architecture:** Domain-driven design with adapter pattern, clean separation of concerns, Bun-based execution, and TypeScript throughout.
 
@@ -353,20 +353,28 @@ These tasks depend on command files being installed.
 ---
 
 #### 001-003: Print Initialization Summary
-**Status:** Not Started
+**Status:** ✅ COMPLETED
 **Priority:** MEDIUM
 **Effort:** Small
 **Description:** Display user-friendly summary showing created folder structure and next command to run.
-**Files to Modify:**
-- `src/lib/projects/init.ts` - Add summary printing logic
+**Files Modified:**
+- `src/lib/projects/init.ts` - Added printInitializationSummary() function with OutputPrinter type for dependency injection
+- `tests/project-init.spec.ts` - Added 11 comprehensive test cases for summary printing
 **Acceptance Criteria:**
-- [ ] Shows success message with project name
-- [ ] Displays folder structure tree
-- [ ] Lists all created template files
-- [ ] Prints next step: `/project:research <name>`
-- [ ] Matches ralphctl's CLI output style
-**Dependencies:** 001-002
+- [x] Shows success message with project name
+- [x] Displays folder structure tree
+- [x] Lists all created template files
+- [x] Prints next step: `/project:research <name>`
+- [x] Matches ralphctl's CLI output style
+**Dependencies:** ✅ 001-002
 **Blocks:** None
+**Learnings:**
+- Dependency injection pattern with OutputPrinter type enables unit testing of console output
+- Unicode tree characters (├──, └──) provide clear visual hierarchy in CLI output
+- Sorting files by numeric prefix (01-05) followed by IMPLEMENTATION_PLAN.md provides intuitive ordering
+- path.relative() handles display of project paths cleanly regardless of repo root location
+- All 271 tests passing (11 new tests for printInitializationSummary)
+- TypeScript compilation successful with no errors
 
 ---
 
@@ -607,9 +615,9 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 ## Summary
 
 **Total Tasks:** 23
-**Completed:** 14 ✅
+**Completed:** 15 ✅
 **In Progress:** 0
-**Pending:** 9
+**Pending:** 8
 
 **Implementation Waves:**
 - Wave 1: 5 of 5 foundation tasks complete (100% done) ✅
@@ -623,9 +631,10 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
   - ✅ 004-004: Create local .claude/commands/ folder
   - ✅ 004-005: Create local .opencode/commands/ folder
   - ✅ 004-006: Install command files
-- Wave 3: 2 of 3 tasks complete (66% done)
+- Wave 3: 3 of 3 tasks complete (100% done) ✅
   - ✅ 001-001: Create project folder structure
   - ✅ 001-002: Generate template files
+  - ✅ 001-003: Print initialization summary
 - Wave 4: 7 tasks (depend on Wave 3)
 - Wave 5: 3 of 3 tasks complete (100% done) ✅
   - ✅ 003-001: Add --project flag to run command
@@ -668,5 +677,5 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 ---
 
 **Last Updated:** 2026-01-23
-**Version:** 1.10
-**Recent Changes:** Completed task 001-002 (Generate Template Files) - second Wave 3 task! Added generateTemplates() function to src/lib/projects/init.ts with 6 template content constants (RESEARCH_TEMPLATE, PRD_TEMPLATE, JTBD_TEMPLATE, TASKS_TEMPLATE, HLD_TEMPLATE, IMPLEMENTATION_PLAN_TEMPLATE). Added 18 comprehensive test cases in tests/project-init.spec.ts. Key features: idempotent design that skips existing files, non-atomic creation (continues on partial failures), aggregated error reporting, dependency injection with FileWriter type. All 260 tests passing. Total progress: 14 of 23 tasks complete (60.9%). Wave 3: 2 of 3 tasks complete (66%). Next: Wave 3 task 001-003 (Print Initialization Summary).
+**Version:** 1.11
+**Recent Changes:** Completed task 001-003 (Print Initialization Summary) - Wave 3 is now complete! Added printInitializationSummary() function to src/lib/projects/init.ts with OutputPrinter type for dependency injection. Added 11 comprehensive test cases in tests/project-init.spec.ts. Key features: Unicode tree characters (├──, └──) for visual hierarchy, smart file sorting (numeric prefix 01-05 followed by IMPLEMENTATION_PLAN.md), path.relative() for clean path display. All 271 tests passing (11 new tests for printInitializationSummary). Total progress: 15 of 23 tasks complete (65.2%). Wave 3: 3 of 3 tasks complete (100% done). Next: Wave 4 planning commands (002-001 through 002-008).
