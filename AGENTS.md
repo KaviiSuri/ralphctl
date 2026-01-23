@@ -52,3 +52,7 @@ Keep Learnings up to date as you find new facts about the requirements, the code
 - Path normalization with path.resolve() handles symlinks and trailing slashes when comparing directory paths
 - Readline-based user confirmation pattern works well for interactive prompts (see confirmOverwrite in io/index.ts and verifyRepoRoot in repo/verification.ts)
 - Dependency injection with typed function parameters (e.g., ToolSelector type) enables unit testing of interactive prompts without mock.module() issues
+- Extracting parameterized internal functions eliminates code duplication (createCommandsFolder parameterized by toolName reduced ~130 lines of duplication to single 73-line function)
+- fs.access() with constants.W_OK verifies directory writability after creation
+- Semantic field naming matters for API clarity: "ready" vs "created" better represents idempotent operations
+- Edge case handling: check if parent exists as file instead of directory using statSync().isDirectory()
