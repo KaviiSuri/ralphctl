@@ -264,6 +264,8 @@ These tasks depend on Wave 1 foundation being complete.
 - `src/lib/templates/commands.ts` - New file with 7 command templates
 - `src/lib/command-infrastructure.ts` - Added installCommandFiles() and installCommandFilesToTarget() functions
 - `tests/command-infrastructure.spec.ts` - Added 13 comprehensive test cases
+- `src/lib/commands/setup.ts` - New setup handler (created)
+- `src/cli.ts` - Added setup command (modified)
 **Acceptance Criteria:**
 - [x] 7 command files exist as templates
 - [x] Copies to `.claude/commands/` when available
@@ -272,6 +274,7 @@ These tasks depend on Wave 1 foundation being complete.
 - [x] Idempotent (safe to run multiple times)
 - [x] Reports installation summary
 - [x] Uses markdown with proper YAML frontmatter
+- [x] CLI command exists to invoke installation
 **Dependencies:** ✅ 004-004, ✅ 004-005
 **Blocks:** None (leaf task for command infrastructure)
 **Learnings:**
@@ -284,6 +287,16 @@ These tasks depend on Wave 1 foundation being complete.
 - Console logging for installation progress provides user feedback during operation
 - All 219 tests passing (13 new tests for command installation)
 - TypeScript compilation successful with no errors
+- **IMPORTANT CORRECTION:** Infrastructure functions alone are insufficient - CLI command needed to invoke them
+- **Bootstrap Problem:** Command templates cannot install themselves - they need a CLI command to trigger installation
+- **Solution:** Created `ralphctl setup` command that:
+  1. Verifies repo root using verifyRepoRoot()
+  2. Detects available CLI tools using detectAvailableTools()
+  3. Prompts user if neither tool detected using determineToolChoice()
+  4. Creates command folders using createCommandFolders()
+  5. Installs all 7 command files using installCommandFiles()
+  6. Displays success summary with next steps
+- The infrastructure functions are now fully integrated into the CLI workflow via `ralphctl setup`
 
 ---
 

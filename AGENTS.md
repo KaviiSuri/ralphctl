@@ -62,3 +62,4 @@ Keep Learnings up to date as you find new facts about the requirements, the code
 - Dependency injection pattern with OutputPrinter type enables testing console.log output without mocking global console
 - Unicode tree characters (├──, └──) work cross-platform for CLI folder structure display
 - File sorting with numeric prefix extraction (parseInt on /^(\d+)-/) provides intuitive ordering for numbered files
+- Tree structure formatting: ensure only the final item uses └── character, all preceding items use ├── for visual consistency

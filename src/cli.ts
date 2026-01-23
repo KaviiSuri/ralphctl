@@ -7,6 +7,7 @@ import { runHandler } from "./lib/commands/run.js";
 import { stepHandler } from "./lib/commands/step.js";
 import { inspectHandler } from "./lib/commands/inspect.js";
 import { initHandler } from "./lib/commands/init.js";
+import { setupHandler } from "./lib/commands/setup.js";
 
 const getCommandName = (): string => {
   if (!process.argv[1]) return "ralphctl";
@@ -161,5 +162,17 @@ const cli = Cli()
   })
   .on("init", async (ctx) => {
     await initHandler({ force: ctx.flags.force as boolean });
+  })
+  .command("setup", "Set up project commands in .claude/commands/ and/or .opencode/commands/", {
+    flags: {
+      force: {
+        type: Boolean,
+        description: "Force reinstall even if commands already exist",
+        default: false,
+      },
+    },
+  })
+  .on("setup", async (ctx) => {
+    await setupHandler({ force: ctx.flags.force as boolean });
   })
   .parse();
