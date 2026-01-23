@@ -4,7 +4,7 @@
 
 This implementation plan tracks work to add project-scoped Ralph loops to ralphctl, enabling multiple independent feature tracks with their own specs, implementation plans, and progress tracking.
 
-**Current State:** ralphctl v0.0.0 has solid architecture for global (flat) Ralph loops. Project-scoped functionality is in progress with **7 of 23 tasks complete** (foundation layer complete: session tagging, placeholder resolution, prompt template updates, --project flag for run, step, and inspect commands, and CLI tool detection).
+**Current State:** ralphctl v0.0.0 has solid architecture for global (flat) Ralph loops. Project-scoped functionality is in progress with **8 of 23 tasks complete** (Wave 1 foundation tasks complete: session tagging, placeholder resolution, prompt template updates, --project flag for run, step, and inspect commands, CLI tool detection, and repo verification).
 
 **Architecture:** Domain-driven design with adapter pattern, clean separation of concerns, Bun-based execution, and TypeScript throughout.
 
@@ -144,33 +144,33 @@ This implementation plan tracks work to add project-scoped Ralph loops to ralphc
 
 ---
 
-### 🟡 In Progress
-
-### 🟡 Wave 1: Foundation Tasks (No Dependencies)
-
-These tasks can be implemented immediately in parallel as they have no dependencies.
-
----
-
 #### 004-003: Verify Repo Root
-**Status:** Not Started
+**Status:** ✅ COMPLETED
 **Priority:** MEDIUM
 **Effort:** Medium
 **Description:** Check if current directory is git repository root using `git rev-parse --show-toplevel`. Warn if not in repo or in subdirectory.
-**Files to Create:**
-- `src/lib/repo-verification.ts` - New module for git repo validation
+**Files Created:**
+- `src/lib/repo/verification.ts` - Module for git repository verification with verifyRepoRoot(), isGitRepository(), and getRepoRoot()
+- `tests/repo-verification.spec.ts` - Comprehensive test suite with 14 test cases
 **Acceptance Criteria:**
-- [ ] Detects git repository correctly
-- [ ] Identifies repo root path
-- [ ] Warns if not at repo root
-- [ ] Prompts for user confirmation
-- [ ] Returns structured verification result
-- [ ] Works with worktrees
-- [ ] Handles missing git gracefully
+- [x] Detects git repository correctly
+- [x] Identifies repo root path
+- [x] Warns if not at repo root
+- [x] Prompts for user confirmation
+- [x] Returns structured verification result
+- [x] Works with worktrees
+- [x] Handles missing git gracefully
 **Dependencies:** None
 **Blocks:** 004-004, 004-005
+**Learnings:**
+- Dependency injection pattern with GitCommandExecutor and UserPrompter types enables unit testing
+- Path normalization with path.resolve() handles symlinks and trailing slashes correctly
+- Readline-based prompting pattern consistent with existing codebase (confirmOverwrite in io/index.ts)
+- All 147 tests passing, TypeScript compilation successful
 
 ---
+
+### 🟡 In Progress
 
 ### 🟡 Wave 2: Tool Detection & Prompt Updates (Depends on Wave 1)
 
@@ -550,21 +550,21 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 ## Summary
 
 **Total Tasks:** 23
-**Completed:** 7 ✅
+**Completed:** 8 ✅
 **In Progress:** 0
-**Pending:** 16
+**Pending:** 15
 
 **Implementation Waves:**
-- Wave 1: 4 of 5 foundation tasks complete (80% done)
+- Wave 1: 5 of 5 foundation tasks complete (100% done) ✅
   - ✅ 003-005: Session tagging with project name
   - ✅ 003-004: {project} placeholder support in prompts
   - ✅ 003-006: Update global prompt templates
   - ✅ 004-001: Detect available CLI tools
-  - ⏳ 004-003: Verify repo root
+  - ✅ 004-003: Verify repo root
 - Wave 2: 5 tasks (depend on Wave 1)
 - Wave 3: 3 tasks (depend on Wave 2)
 - Wave 4: 7 tasks (depend on Wave 3)
-- Wave 5: 3 of 3 tasks complete (100% done)
+- Wave 5: 3 of 3 tasks complete (100% done) ✅
   - ✅ 003-001: Add --project flag to run command
   - ✅ 003-002: Add --project flag to step command
   - ✅ 003-003: Add --project flag to inspect command
@@ -573,7 +573,7 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 ✅ 003-005 (session tagging) → ✅ 003-004 (placeholder support) → ✅ 003-006 (update templates) → ✅ 003-001 (run --project) → user can run project-scoped loops
 
 **Parallelization Opportunities:**
-- Wave 1: 1 remaining task (004-003) - can be done independently
+- Wave 1: All tasks complete ✅
 - Wave 4: All 7 planning commands can be done in parallel after Wave 3
 - Wave 5: All tasks complete ✅
 
@@ -585,13 +585,13 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 2. ✅ ~~Task 003-001: Add --project flag to run command~~ - COMPLETED
 3. ✅ ~~Implement remaining Wave 5 tasks (003-002, 003-003)~~ - COMPLETED
 4. ✅ ~~Task 004-001: Detect available CLI tools~~ - COMPLETED
-5. **Complete remaining Wave 1 task: 004-003 (Verify repo root)**
-6. **Move to Wave 2** once Wave 1 complete
+5. ✅ ~~Wave 1 complete~~ - COMPLETED
+6. **Move to Wave 2** - tool prompting and folder creation
 7. **Implement Wave 3** (folder creation + template generation)
 8. **Create all Wave 4 command files** in parallel
 
 **Immediate Next Actions:**
-- Task 004-003: Verify repo root with git
+- Wave 2: Task 004-002 (Prompt User When No Tools Detected)
 
 **Testing Strategy:**
 - Use bun:test with dependency injection pattern (avoid mock.module() for better test isolation)
@@ -605,5 +605,5 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 ---
 
 **Last Updated:** 2026-01-23
-**Version:** 1.4
-**Recent Changes:** Completed task 004-001 (Detect Available CLI Tools) - implemented CLI tool detection with cross-platform support and dependency injection for testability. Updated progress tracking (7 of 23 tasks complete, Wave 1 at 80%).
+**Version:** 1.5
+**Recent Changes:** Completed task 004-003 (Verify Repo Root) - implemented git repository verification with user prompting and comprehensive test coverage. Wave 1 foundation tasks now 100% complete (8 of 23 total tasks done).

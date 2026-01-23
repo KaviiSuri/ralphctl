@@ -49,3 +49,5 @@ Keep Learnings up to date as you find new facts about the requirements, the code
 - inspect --project filters sessions by project field, only shows run command sessions (step doesn't track)
 - Dependency injection pattern with type aliases (e.g., CommandExecutor) enables unit testing without mock.module() global state issues
 - Cross-platform command checking: use platform-based conditional logic (which on Unix, where on Windows)
+- Path normalization with path.resolve() handles symlinks and trailing slashes when comparing directory paths
+- Readline-based user confirmation pattern works well for interactive prompts (see confirmOverwrite in io/index.ts and verifyRepoRoot in repo/verification.ts)
