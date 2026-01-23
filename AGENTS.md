@@ -51,3 +51,4 @@ Keep Learnings up to date as you find new facts about the requirements, the code
 - Cross-platform command checking: use platform-based conditional logic (which on Unix, where on Windows)
 - Path normalization with path.resolve() handles symlinks and trailing slashes when comparing directory paths
 - Readline-based user confirmation pattern works well for interactive prompts (see confirmOverwrite in io/index.ts and verifyRepoRoot in repo/verification.ts)
+- Dependency injection with typed function parameters (e.g., ToolSelector type) enables unit testing of interactive prompts without mock.module() issues

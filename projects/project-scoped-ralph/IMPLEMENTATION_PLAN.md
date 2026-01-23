@@ -4,7 +4,7 @@
 
 This implementation plan tracks work to add project-scoped Ralph loops to ralphctl, enabling multiple independent feature tracks with their own specs, implementation plans, and progress tracking.
 
-**Current State:** ralphctl v0.0.0 has solid architecture for global (flat) Ralph loops. Project-scoped functionality is in progress with **8 of 23 tasks complete** (Wave 1 foundation tasks complete: session tagging, placeholder resolution, prompt template updates, --project flag for run, step, and inspect commands, CLI tool detection, and repo verification).
+**Current State:** ralphctl v0.0.0 has solid architecture for global (flat) Ralph loops. Project-scoped functionality is in progress with **9 of 23 tasks complete** (Wave 1 foundation tasks complete: session tagging, placeholder resolution, prompt template updates, --project flag for run, step, and inspect commands, CLI tool detection, repo verification, and user prompting for tool selection).
 
 **Architecture:** Domain-driven design with adapter pattern, clean separation of concerns, Bun-based execution, and TypeScript throughout.
 
@@ -170,31 +170,39 @@ This implementation plan tracks work to add project-scoped Ralph loops to ralphc
 
 ---
 
+#### 004-002: Prompt User When No Tools Detected
+**Status:** ✅ COMPLETED
+**Priority:** MEDIUM
+**Effort:** Medium
+**Description:** When tool detection finds neither tool, prompt user to choose: Claude Code, OpenCode, or Both. Pass choice to folder creation.
+**Files Created:**
+- `src/lib/tools/prompting.ts` - Module for interactive tool selection with parseToolChoice(), promptToolSelection(), and determineToolChoice()
+- `tests/tool-prompting.spec.ts` - Comprehensive test suite with 32 test cases
+**Acceptance Criteria:**
+- [x] Shows clear warning about missing tools
+- [x] Offers numbered options (1-3)
+- [x] Accepts multiple input formats (number, tool name)
+- [x] Case-insensitive matching
+- [x] Re-prompts on invalid input (max 3 attempts)
+- [x] Handles Ctrl+C gracefully
+- [x] Passes user choice to downstream tasks
+**Dependencies:** ✅ 004-001
+**Blocks:** 004-004, 004-005
+**Learnings:**
+- Dependency injection with ToolSelector type enables unit testing of interactive prompts
+- parseToolChoice() handles multiple input formats (numeric "1"/"2"/"3", text "claude"/"opencode"/"both", case-insensitive)
+- promptToolSelection() implements retry logic with max attempts (default 3), returns null on exhaustion
+- determineToolChoice() integrates detection results with user prompting - auto-chooses when tools detected, prompts when none found
+- All acceptance criteria met per spec, 32 comprehensive test cases all passing
+- All 182 tests in the project pass, TypeScript compilation successful with no errors
+
+---
+
 ### 🟡 In Progress
 
 ### 🟡 Wave 2: Tool Detection & Prompt Updates (Depends on Wave 1)
 
 These tasks depend on Wave 1 foundation being complete.
-
-#### 004-002: Prompt User When No Tools Detected
-**Status:** Not Started
-**Priority:** MEDIUM
-**Effort:** Medium
-**Description:** When tool detection finds neither tool, prompt user to choose: Claude Code, OpenCode, or Both. Pass choice to folder creation.
-**Files to Create:**
-- `src/lib/tool-prompting.ts` - New module for interactive tool selection
-**Acceptance Criteria:**
-- [ ] Shows clear warning about missing tools
-- [ ] Offers numbered options (1-3)
-- [ ] Accepts multiple input formats (number, tool name)
-- [ ] Case-insensitive matching
-- [ ] Re-prompts on invalid input
-- [ ] Handles Ctrl+C gracefully
-- [ ] Passes user choice to downstream tasks
-**Dependencies:** 004-001
-**Blocks:** 004-004, 004-005
-
----
 
 #### 004-004: Create local .claude/commands/ folder
 **Status:** Not Started
@@ -550,9 +558,9 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 ## Summary
 
 **Total Tasks:** 23
-**Completed:** 8 ✅
+**Completed:** 9 ✅
 **In Progress:** 0
-**Pending:** 15
+**Pending:** 14
 
 **Implementation Waves:**
 - Wave 1: 5 of 5 foundation tasks complete (100% done) ✅
@@ -561,7 +569,9 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
   - ✅ 003-006: Update global prompt templates
   - ✅ 004-001: Detect available CLI tools
   - ✅ 004-003: Verify repo root
-- Wave 2: 5 tasks (depend on Wave 1)
+- Wave 2: 1 of 5 tasks complete (20% done)
+  - ✅ 004-002: Prompt user when no tools detected
+  - Pending: 004-004, 004-005, 004-006 (command infrastructure)
 - Wave 3: 3 tasks (depend on Wave 2)
 - Wave 4: 7 tasks (depend on Wave 3)
 - Wave 5: 3 of 3 tasks complete (100% done) ✅
@@ -591,7 +601,8 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 8. **Create all Wave 4 command files** in parallel
 
 **Immediate Next Actions:**
-- Wave 2: Task 004-002 (Prompt User When No Tools Detected)
+- Wave 2: Task 004-004 (Create local .claude/commands/ folder)
+- Wave 2: Task 004-005 (Create local .opencode/commands/ folder)
 
 **Testing Strategy:**
 - Use bun:test with dependency injection pattern (avoid mock.module() for better test isolation)
@@ -605,5 +616,5 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 ---
 
 **Last Updated:** 2026-01-23
-**Version:** 1.5
-**Recent Changes:** Completed task 004-003 (Verify Repo Root) - implemented git repository verification with user prompting and comprehensive test coverage. Wave 1 foundation tasks now 100% complete (8 of 23 total tasks done).
+**Version:** 1.6
+**Recent Changes:** Completed task 004-002 (Prompt User When No Tools Detected) - implemented interactive tool selection with parseToolChoice(), promptToolSelection(), and determineToolChoice() functions. All 32 tests passing, full integration with tool detection. Wave 2 now 1 of 5 tasks complete (9 of 23 total tasks done).
