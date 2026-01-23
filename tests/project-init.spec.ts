@@ -1,13 +1,15 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { mkdirSync, rmSync, existsSync, writeFileSync } from "fs";
+import { mkdirSync, rmSync, existsSync, writeFileSync, readFileSync } from "fs";
 import { join } from "path";
 import {
   isValidProjectName,
   createProjectStructure,
+  generateTemplates,
   type DirectoryCreator,
   type FileSystemChecker,
   type FileStatChecker,
   type WritabilityChecker,
+  type FileWriter,
 } from "../src/lib/projects/init.js";
 
 describe("Project Initialization", () => {
@@ -255,6 +257,323 @@ describe("Project Initialization", () => {
         expect((error as Error).message).toContain("Invalid project name");
         expect((error as Error).message).toContain("cannot contain path separators");
       }
+    });
+  });
+
+  describe("generateTemplates", () => {
+    it("should generate all 6 template files", async () => {
+      // First create project structure
+      await createProjectStructure("template-test", testRoot);
+
+      // Generate templates
+      const result = await generateTemplates("template-test", testRoot);
+
+      expect(result.created.length).toBe(6);
+      expect(result.skipped.length).toBe(0);
+      expect(result.created).toContain("01-research.md");
+      expect(result.created).toContain("02-prd.md");
+      expect(result.created).toContain("03-jtbd.md");
+      expect(result.created).toContain("04-tasks.md");
+      expect(result.created).toContain("05-hld.md");
+      expect(result.created).toContain("IMPLEMENTATION_PLAN.md");
+
+      // Verify files exist on disk
+      const projectPath = join(testRoot, "projects", "template-test");
+      expect(existsSync(join(projectPath, "01-research.md"))).toBe(true);
+      expect(existsSync(join(projectPath, "02-prd.md"))).toBe(true);
+      expect(existsSync(join(projectPath, "03-jtbd.md"))).toBe(true);
+      expect(existsSync(join(projectPath, "04-tasks.md"))).toBe(true);
+      expect(existsSync(join(projectPath, "05-hld.md"))).toBe(true);
+      expect(existsSync(join(projectPath, "IMPLEMENTATION_PLAN.md"))).toBe(true);
+    });
+
+    it("should not overwrite existing template files", async () => {
+      // Create project structure
+      await createProjectStructure("existing-templates", testRoot);
+
+      // Create some existing files
+      const projectPath = join(testRoot, "projects", "existing-templates");
+      writeFileSync(join(projectPath, "01-research.md"), "Existing content");
+      writeFileSync(join(projectPath, "02-prd.md"), "Existing PRD");
+
+      // Generate templates
+      const result = await generateTemplates("existing-templates", testRoot);
+
+      expect(result.created.length).toBe(4);
+      expect(result.skipped.length).toBe(2);
+      expect(result.skipped).toContain("01-research.md");
+      expect(result.skipped).toContain("02-prd.md");
+
+      // Verify existing files weren't overwritten
+      const researchContent = readFileSync(join(projectPath, "01-research.md"), "utf-8");
+      expect(researchContent).toBe("Existing content");
+
+      const prdContent = readFileSync(join(projectPath, "02-prd.md"), "utf-8");
+      expect(prdContent).toBe("Existing PRD");
+
+      // Verify new files were created
+      expect(existsSync(join(projectPath, "03-jtbd.md"))).toBe(true);
+      expect(existsSync(join(projectPath, "04-tasks.md"))).toBe(true);
+    });
+
+    it("should be idempotent (running twice doesn't change anything)", async () => {
+      // Create project and generate templates
+      await createProjectStructure("idempotent-test", testRoot);
+      const firstRun = await generateTemplates("idempotent-test", testRoot);
+
+      expect(firstRun.created.length).toBe(6);
+      expect(firstRun.skipped.length).toBe(0);
+
+      // Run again
+      const secondRun = await generateTemplates("idempotent-test", testRoot);
+
+      expect(secondRun.created.length).toBe(0);
+      expect(secondRun.skipped.length).toBe(6);
+    });
+
+    it("should error if project folder doesn't exist", async () => {
+      await expect(
+        generateTemplates("non-existent-project", testRoot)
+      ).rejects.toThrow("Project folder not found");
+    });
+
+    it("should include proper markdown structure in templates", async () => {
+      await createProjectStructure("markdown-test", testRoot);
+      await generateTemplates("markdown-test", testRoot);
+
+      const projectPath = join(testRoot, "projects", "markdown-test");
+
+      // Check research template
+      const researchContent = readFileSync(join(projectPath, "01-research.md"), "utf-8");
+      expect(researchContent).toContain("# Research:");
+      expect(researchContent).toContain("## Problem Statement");
+      expect(researchContent).toContain("**Next step**:");
+
+      // Check PRD template
+      const prdContent = readFileSync(join(projectPath, "02-prd.md"), "utf-8");
+      expect(prdContent).toContain("# PRD:");
+      expect(prdContent).toContain("## User Stories");
+      expect(prdContent).toContain("**As a**");
+      expect(prdContent).toContain("**I want to**");
+      expect(prdContent).toContain("**So that**");
+
+      // Check JTBD template
+      const jtbdContent = readFileSync(join(projectPath, "03-jtbd.md"), "utf-8");
+      expect(jtbdContent).toContain("# Jobs To Be Done:");
+      expect(jtbdContent).toContain("## JTBD-001:");
+      expect(jtbdContent).toContain("**Job Statement**:");
+
+      // Check tasks template
+      const tasksContent = readFileSync(join(projectPath, "04-tasks.md"), "utf-8");
+      expect(tasksContent).toContain("# Tasks:");
+      expect(tasksContent).toContain("## Dependency Graph");
+      expect(tasksContent).toContain("## Linearized Implementation Order");
+
+      // Check HLD template
+      const hldContent = readFileSync(join(projectPath, "05-hld.md"), "utf-8");
+      expect(hldContent).toContain("# High-Level Design:");
+      expect(hldContent).toContain("**(OPTIONAL)**");
+      expect(hldContent).toContain("## Components");
+
+      // Check implementation plan template
+      const planContent = readFileSync(join(projectPath, "IMPLEMENTATION_PLAN.md"), "utf-8");
+      expect(planContent).toContain("# Implementation Plan:");
+      expect(planContent).toContain("## Current Focus");
+      expect(planContent).toContain("## Completed Tasks");
+      expect(planContent).toContain("## Pending Tasks");
+    });
+
+    it("should handle permission errors gracefully with dependency injection", async () => {
+      await createProjectStructure("permission-test", testRoot);
+
+      const mockFileWriter: FileWriter = async () => {
+        const error: NodeJS.ErrnoException = new Error("Permission denied");
+        error.code = "EACCES";
+        throw error;
+      };
+
+      await expect(
+        generateTemplates("permission-test", testRoot, mockFileWriter)
+      ).rejects.toThrow("Permission denied");
+    });
+
+    it("should handle disk space errors gracefully with dependency injection", async () => {
+      await createProjectStructure("diskspace-test", testRoot);
+
+      const mockFileWriter: FileWriter = async () => {
+        const error: NodeJS.ErrnoException = new Error("No space left");
+        error.code = "ENOSPC";
+        throw error;
+      };
+
+      await expect(
+        generateTemplates("diskspace-test", testRoot, mockFileWriter)
+      ).rejects.toThrow("Insufficient disk space");
+    });
+
+    it("should aggregate errors when multiple files fail", async () => {
+      await createProjectStructure("multi-error-test", testRoot);
+
+      let callCount = 0;
+      const mockFileWriter: FileWriter = async (filePath: string) => {
+        callCount++;
+        // Fail on first two files
+        if (callCount <= 2) {
+          const error: NodeJS.ErrnoException = new Error("Write failed");
+          error.code = "EACCES";
+          throw error;
+        }
+      };
+
+      try {
+        await generateTemplates("multi-error-test", testRoot, mockFileWriter);
+        expect(false).toBe(true); // Should not reach here
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+        const message = (error as Error).message;
+        expect(message).toContain("Failed to create template files");
+        // Should list multiple failures
+        expect(message).toContain("01-research.md");
+        expect(message).toContain("02-prd.md");
+      }
+    });
+
+    it("should return correct project path in result", async () => {
+      await createProjectStructure("path-test", testRoot);
+      const result = await generateTemplates("path-test", testRoot);
+
+      expect(result.projectPath).toBe(join(testRoot, "projects", "path-test"));
+    });
+
+    it("should handle partial existing files correctly", async () => {
+      await createProjectStructure("partial-test", testRoot);
+
+      // Create only some files
+      const projectPath = join(testRoot, "projects", "partial-test");
+      writeFileSync(join(projectPath, "01-research.md"), "Research done");
+      writeFileSync(join(projectPath, "03-jtbd.md"), "JTBDs done");
+      writeFileSync(join(projectPath, "IMPLEMENTATION_PLAN.md"), "Plan done");
+
+      const result = await generateTemplates("partial-test", testRoot);
+
+      expect(result.created.length).toBe(3);
+      expect(result.skipped.length).toBe(3);
+      expect(result.created).toContain("02-prd.md");
+      expect(result.created).toContain("04-tasks.md");
+      expect(result.created).toContain("05-hld.md");
+      expect(result.skipped).toContain("01-research.md");
+      expect(result.skipped).toContain("03-jtbd.md");
+      expect(result.skipped).toContain("IMPLEMENTATION_PLAN.md");
+    });
+
+    it("should write files with UTF-8 encoding", async () => {
+      await createProjectStructure("encoding-test", testRoot);
+
+      const writtenFiles: Map<string, { content: string; encoding: BufferEncoding }> = new Map();
+
+      const mockFileWriter: FileWriter = async (
+        filePath: string,
+        content: string,
+        encoding: BufferEncoding
+      ) => {
+        writtenFiles.set(filePath, { content, encoding });
+      };
+
+      await generateTemplates("encoding-test", testRoot, mockFileWriter);
+
+      // Verify all files were written with UTF-8
+      for (const [, fileInfo] of writtenFiles) {
+        expect(fileInfo.encoding).toBe("utf-8");
+      }
+
+      expect(writtenFiles.size).toBe(6);
+    });
+
+    it("should create templates with placeholder content", async () => {
+      await createProjectStructure("placeholder-test", testRoot);
+      await generateTemplates("placeholder-test", testRoot);
+
+      const projectPath = join(testRoot, "projects", "placeholder-test");
+
+      // Research should have placeholder sections
+      const researchContent = readFileSync(join(projectPath, "01-research.md"), "utf-8");
+      expect(researchContent).toContain("[Describe the problem");
+      expect(researchContent).toContain("[List existing solutions");
+
+      // PRD should have example user story format
+      const prdContent = readFileSync(join(projectPath, "02-prd.md"), "utf-8");
+      expect(prdContent).toContain("[user type]");
+      expect(prdContent).toContain("[action]");
+      expect(prdContent).toContain("[benefit]");
+
+      // Tasks should have example format
+      const tasksContent = readFileSync(join(projectPath, "04-tasks.md"), "utf-8");
+      expect(tasksContent).toContain("Task 001-001:");
+      expect(tasksContent).toContain("**Dependencies**:");
+      expect(tasksContent).toContain("**Acceptance**:");
+    });
+
+    it("should include next step instructions in templates", async () => {
+      await createProjectStructure("nextstep-test", testRoot);
+      await generateTemplates("nextstep-test", testRoot);
+
+      const projectPath = join(testRoot, "projects", "nextstep-test");
+
+      const researchContent = readFileSync(join(projectPath, "01-research.md"), "utf-8");
+      expect(researchContent).toContain("/project:prd");
+
+      const prdContent = readFileSync(join(projectPath, "02-prd.md"), "utf-8");
+      expect(prdContent).toContain("/project:jtbd");
+
+      const jtbdContent = readFileSync(join(projectPath, "03-jtbd.md"), "utf-8");
+      expect(jtbdContent).toContain("/project:tasks");
+
+      const tasksContent = readFileSync(join(projectPath, "04-tasks.md"), "utf-8");
+      expect(tasksContent).toContain("/project:hld");
+      expect(tasksContent).toContain("/project:specs");
+
+      const hldContent = readFileSync(join(projectPath, "05-hld.md"), "utf-8");
+      expect(hldContent).toContain("/project:specs");
+    });
+
+    it("should work with nested repo roots", async () => {
+      const nestedRoot = join(testRoot, "nested", "repo");
+      mkdirSync(nestedRoot, { recursive: true });
+
+      await createProjectStructure("nested-test", nestedRoot);
+      const result = await generateTemplates("nested-test", nestedRoot);
+
+      expect(result.created.length).toBe(6);
+      expect(result.projectPath).toBe(join(nestedRoot, "projects", "nested-test"));
+
+      // Verify files exist
+      expect(existsSync(join(nestedRoot, "projects", "nested-test", "01-research.md"))).toBe(
+        true
+      );
+    });
+
+    it("should generate all templates even if some are skipped", async () => {
+      await createProjectStructure("mixed-test", testRoot);
+
+      const projectPath = join(testRoot, "projects", "mixed-test");
+
+      // Pre-create alternating files
+      writeFileSync(join(projectPath, "01-research.md"), "Existing");
+      writeFileSync(join(projectPath, "03-jtbd.md"), "Existing");
+      writeFileSync(join(projectPath, "05-hld.md"), "Existing");
+
+      const result = await generateTemplates("mixed-test", testRoot);
+
+      expect(result.created.length).toBe(3);
+      expect(result.skipped.length).toBe(3);
+
+      // Verify all 6 files exist now
+      expect(existsSync(join(projectPath, "01-research.md"))).toBe(true);
+      expect(existsSync(join(projectPath, "02-prd.md"))).toBe(true);
+      expect(existsSync(join(projectPath, "03-jtbd.md"))).toBe(true);
+      expect(existsSync(join(projectPath, "04-tasks.md"))).toBe(true);
+      expect(existsSync(join(projectPath, "05-hld.md"))).toBe(true);
+      expect(existsSync(join(projectPath, "IMPLEMENTATION_PLAN.md"))).toBe(true);
     });
   });
 });
