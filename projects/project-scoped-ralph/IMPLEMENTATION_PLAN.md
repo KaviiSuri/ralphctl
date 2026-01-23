@@ -292,21 +292,30 @@ These tasks depend on Wave 1 foundation being complete.
 These tasks depend on command files being installed.
 
 #### 001-001: Create Project Folder Structure
-**Status:** Not Started
+**Status:** ✅ COMPLETED
 **Priority:** HIGH
 **Effort:** Medium
 **Description:** Implement core folder creation logic for projects. Create `projects/<name>/specs/` structure with validation.
-**Files to Create:**
-- `src/lib/projects/init.ts` - New module for project initialization
+**Files Created:**
+- `src/lib/projects/init.ts` - Module for project folder structure creation with createProjectStructure() and isValidProjectName() functions
+- `tests/project-init.spec.ts` - Comprehensive test suite with 26 test cases
 **Acceptance Criteria:**
-- [ ] Validates project name format
-- [ ] Creates `projects/` directory if needed
-- [ ] Creates `projects/<name>/specs/` structure
-- [ ] Error if project already exists
-- [ ] Works from git repo root
-- [ ] Clear error messages for invalid names
+- [x] Validates project name format
+- [x] Creates `projects/` directory if needed
+- [x] Creates `projects/<name>/specs/` structure
+- [x] Error if project already exists
+- [x] Works from git repo root
+- [x] Clear error messages for invalid names
 **Dependencies:** None
 **Blocks:** 001-002
+**Learnings:**
+- Dependency injection pattern with DirectoryCreator, FileSystemChecker, FileStatChecker, and WritabilityChecker types enables unit testing without filesystem side effects
+- Recursive directory creation with { recursive: true } handles parent projects/ directory creation automatically
+- Error handling with EACCES, EPERM, and ENOSPC codes provides clear user feedback for common failure scenarios
+- Idempotent design checks for complete vs partial structures - completes partial structures (e.g., project folder without specs/)
+- isNew flag in result distinguishes new creation from completing partial structure
+- isValidProjectName() provides basic safety validation: no empty strings, path separators, dots, or names starting with dots
+- All 245 tests passing (26 new tests for project initialization), TypeScript compilation successful
 
 ---
 
@@ -583,9 +592,9 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 ## Summary
 
 **Total Tasks:** 23
-**Completed:** 12 ✅
+**Completed:** 13 ✅
 **In Progress:** 0
-**Pending:** 11
+**Pending:** 10
 
 **Implementation Waves:**
 - Wave 1: 5 of 5 foundation tasks complete (100% done) ✅
@@ -599,7 +608,8 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
   - ✅ 004-004: Create local .claude/commands/ folder
   - ✅ 004-005: Create local .opencode/commands/ folder
   - ✅ 004-006: Install command files
-- Wave 3: 3 tasks (depend on Wave 2)
+- Wave 3: 1 of 3 tasks complete (33% done)
+  - ✅ 001-001: Create project folder structure
 - Wave 4: 7 tasks (depend on Wave 3)
 - Wave 5: 3 of 3 tasks complete (100% done) ✅
   - ✅ 003-001: Add --project flag to run command
@@ -642,5 +652,5 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 ---
 
 **Last Updated:** 2026-01-23
-**Version:** 1.8
-**Recent Changes:** Completed task 004-006 (Install Command Files) - final Wave 2 task! Implemented src/lib/templates/commands.ts with 7 command templates and added installCommandFiles() and installCommandFilesToTarget() functions to src/lib/command-infrastructure.ts. Added 13 comprehensive test cases for command installation. Wave 2 now complete with all 5 tasks done (100%). Total progress: 12 of 23 tasks complete (52.2%). Next: Wave 3 project folder structure creation (task 001-001).
+**Version:** 1.9
+**Recent Changes:** Completed task 001-001 (Create Project Folder Structure) - first Wave 3 task! Implemented src/lib/projects/init.ts with createProjectStructure() and isValidProjectName() functions. Added 26 comprehensive test cases in tests/project-init.spec.ts. Key features: dependency injection pattern, recursive directory creation, idempotent design handling partial structures, isNew flag to distinguish new vs partial completion. All 245 tests passing. Total progress: 13 of 23 tasks complete (56.5%). Next: Wave 3 template file generation (task 001-002).
