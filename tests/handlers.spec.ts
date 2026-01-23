@@ -2985,6 +2985,47 @@ describe("Command Handlers", () => {
           BUILD_TEMPLATE: "Mock BUILD template",
         };
       });
+
+      // Mock dependencies for merged init command
+      mock.module("../src/lib/tools/detection.js", () => {
+        return {
+          detectAvailableTools: mock(() => ({ claude: true, opencode: true, hasAny: true, hasBoth: true })),
+        };
+      });
+
+      mock.module("../src/lib/tools/prompting.js", () => {
+        return {
+          determineToolChoice: mock(() => Promise.resolve({ claude: true, opencode: true })),
+        };
+      });
+
+      mock.module("../src/lib/command-infrastructure.js", () => {
+        return {
+          createCommandFolders: mock(() => Promise.resolve({
+            claudeReady: true,
+            opencodeReady: true,
+            claudePath: ".claude/commands",
+            opencodePath: ".opencode/commands",
+          })),
+          installCommandFiles: mock(() => Promise.resolve({
+            claudeInstalled: 7,
+            opencodeInstalled: 7,
+            claudePath: ".claude/commands",
+            opencodePath: ".opencode/commands",
+            errors: [],
+          })),
+        };
+      });
+
+      mock.module("../src/lib/repo/verification.js", () => {
+        return {
+          verifyRepoRoot: mock(() => Promise.resolve({
+            repoRootPath: "/fake/repo",
+            isRepoRoot: true,
+            userConfirmed: false,
+          })),
+        };
+      });
     });
 
     it("should write both files when they don't exist", async () => {
@@ -3000,7 +3041,7 @@ describe("Command Handlers", () => {
       expect(writeFile).toHaveBeenCalledWith("PROMPT_build.md", "Mock BUILD template");
       expect(mockLog).toHaveBeenCalledWith("Created PROMPT_plan.md");
       expect(mockLog).toHaveBeenCalledWith("Created PROMPT_build.md");
-      expect(mockLog).toHaveBeenCalledWith("\n✓ Initialized prompt templates");
+      expect(mockLog).toHaveBeenCalledWith("  ✓ Prompt templates created");
     });
 
     it("should prompt for confirmation when files exist and force is false", async () => {
@@ -3035,7 +3076,7 @@ describe("Command Handlers", () => {
       expect(confirmOverwrite).toHaveBeenCalledWith("PROMPT_build.md");
       expect(mockLog).toHaveBeenCalledWith("Skipping PROMPT_plan.md");
       expect(mockLog).toHaveBeenCalledWith("Skipping PROMPT_build.md");
-      expect(mockLog).toHaveBeenCalledWith("\nNo files were written");
+      expect(mockLog).toHaveBeenCalledWith("  ⚠ Prompt templates skipped (already exist)");
     });
 
     it("should overwrite when user confirms", async () => {
@@ -3070,7 +3111,7 @@ describe("Command Handlers", () => {
       expect(writeFile).toHaveBeenCalledWith("PROMPT_build.md", "Mock BUILD template");
       expect(mockLog).toHaveBeenCalledWith("Created PROMPT_plan.md");
       expect(mockLog).toHaveBeenCalledWith("Created PROMPT_build.md");
-      expect(mockLog).toHaveBeenCalledWith("\n✓ Initialized prompt templates");
+      expect(mockLog).toHaveBeenCalledWith("  ✓ Prompt templates created");
     });
 
     it("should skip confirmation when force is true", async () => {
@@ -3106,7 +3147,7 @@ describe("Command Handlers", () => {
       expect(writeFile).toHaveBeenCalledWith("PROMPT_build.md", "Mock BUILD template");
       expect(mockLog).toHaveBeenCalledWith("Created PROMPT_plan.md");
       expect(mockLog).toHaveBeenCalledWith("Created PROMPT_build.md");
-      expect(mockLog).toHaveBeenCalledWith("\n✓ Initialized prompt templates");
+      expect(mockLog).toHaveBeenCalledWith("  ✓ Prompt templates created");
     });
   });
 });
