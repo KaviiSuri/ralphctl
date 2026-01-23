@@ -38,3 +38,8 @@ Keep Learnings up to date as you find new facts about the requirements, the code
 - Iteration markers (--- Iteration N/M ---) provide clear progress visibility
 - Manual interruption handling requires catching AbortError specifically
 - Testing multiple iterations uses closure-based counters in mocks
+- Optional fields in TypeScript interfaces work well for backward compatibility - just spread existing session object and add new field
+- Migration logic in state reading handles old sessions gracefully by setting undefined for missing fields
+- String replacement with replaceAll() is simple and effective for placeholder resolution
+- Mock.module in Bun tests affects all tests globally - mocks must implement the same logic as real code to avoid test interference
+- Bun test suite provides good confidence - 108 tests verify no regressions when adding features
