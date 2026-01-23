@@ -65,3 +65,4 @@ Keep Learnings up to date as you find new facts about the requirements, the code
 - Tree structure formatting: ensure only the final item uses └── character, all preceding items use ├── for visual consistency
 - Bootstrap problem: infrastructure functions (createCommandFolders, installCommandFiles) are not useful without a CLI command to invoke them - always implement the complete end-to-end workflow including CLI integration
 - Command templates in src/lib/templates/commands.ts are deployed via ralphctl setup to .claude/commands/ and .opencode/commands/ - verify installation status before implementing
+- {project} placeholder in prompts resolves to '.' in global mode (no --project flag) and 'projects/<name>' in project mode - this enables single template design for both modes
