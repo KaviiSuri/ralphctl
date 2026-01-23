@@ -2,9 +2,9 @@
 
 ## Overall Status
 
-**Completed Specs:** 13/13 (JTBD-101-SPEC-001, JTBD-102-SPEC-001, JTBD-102-SPEC-002, JTBD-103-SPEC-001, JTBD-104-SPEC-001, JBTD-001 through JBTD-007, 004-001) ✅
+**Completed Specs:** 14/14 (JTBD-101-SPEC-001, JTBD-102-SPEC-001, JTBD-102-SPEC-002, JTBD-103-SPEC-001, JTBD-104-SPEC-001, JBTD-001 through JBTD-007, 004-001, 004-002) ✅
 **Remaining Specs:** 0
-**Current Tests:** 133 passing ✅
+**Current Tests:** 182 passing ✅
 **Typecheck:** Passing ✅
 **P2 Gaps:** All complete ✅
 
@@ -177,9 +177,37 @@ All tasks complete! ✅
 - Returns ToolDetectionResult with claude, opencode, hasAny, hasBoth fields
 - Gracefully handles errors (command not found, timeout, permission errors)
 - Created comprehensive tests in tests/tool-detection.spec.ts with 10 test cases
-- All 133 tests passing, no TypeScript errors
+- All 182 tests passing, no TypeScript errors
 - Performance: <100ms per tool check with 1-second timeout
 - Files created: src/lib/tools/detection.ts, tests/tool-detection.spec.ts
+
+### 004-002: Interactive Tool Selection ✅
+- Created src/lib/tools/prompting.ts with interactive tool selection module:
+  - `parseToolChoice()` - Parse user input into tool choice (claude, opencode, both)
+  - `promptToolSelection()` - Prompt user with numbered options (1-3) when no tools detected
+  - `determineToolChoice()` - Main integration function combining detection with prompting
+  - Uses dependency injection pattern (ToolSelector type) for testability
+  - Supports multiple input formats: numeric (1-3), tool names, case-insensitive
+  - Re-prompts on invalid input with max 3 attempts
+  - Handles Ctrl+C gracefully with "Setup cancelled" message
+  - Shows confirmation message with selected tool(s) and folder paths
+- Created comprehensive test suite in tests/tool-prompting.spec.ts with 32 tests covering:
+  - Input parsing with all valid formats (1-3, tool names, case variations, whitespace)
+  - Invalid input handling and null returns
+  - Prompting with retry logic and max attempts
+  - User cancellation handling
+  - Integration with tool detection via determineToolChoice()
+  - All edge cases from spec
+- All 182 tests passing (32 new, 150 existing), TypeScript compilation successful
+- Acceptance criteria met:
+  - Shows clear warning about missing tools
+  - Offers numbered options (1-3)
+  - Accepts multiple input formats (number, tool name)
+  - Case-insensitive matching
+  - Re-prompts on invalid input
+  - Handles Ctrl+C gracefully
+  - Passes user choice to downstream tasks
+- Files created: src/lib/tools/prompting.ts, tests/tool-prompting.spec.ts
 
 ---
 
@@ -214,3 +242,7 @@ All tasks complete! ✅
 - Bun test's mock.module() affects all tests globally - better to use dependency injection for testability
 - execSync with stdio: "pipe" suppresses command output cleanly
 - Cross-platform command checking works well with platform-based conditional logic
+- Dependency injection with ToolSelector type enables testing without readline mocking
+- Closure-based mock selectors cleanly simulate retry behavior in tests
+- Console.log for confirmation messages provides good UX feedback
+- Pattern follows existing codebase conventions (similar to repo/verification.ts)
