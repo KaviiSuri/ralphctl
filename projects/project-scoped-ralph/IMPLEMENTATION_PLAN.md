@@ -615,6 +615,13 @@ These 6 commands provide guided workflow through research → PRD → JTBD → T
 - Tasks command correctly shows both optional /project:hld and mandatory /project:specs paths
 - All 271 tests passing, TypeScript compilation successful
 
+**Runtime Testing Note:**
+- Command template files exist and are properly installed
+- YAML frontmatter is valid (verified via cat)
+- All 271 tests passing, TypeScript compilation successful
+- Runtime validation in interactive Claude Code/OpenCode environment pending user testing
+- Smoke testing recommended: run /project:research and /project:prd commands manually to verify end-to-end flow
+
 ---
 
 ### 🟡 Wave 5: Project-Scoped Execution (Depends on Wave 1)
