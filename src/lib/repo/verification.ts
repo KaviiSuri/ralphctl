@@ -4,6 +4,7 @@
 
 import { execSync } from "child_process";
 import * as path from "path";
+import { promptYesNo } from "../io/index.js";
 
 /**
  * Result of repository verification
@@ -41,29 +42,9 @@ const defaultGitExecutor: GitCommandExecutor = (command: string) => {
 };
 
 /**
- * Default user prompter using readline
+ * Default user prompter using shared promptYesNo utility
  */
-const defaultPrompter: UserPrompter = async (message: string): Promise<boolean> => {
-  const readline = (await import("node:readline")).createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  const question = (prompt: string): Promise<string> =>
-    new Promise((resolve) => {
-      readline.question(prompt, (answer) => {
-        resolve(answer);
-      });
-    });
-
-  try {
-    const response = await question(message);
-    const normalized = response.trim().toLowerCase();
-    return normalized === "y" || normalized === "yes";
-  } finally {
-    readline.close();
-  }
-};
+const defaultPrompter: UserPrompter = promptYesNo;
 
 /**
  * Checks if current directory is a git repository

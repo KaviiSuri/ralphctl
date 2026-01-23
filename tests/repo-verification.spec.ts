@@ -81,9 +81,6 @@ describe("Repository Verification", () => {
   });
 
   describe("verifyRepoRoot", () => {
-    // Save and restore process.cwd
-    const originalCwd = process.cwd();
-
     it("should pass silently when at repo root", async () => {
       const mockRepoRoot = "/Users/test/my-repo";
       const mockExecutor: GitCommandExecutor = (command: string) => {
@@ -291,6 +288,38 @@ describe("Repository Verification", () => {
       expect(result.isRepoRoot).toBe(false);
       expect(result.repoRootPath).toBe(null);
       expect(result.needsWarning).toBe(true);
+    });
+  });
+
+  describe("Integration Tests", () => {
+    it("should work with real git commands in actual repository", async () => {
+      // This test runs against the actual repository
+      // It should pass silently since we're at repo root (tests run from project root)
+
+      const mockPrompter: UserPrompter = async (message: string) => {
+        throw new Error("Prompter should not be called when at repo root");
+      };
+
+      const result = await verifyRepoRoot(undefined, mockPrompter);
+
+      // In the ralphctl repo, we should be at the root
+      expect(result.isRepoRoot).toBe(true);
+      expect(result.repoRootPath).toBeTruthy();
+      expect(result.userConfirmed).toBe(false);
+      expect(result.needsWarning).toBe(false);
+    });
+
+    it("should detect repo correctly with real git commands", () => {
+      // Test with actual git in the repository
+      const isRepo = isGitRepository();
+      expect(isRepo).toBe(true);
+    });
+
+    it("should get correct repo root with real git commands", () => {
+      // Test with actual git in the repository
+      const repoRoot = getRepoRoot();
+      expect(repoRoot).toBeTruthy();
+      expect(repoRoot).toContain("ralphctl"); // Should contain project name
     });
   });
 });
