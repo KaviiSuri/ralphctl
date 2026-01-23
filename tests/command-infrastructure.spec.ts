@@ -792,7 +792,7 @@ describe("Command Infrastructure", () => {
       // Check project:research.md
       const researchCommandPath = "/test/repo/.claude/commands/project:research.md";
       const researchCommandContent = writtenFiles.get(researchCommandPath);
-      expect(researchCommandContent).toContain("description: Guide research capture");
+      expect(researchCommandContent).toContain("description: Guide multi-source research");
 
       // Check project:specs.md
       const specsCommandPath = "/test/repo/.claude/commands/project:specs.md";
