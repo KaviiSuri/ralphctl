@@ -64,3 +64,4 @@ Keep Learnings up to date as you find new facts about the requirements, the code
 - File sorting with numeric prefix extraction (parseInt on /^(\d+)-/) provides intuitive ordering for numbered files
 - Tree structure formatting: ensure only the final item uses └── character, all preceding items use ├── for visual consistency
 - Bootstrap problem: infrastructure functions (createCommandFolders, installCommandFiles) are not useful without a CLI command to invoke them - always implement the complete end-to-end workflow including CLI integration
+- Command templates in src/lib/templates/commands.ts are deployed via ralphctl setup to .claude/commands/ and .opencode/commands/ - verify installation status before implementing
