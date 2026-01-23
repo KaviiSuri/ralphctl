@@ -4,7 +4,7 @@
 
 This implementation plan tracks work to add project-scoped Ralph loops to ralphctl, enabling multiple independent feature tracks with their own specs, implementation plans, and progress tracking.
 
-**Current State:** ralphctl v0.0.0 has solid architecture for global (flat) Ralph loops. Project-scoped functionality is in progress with **9 of 23 tasks complete** (Wave 1 foundation tasks complete: session tagging, placeholder resolution, prompt template updates, --project flag for run, step, and inspect commands, CLI tool detection, repo verification, and user prompting for tool selection).
+**Current State:** ralphctl v0.0.0 has solid architecture for global (flat) Ralph loops. Project-scoped functionality is in progress with **11 of 23 tasks complete** (Wave 1 foundation tasks complete: session tagging, placeholder resolution, prompt template updates, --project flag for run, step, and inspect commands, CLI tool detection, repo verification, user prompting for tool selection, and command folder infrastructure for both Claude Code and OpenCode).
 
 **Architecture:** Domain-driven design with adapter pattern, clean separation of concerns, Bun-based execution, and TypeScript throughout.
 
@@ -205,38 +205,52 @@ This implementation plan tracks work to add project-scoped Ralph loops to ralphc
 These tasks depend on Wave 1 foundation being complete.
 
 #### 004-004: Create local .claude/commands/ folder
-**Status:** Not Started
+**Status:** ✅ COMPLETED
 **Priority:** HIGH
 **Effort:** Small
 **Description:** Create `.claude/commands/` directory at repo root (NOT global ~/.claude/) when Claude Code is detected or selected.
-**Files to Create:**
-- `src/lib/command-infrastructure.ts` - New module for folder creation
+**Files Created:**
+- `src/lib/command-infrastructure.ts` - Module for command folder creation with createClaudeCommandsFolder(), createOpenCodeCommandsFolder(), and createCommandFolders() functions
+- `tests/command-infrastructure.spec.ts` - Comprehensive test suite with 26 test cases
 **Acceptance Criteria:**
-- [ ] Creates `.claude/commands/` at repo root
-- [ ] Only creates when Claude Code detected/selected
-- [ ] Idempotent (no error if exists)
-- [ ] Verifies writability after creation
-- [ ] Uses absolute paths, never `~/.claude/`
-**Dependencies:** 004-001, 004-003
+- [x] Creates `.claude/commands/` at repo root
+- [x] Only creates when Claude Code detected/selected
+- [x] Idempotent (no error if exists)
+- [x] Verifies writability after creation
+- [x] Uses absolute paths, never `~/.claude/`
+**Dependencies:** ✅ 004-001, ✅ 004-003
 **Blocks:** 004-006
+**Learnings:**
+- Dependency injection pattern with DirectoryCreator and FileSystemChecker types enables unit testing without filesystem side effects
+- Recursive directory creation with { recursive: true } handles parent .claude/ directory creation automatically
+- Error handling with EACCES, EPERM, and ENOSPC codes provides clear user feedback for common failure scenarios
+- Idempotent design checks existsSync() before attempting creation
+- All 203 tests passing (26 new tests for command infrastructure), TypeScript compilation successful
 
 ---
 
 #### 004-005: Create local .opencode/commands/ folder
-**Status:** Not Started
+**Status:** ✅ COMPLETED
 **Priority:** HIGH
 **Effort:** Small
 **Description:** Create `.opencode/commands/` directory at repo root (NOT global ~/.config/opencode/) when OpenCode is detected or selected.
-**Files to Modify:**
-- `src/lib/command-infrastructure.ts` - Add OpenCode folder creation logic
+**Files Created:**
+- `src/lib/command-infrastructure.ts` - Module for command folder creation with createClaudeCommandsFolder(), createOpenCodeCommandsFolder(), and createCommandFolders() functions
+- `tests/command-infrastructure.spec.ts` - Comprehensive test suite with 26 test cases
 **Acceptance Criteria:**
-- [ ] Creates `.opencode/commands/` at repo root
-- [ ] Only creates when OpenCode detected/selected
-- [ ] Idempotent (no error if exists)
-- [ ] Verifies writability after creation
-- [ ] Uses absolute paths, never global config
-**Dependencies:** 004-001, 004-003
+- [x] Creates `.opencode/commands/` at repo root
+- [x] Only creates when OpenCode detected/selected
+- [x] Idempotent (no error if exists)
+- [x] Verifies writability after creation
+- [x] Uses absolute paths, never global config
+**Dependencies:** ✅ 004-001, ✅ 004-003
 **Blocks:** 004-006
+**Learnings:**
+- Dependency injection pattern with DirectoryCreator and FileSystemChecker types enables unit testing without filesystem side effects
+- Recursive directory creation with { recursive: true } handles parent .opencode/ directory creation automatically
+- Error handling with EACCES, EPERM, and ENOSPC codes provides clear user feedback for common failure scenarios
+- Idempotent design checks existsSync() before attempting creation
+- All 203 tests passing (26 new tests for command infrastructure), TypeScript compilation successful
 
 ---
 
@@ -558,9 +572,9 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 ## Summary
 
 **Total Tasks:** 23
-**Completed:** 9 ✅
+**Completed:** 11 ✅
 **In Progress:** 0
-**Pending:** 14
+**Pending:** 12
 
 **Implementation Waves:**
 - Wave 1: 5 of 5 foundation tasks complete (100% done) ✅
@@ -569,9 +583,11 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
   - ✅ 003-006: Update global prompt templates
   - ✅ 004-001: Detect available CLI tools
   - ✅ 004-003: Verify repo root
-- Wave 2: 1 of 5 tasks complete (20% done)
+- Wave 2: 3 of 5 tasks complete (60% done)
   - ✅ 004-002: Prompt user when no tools detected
-  - Pending: 004-004, 004-005, 004-006 (command infrastructure)
+  - ✅ 004-004: Create local .claude/commands/ folder
+  - ✅ 004-005: Create local .opencode/commands/ folder
+  - Pending: 004-006 (Install command files)
 - Wave 3: 3 tasks (depend on Wave 2)
 - Wave 4: 7 tasks (depend on Wave 3)
 - Wave 5: 3 of 3 tasks complete (100% done) ✅
@@ -601,8 +617,7 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 8. **Create all Wave 4 command files** in parallel
 
 **Immediate Next Actions:**
-- Wave 2: Task 004-004 (Create local .claude/commands/ folder)
-- Wave 2: Task 004-005 (Create local .opencode/commands/ folder)
+- Wave 2: Task 004-006 (Install command files) - final Wave 2 task
 
 **Testing Strategy:**
 - Use bun:test with dependency injection pattern (avoid mock.module() for better test isolation)
@@ -616,5 +631,5 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 ---
 
 **Last Updated:** 2026-01-23
-**Version:** 1.6
-**Recent Changes:** Completed task 004-002 (Prompt User When No Tools Detected) - implemented interactive tool selection with parseToolChoice(), promptToolSelection(), and determineToolChoice() functions. All 32 tests passing, full integration with tool detection. Wave 2 now 1 of 5 tasks complete (9 of 23 total tasks done).
+**Version:** 1.7
+**Recent Changes:** Completed tasks 004-004 (Create local .claude/commands/ folder) and 004-005 (Create local .opencode/commands/ folder). Implemented src/lib/command-infrastructure.ts with createClaudeCommandsFolder(), createOpenCodeCommandsFolder(), and createCommandFolders() functions using dependency injection pattern for testability. Added comprehensive test suite (26 tests) with full coverage of creation, idempotency, error handling, and writability verification. All 203 tests passing. Wave 2 now 3 of 5 tasks complete (60% done) - only 004-006 (Install command files) remains. Total progress: 11 of 23 tasks complete (47.8%).
