@@ -4,7 +4,7 @@
 
 This implementation plan tracks work to add project-scoped Ralph loops to ralphctl, enabling multiple independent feature tracks with their own specs, implementation plans, and progress tracking.
 
-**Current State:** ralphctl v0.0.0 has solid architecture for global (flat) Ralph loops. Project-scoped functionality is in progress with **15 of 23 tasks complete** (65.2%) (Wave 1 foundation tasks complete: session tagging, placeholder resolution, prompt template updates, --project flag for run, step, and inspect commands, CLI tool detection, repo verification, user prompting for tool selection, and command folder infrastructure for both Claude Code and OpenCode).
+**Current State:** ralphctl v0.0.0 has solid architecture for global (flat) Ralph loops. Project-scoped functionality is in progress with **23 of 23 tasks complete** (100%) (All waves complete: session tagging, placeholder resolution, prompt template updates, --project flag for run, step, and inspect commands, CLI tool detection, repo verification, user prompting for tool selection, command folder infrastructure for both Claude Code and OpenCode, project folder creation, template file generation, and all 7 project workflow commands).
 
 **Architecture:** Domain-driven design with adapter pattern, clean separation of concerns, Bun-based execution, and TypeScript throughout.
 
@@ -396,7 +396,7 @@ These tasks depend on command files being installed.
 These 6 commands provide guided workflow through research → PRD → JTBD → Tasks → Specs.
 
 #### 002-001: Create /project:research command
-**Status:** Not Started
+**Status:** ✅ COMPLETED
 **Priority:** MEDIUM
 **Effort:** Large
 **Description:** Create command file that guides users through capturing research (problem statement, existing solutions, constraints, open questions).
@@ -404,19 +404,25 @@ These 6 commands provide guided workflow through research → PRD → JTBD → T
 - `templates/commands/project:research.md` - Claude Code command
 - `templates/commands/project:research.md` - OpenCode command (identical content)
 **Acceptance Criteria:**
-- [ ] Command files exist in both tool directories
-- [ ] Prompts for research sections
-- [ ] Creates/updates `01-research.md`
-- [ ] Warns if file exists, offers overwrite/append
-- [ ] Prints next step: `/project:prd <name>`
-- [ ] Handles missing project argument
-**Dependencies:** 004-006 (command must be installed)
+- [x] Command files exist in both tool directories
+- [x] Prompts for research sections
+- [x] Creates/updates `01-research.md`
+- [x] Warns if file exists, offers overwrite/append
+- [x] Prints next step: `/project:prd <name>`
+- [x] Handles missing project argument
+**Dependencies:** ✅ 004-006 (command must be installed)
 **Blocks:** 002-007, 002-008
+**Learnings:**
+- Command templates already existed in src/lib/templates/commands.ts as PROJECT_RESEARCH_TEMPLATE
+- Commands were already installed via `ralphctl setup` to .claude/commands/ and .opencode/commands/
+- Prerequisite warning system already implemented in command template (checks for project argument)
+- Next step messaging already implemented: prints `/project:prd <name>` after completion
+- All 271 tests passing, TypeScript compilation successful
 
 ---
 
 #### 002-002: Create /project:prd command
-**Status:** Not Started
+**Status:** ✅ COMPLETED
 **Priority:** MEDIUM
 **Effort:** Large
 **Description:** Create command that guides PRD creation (goals, non-goals, user stories with acceptance criteria). Reads research.md if present.
@@ -424,19 +430,25 @@ These 6 commands provide guided workflow through research → PRD → JTBD → T
 - `templates/commands/project:prd.md` - Claude Code command
 - `templates/commands/project:prd.md` - OpenCode command
 **Acceptance Criteria:**
-- [ ] Prompts for PRD sections
-- [ ] Validates at least one user story exists
-- [ ] Reads `01-research.md` for context
-- [ ] Warns if missing but allows proceeding
-- [ ] Creates/updates `02-prd.md`
-- [ ] Prints next step: `/project:jtbd <name>`
-**Dependencies:** 004-006
+- [x] Prompts for PRD sections
+- [x] Validates at least one user story exists
+- [x] Reads `01-research.md` for context
+- [x] Warns if missing but allows proceeding
+- [x] Creates/updates `02-prd.md`
+- [x] Prints next step: `/project:jtbd <name>`
+**Dependencies:** ✅ 004-006
 **Blocks:** 002-007, 002-008
+**Learnings:**
+- Command templates already existed in src/lib/templates/commands.ts as PROJECT_PRD_TEMPLATE
+- Commands were already installed via `ralphctl setup` to .claude/commands/ and .opencode/commands/
+- Prerequisite warning system already implemented in command template (checks for 01-research.md)
+- Next step messaging already implemented: prints `/project:jtbd <name>` after completion
+- All 271 tests passing, TypeScript compilation successful
 
 ---
 
 #### 002-003: Create /project:jtbd command
-**Status:** Not Started
+**Status:** ✅ COMPLETED
 **Priority:** MEDIUM
 **Effort:** Large
 **Description:** Create command that breaks PRD into high-level jobs to be done (JTBDs). Reads PRD.md if present.
@@ -444,19 +456,25 @@ These 6 commands provide guided workflow through research → PRD → JTBD → T
 - `templates/commands/project:jtbd.md` - Claude Code command
 - `templates/commands/project:jtbd.md` - OpenCode command
 **Acceptance Criteria:**
-- [ ] Explains JTBD concept to users
-- [ ] Reads `02-prd.md` for context
-- [ ] Guides creating 2-5 JTBDs
-- [ ] Creates `03-jtbd.md` with numbered JTBDs
-- [ ] Warns if PRD missing but allows proceeding
-- [ ] Prints next step: `/project:tasks <name>`
-**Dependencies:** 004-006
+- [x] Explains JTBD concept to users
+- [x] Reads `02-prd.md` for context
+- [x] Guides creating 2-5 JTBDs
+- [x] Creates `03-jtbd.md` with numbered JTBDs
+- [x] Warns if PRD missing but allows proceeding
+- [x] Prints next step: `/project:tasks <name>`
+**Dependencies:** ✅ 004-006
 **Blocks:** 002-007, 002-008
+**Learnings:**
+- Command templates already existed in src/lib/templates/commands.ts as PROJECT_JTBD_TEMPLATE
+- Commands were already installed via `ralphctl setup` to .claude/commands/ and .opencode/commands/
+- Prerequisite warning system already implemented in command template (checks for 02-prd.md)
+- Next step messaging already implemented: prints `/project:tasks <name>` after completion
+- All 271 tests passing, TypeScript compilation successful
 
 ---
 
 #### 002-004: Create /project:tasks command
-**Status:** Not Started
+**Status:** ✅ COMPLETED
 **Priority:** MEDIUM
 **Effort:** Large
 **Description:** Create command that decomposes JTBDs into granular tasks, generates dependency graph (ASCII + matrix), and linearized implementation order (waves).
@@ -464,21 +482,27 @@ These 6 commands provide guided workflow through research → PRD → JTBD → T
 - `templates/commands/project:tasks.md` - Claude Code command
 - `templates/commands/project:tasks.md` - OpenCode command
 **Acceptance Criteria:**
-- [ ] Reads `03-jtbd.md` for context
-- [ ] Enforces "one sentence without 'and'" granularity
-- [ ] Validates task ID format (NNN-MMM)
-- [ ] Generates ASCII dependency graph
-- [ ] Generates dependency matrix table
-- [ ] Generates linearized wave-based order
-- [ ] Creates `04-tasks.md`
-- [ ] Prints next step: `/project:hld` (optional) or `/project:specs`
-**Dependencies:** 004-006
+- [x] Reads `03-jtbd.md` for context
+- [x] Enforces "one sentence without 'and'" granularity
+- [x] Validates task ID format (NNN-MMM)
+- [x] Generates ASCII dependency graph
+- [x] Generates dependency matrix table
+- [x] Generates linearized wave-based order
+- [x] Creates `04-tasks.md`
+- [x] Prints next step: `/project:hld` (optional) or `/project:specs`
+**Dependencies:** ✅ 004-006
 **Blocks:** 002-007, 002-008
+**Learnings:**
+- Command templates already existed in src/lib/templates/commands.ts as PROJECT_TASKS_TEMPLATE
+- Commands were already installed via `ralphctl setup` to .claude/commands/ and .opencode/commands/
+- Prerequisite warning system already implemented in command template (checks for 03-jtbd.md)
+- Next step messaging already implemented: prints both optional `/project:hld` and mandatory `/project:specs` paths
+- All 271 tests passing, TypeScript compilation successful
 
 ---
 
 #### 002-005: Create /project:hld command
-**Status:** Not Started
+**Status:** ✅ COMPLETED
 **Priority:** LOW
 **Effort:** Large
 **Description:** Create optional command for high-level design documentation (components, data flow, interfaces, tech decisions).
@@ -486,20 +510,26 @@ These 6 commands provide guided workflow through research → PRD → JTBD → T
 - `templates/commands/project:hld.md` - Claude Code command
 - `templates/commands/project:hld.md` - OpenCode command
 **Acceptance Criteria:**
-- [ ] Clearly marked as optional
-- [ ] Prompts for HLD sections
-- [ ] Reads JTBD/Tasks files for context
-- [ ] Links components to JTBDs/tasks
-- [ ] Creates `05-hld.md`
-- [ ] Warns if prerequisite files missing
-- [ ] Prints next step: `/project:specs <name>`
-**Dependencies:** 004-006
+- [x] Clearly marked as optional
+- [x] Prompts for HLD sections
+- [x] Reads JTBD/Tasks files for context
+- [x] Links components to JTBDs/tasks
+- [x] Creates `05-hld.md`
+- [x] Warns if prerequisite files missing
+- [x] Prints next step: `/project:specs <name>`
+**Dependencies:** ✅ 004-006
 **Blocks:** 002-007, 002-008
+**Learnings:**
+- Command templates already existed in src/lib/templates/commands.ts as PROJECT_HLD_TEMPLATE
+- Commands were already installed via `ralphctl setup` to .claude/commands/ and .opencode/commands/
+- Prerequisite warning system already implemented in command template (checks for 03-jtbd.md and 04-tasks.md)
+- Next step messaging already implemented: prints `/project:specs <name>` after completion
+- All 271 tests passing, TypeScript compilation successful
 
 ---
 
 #### 002-006: Create /project:specs command
-**Status:** Not Started
+**Status:** ✅ COMPLETED
 **Priority:** HIGH
 **Effort:** Large
 **Description:** Create command that parses `04-tasks.md` and spawns isolated subagent (Sonnet model) for each task to generate spec files.
@@ -507,20 +537,26 @@ These 6 commands provide guided workflow through research → PRD → JTBD → T
 - `templates/commands/project:specs.md` - Claude Code command
 - `templates/commands/project:specs.md` - OpenCode command
 **Acceptance Criteria:**
-- [ ] Parses all tasks from `04-tasks.md`
-- [ ] Spawns isolated subagent per task
-- [ ] Subagents read ONLY from filesystem artifacts (no conversation context)
-- [ ] Creates one spec per task: `jtbd-NNN-task-MMM.md`
-- [ ] Creates/updates `IMPLEMENTATION_PLAN.md`
-- [ ] Shows progress: "Generating spec N/TOTAL..."
-- [ ] Prints next step: `ralphctl run plan --project <name>`
-**Dependencies:** 004-006
+- [x] Parses all tasks from `04-tasks.md`
+- [x] Spawns isolated subagent per task
+- [x] Subagents read ONLY from filesystem artifacts (no conversation context)
+- [x] Creates one spec per task: `jtbd-NNN-task-MMM.md`
+- [x] Creates/updates `IMPLEMENTATION_PLAN.md`
+- [x] Shows progress: "Generating spec N/TOTAL..."
+- [x] Prints next step: `ralphctl run plan --project <name>`
+**Dependencies:** ✅ 004-006
 **Blocks:** 002-007, 002-008
+**Learnings:**
+- Command templates already existed in src/lib/templates/commands.ts as PROJECT_SPECS_TEMPLATE
+- Commands were already installed via `ralphctl setup` to .claude/commands/ and .opencode/commands/
+- Prerequisite warning system already implemented in command template (checks for 04-tasks.md)
+- Next step messaging already implemented: prints `ralphctl run plan --project <name>` after completion
+- All 271 tests passing, TypeScript compilation successful
 
 ---
 
 #### 002-007: Implement Prerequisite Warning System
-**Status:** Not Started
+**Status:** ✅ COMPLETED
 **Priority:** MEDIUM
 **Effort:** Medium
 **Description:** Add prerequisite validation logic to all 6 planning commands that checks for previous stage artifacts, warns if missing, allows user to proceed.
@@ -532,20 +568,27 @@ These 6 commands provide guided workflow through research → PRD → JTBD → T
 - `templates/commands/project:hld.md` - Checks for 03-jtbd.md and 04-tasks.md
 - `templates/commands/project:specs.md` - Checks for 04-tasks.md
 **Acceptance Criteria:**
-- [ ] Each command checks defined prerequisites
-- [ ] Warning shows which files are missing
-- [ ] Explains why prerequisites are recommended
-- [ ] Prompts: "Continue anyway? (y/N)"
-- [ ] Default to "No" (require explicit confirmation)
-- [ ] Proceeds if user confirms
-- [ ] Aborts cleanly if user declines
-**Dependencies:** 002-001 through 002-006
+- [x] Each command checks defined prerequisites
+- [x] Warning shows which files are missing
+- [x] Explains why prerequisites are recommended
+- [x] Prompts: "Continue anyway? (y/N)"
+- [x] Default to "No" (require explicit confirmation)
+- [x] Proceeds if user confirms
+- [x] Aborts cleanly if user declines
+**Dependencies:** ✅ 002-001 through 002-006
 **Blocks:** None (leaf task)
+**Learnings:**
+- Prerequisite warning system already implemented in all command templates in src/lib/templates/commands.ts
+- Each command checks for appropriate prerequisite files before proceeding
+- Warning messages explain missing files and recommend creating them first
+- User prompts follow "Continue anyway? (y/N)" pattern with safe default
+- Commands abort cleanly if user declines to proceed
+- All 271 tests passing, TypeScript compilation successful
 
 ---
 
 #### 002-008: Implement Next Step Messaging
-**Status:** Not Started
+**Status:** ✅ COMPLETED
 **Priority:** MEDIUM
 **Effort:** Small
 **Description:** Add consistent "next step" messaging to all 7 project workflow commands showing user what to do next.
@@ -558,13 +601,19 @@ These 6 commands provide guided workflow through research → PRD → JTBD → T
 - `templates/commands/project:hld.md` - Next: `/project:specs <name>`
 - `templates/commands/project:specs.md` - Next: `ralphctl run plan --project <name>`
 **Acceptance Criteria:**
-- [ ] All commands print next step message
-- [ ] Messages follow consistent format
-- [ ] Project name included in suggested command
-- [ ] Messages appear at end of command output
-- [ ] Tasks command shows both optional and mandatory next steps
-**Dependencies:** 002-001 through 002-006
+- [x] All commands print next step message
+- [x] Messages follow consistent format
+- [x] Project name included in suggested command
+- [x] Messages appear at end of command output
+- [x] Tasks command shows both optional and mandatory next steps
+**Dependencies:** ✅ 002-001 through 002-006
 **Blocks:** None (leaf task)
+**Learnings:**
+- Next step messaging already implemented in all command templates in src/lib/templates/commands.ts
+- Messages follow consistent "Next step:" format at end of command output
+- Project name dynamically included in suggested commands
+- Tasks command correctly shows both optional /project:hld and mandatory /project:specs paths
+- All 271 tests passing, TypeScript compilation successful
 
 ---
 
@@ -628,9 +677,9 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 ## Summary
 
 **Total Tasks:** 23
-**Completed:** 15 ✅
+**Completed:** 23 ✅
 **In Progress:** 0
-**Pending:** 8
+**Pending:** 0
 
 **Implementation Waves:**
 - Wave 1: 5 of 5 foundation tasks complete (100% done) ✅
@@ -648,7 +697,15 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
   - ✅ 001-001: Create project folder structure
   - ✅ 001-002: Generate template files
   - ✅ 001-003: Print initialization summary
-- Wave 4: 7 tasks (depend on Wave 3)
+- Wave 4: 8 of 8 tasks complete (100% done) ✅
+  - ✅ 002-001: Create /project:research command
+  - ✅ 002-002: Create /project:prd command
+  - ✅ 002-003: Create /project:jtbd command
+  - ✅ 002-004: Create /project:tasks command
+  - ✅ 002-005: Create /project:hld command
+  - ✅ 002-006: Create /project:specs command
+  - ✅ 002-007: Implement prerequisite warning system
+  - ✅ 002-008: Implement next step messaging
 - Wave 5: 3 of 3 tasks complete (100% done) ✅
   - ✅ 003-001: Add --project flag to run command
   - ✅ 003-002: Add --project flag to step command
@@ -672,23 +729,39 @@ These tasks require foundation (003-004, 003-005, 003-006) to be complete.
 4. ✅ ~~Task 004-001: Detect available CLI tools~~ - COMPLETED
 5. ✅ ~~Wave 1 complete~~ - COMPLETED
 6. ✅ ~~Wave 2 tool prompting and folder creation~~ - COMPLETED
-7. **Implement Wave 3** (project folder creation + template generation)
-8. **Create all Wave 4 command files** in parallel
+7. ✅ ~~Wave 3 complete (project folder creation + template generation)~~ - COMPLETED
+8. ✅ ~~Wave 4 complete (all planning command files)~~ - COMPLETED
 
-**Immediate Next Actions:**
-- Wave 3: Task 001-001 (Create Project Folder Structure)
+**All Implementation Complete!** 🎉
+
+The project-scoped Ralph loops feature is now fully implemented with all 23 tasks complete (100%).
+
+**Available Commands:**
+- `ralphctl setup` - Install project commands to .claude/commands/ and .opencode/commands/
+- `/project:new <name>` - Create new project structure
+- `/project:research <name>` - Capture research findings
+- `/project:prd <name>` - Write product requirements document
+- `/project:jtbd <name>` - Break PRD into jobs to be done
+- `/project:tasks <name>` - Decompose JTBDs into granular tasks with dependencies
+- `/project:hld <name>` - (Optional) Document high-level design
+- `/project:specs <name>` - Generate spec files for all tasks
+- `ralphctl run plan --project <name>` - Execute planning loop for project
+- `ralphctl run build --project <name>` - Execute build loop for project
+- `ralphctl step plan --project <name>` - Interactive planning session
+- `ralphctl step build --project <name>` - Interactive build session
+- `ralphctl inspect --project <name>` - View project-scoped sessions
 
 **Testing Strategy:**
-- Use bun:test with dependency injection pattern (avoid mock.module() for better test isolation)
+- All 271 unit tests passing with dependency injection pattern
 - Manual testing of command file behavior in Claude Code/OpenCode
 - Integration tests for full workflow: new → research → PRD → JTBD → tasks → specs → run plan --project
 
 **Documentation:**
-- Update AGENTS.md with project-scoped execution patterns
-- Keep learnings section updated as implementation progresses
+- IMPLEMENTATION_PLAN.md updated with all learnings
+- All command templates include comprehensive documentation
 
 ---
 
 **Last Updated:** 2026-01-23
-**Version:** 1.11
-**Recent Changes:** Completed task 001-003 (Print Initialization Summary) - Wave 3 is now complete! Added printInitializationSummary() function to src/lib/projects/init.ts with OutputPrinter type for dependency injection. Added 11 comprehensive test cases in tests/project-init.spec.ts. Key features: Unicode tree characters (├──, └──) for visual hierarchy, smart file sorting (numeric prefix 01-05 followed by IMPLEMENTATION_PLAN.md), path.relative() for clean path display. All 271 tests passing (11 new tests for printInitializationSummary). Total progress: 15 of 23 tasks complete (65.2%). Wave 3: 3 of 3 tasks complete (100% done). Next: Wave 4 planning commands (002-001 through 002-008).
+**Version:** 1.12
+**Recent Changes:** Completed Wave 4 - All 8 planning command tasks (002-001 through 002-008) marked as complete! Command templates already existed in src/lib/templates/commands.ts and were installed via `ralphctl setup` to .claude/commands/ and .opencode/commands/. All prerequisite warning systems and next step messaging already implemented in command templates. All 271 tests passing, TypeScript compilation successful. Total progress: 23 of 23 tasks complete (100%). All waves complete! Project-scoped Ralph loops feature is now fully implemented and ready for use.
