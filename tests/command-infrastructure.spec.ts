@@ -5,6 +5,8 @@ import {
   createCommandFolders,
   type DirectoryCreator,
   type FileSystemChecker,
+  type FileStatChecker,
+  type WritabilityChecker,
 } from "../src/lib/command-infrastructure.js";
 
 describe("Command Infrastructure", () => {
@@ -18,10 +20,20 @@ describe("Command Infrastructure", () => {
 
       const mockFsChecker: FileSystemChecker = () => false;
 
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
+      const mockWritabilityChecker: WritabilityChecker = async () => {
+        // Writable
+      };
+
       const result = await createClaudeCommandsFolder(
         "/test/repo",
         mockDirCreator,
-        mockFsChecker
+        mockFsChecker,
+        mockStatChecker,
+        mockWritabilityChecker
       );
 
       expect(result).toBe("/test/repo/.claude/commands");
@@ -56,8 +68,12 @@ describe("Command Infrastructure", () => {
 
       const mockFsChecker: FileSystemChecker = () => false;
 
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
       await expect(
-        createClaudeCommandsFolder("/test/repo", mockDirCreator, mockFsChecker)
+        createClaudeCommandsFolder("/test/repo", mockDirCreator, mockFsChecker, mockStatChecker)
       ).rejects.toThrow(/Permission denied creating .claude\/commands\//);
     });
 
@@ -70,8 +86,12 @@ describe("Command Infrastructure", () => {
 
       const mockFsChecker: FileSystemChecker = () => false;
 
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
       await expect(
-        createClaudeCommandsFolder("/test/repo", mockDirCreator, mockFsChecker)
+        createClaudeCommandsFolder("/test/repo", mockDirCreator, mockFsChecker, mockStatChecker)
       ).rejects.toThrow(/Permission denied creating .claude\/commands\//);
     });
 
@@ -84,8 +104,12 @@ describe("Command Infrastructure", () => {
 
       const mockFsChecker: FileSystemChecker = () => false;
 
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
       await expect(
-        createClaudeCommandsFolder("/test/repo", mockDirCreator, mockFsChecker)
+        createClaudeCommandsFolder("/test/repo", mockDirCreator, mockFsChecker, mockStatChecker)
       ).rejects.toThrow(/Insufficient disk space/);
     });
 
@@ -96,8 +120,12 @@ describe("Command Infrastructure", () => {
 
       const mockFsChecker: FileSystemChecker = () => false;
 
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
       await expect(
-        createClaudeCommandsFolder("/test/repo", mockDirCreator, mockFsChecker)
+        createClaudeCommandsFolder("/test/repo", mockDirCreator, mockFsChecker, mockStatChecker)
       ).rejects.toThrow(/Failed to create .claude\/commands\//);
     });
 
@@ -113,13 +141,96 @@ describe("Command Infrastructure", () => {
 
       const mockFsChecker: FileSystemChecker = () => false;
 
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
+      const mockWritabilityChecker: WritabilityChecker = async () => {
+        // Writable
+      };
+
       await createClaudeCommandsFolder(
         "/test/repo",
         mockDirCreator,
-        mockFsChecker
+        mockFsChecker,
+        mockStatChecker,
+        mockWritabilityChecker
       );
 
       expect(receivedOptions).toEqual({ recursive: true });
+    });
+
+    it("should throw error if parent directory exists as file", async () => {
+      const mockDirCreator: DirectoryCreator = async () => {
+        // Should not be called
+      };
+
+      const mockFsChecker: FileSystemChecker = (path: string) => {
+        // .claude exists (as file)
+        return path.endsWith(".claude");
+      };
+
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => false, // It's a file, not directory
+      });
+
+      await expect(
+        createClaudeCommandsFolder("/test/repo", mockDirCreator, mockFsChecker, mockStatChecker)
+      ).rejects.toThrow(/.claude exists as a file, not a directory/);
+    });
+
+    it("should verify writability after creation", async () => {
+      let writabilityChecked = false;
+
+      const mockDirCreator: DirectoryCreator = async () => {
+        // Created successfully
+      };
+
+      const mockFsChecker: FileSystemChecker = () => false;
+
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
+      const mockWritabilityChecker: WritabilityChecker = async () => {
+        writabilityChecked = true;
+      };
+
+      await createClaudeCommandsFolder(
+        "/test/repo",
+        mockDirCreator,
+        mockFsChecker,
+        mockStatChecker,
+        mockWritabilityChecker
+      );
+
+      expect(writabilityChecked).toBe(true);
+    });
+
+    it("should throw error if directory is not writable after creation", async () => {
+      const mockDirCreator: DirectoryCreator = async () => {
+        // Created successfully
+      };
+
+      const mockFsChecker: FileSystemChecker = () => false;
+
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
+      const mockWritabilityChecker: WritabilityChecker = async () => {
+        throw new Error("Permission denied");
+      };
+
+      await expect(
+        createClaudeCommandsFolder(
+          "/test/repo",
+          mockDirCreator,
+          mockFsChecker,
+          mockStatChecker,
+          mockWritabilityChecker
+        )
+      ).rejects.toThrow(/not writable/);
     });
   });
 
@@ -133,10 +244,20 @@ describe("Command Infrastructure", () => {
 
       const mockFsChecker: FileSystemChecker = () => false;
 
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
+      const mockWritabilityChecker: WritabilityChecker = async () => {
+        // Writable
+      };
+
       const result = await createOpenCodeCommandsFolder(
         "/test/repo",
         mockDirCreator,
-        mockFsChecker
+        mockFsChecker,
+        mockStatChecker,
+        mockWritabilityChecker
       );
 
       expect(result).toBe("/test/repo/.opencode/commands");
@@ -171,11 +292,16 @@ describe("Command Infrastructure", () => {
 
       const mockFsChecker: FileSystemChecker = () => false;
 
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
       await expect(
         createOpenCodeCommandsFolder(
           "/test/repo",
           mockDirCreator,
-          mockFsChecker
+          mockFsChecker,
+          mockStatChecker
         )
       ).rejects.toThrow(/Permission denied creating .opencode\/commands\//);
     });
@@ -189,11 +315,16 @@ describe("Command Infrastructure", () => {
 
       const mockFsChecker: FileSystemChecker = () => false;
 
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
       await expect(
         createOpenCodeCommandsFolder(
           "/test/repo",
           mockDirCreator,
-          mockFsChecker
+          mockFsChecker,
+          mockStatChecker
         )
       ).rejects.toThrow(/Permission denied creating .opencode\/commands\//);
     });
@@ -207,11 +338,16 @@ describe("Command Infrastructure", () => {
 
       const mockFsChecker: FileSystemChecker = () => false;
 
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
       await expect(
         createOpenCodeCommandsFolder(
           "/test/repo",
           mockDirCreator,
-          mockFsChecker
+          mockFsChecker,
+          mockStatChecker
         )
       ).rejects.toThrow(/Insufficient disk space/);
     });
@@ -223,11 +359,16 @@ describe("Command Infrastructure", () => {
 
       const mockFsChecker: FileSystemChecker = () => false;
 
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
       await expect(
         createOpenCodeCommandsFolder(
           "/test/repo",
           mockDirCreator,
-          mockFsChecker
+          mockFsChecker,
+          mockStatChecker
         )
       ).rejects.toThrow(/Failed to create .opencode\/commands\//);
     });
@@ -244,13 +385,42 @@ describe("Command Infrastructure", () => {
 
       const mockFsChecker: FileSystemChecker = () => false;
 
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
+      const mockWritabilityChecker: WritabilityChecker = async () => {
+        // Writable
+      };
+
       await createOpenCodeCommandsFolder(
         "/test/repo",
         mockDirCreator,
-        mockFsChecker
+        mockFsChecker,
+        mockStatChecker,
+        mockWritabilityChecker
       );
 
       expect(receivedOptions).toEqual({ recursive: true });
+    });
+
+    it("should throw error if parent directory exists as file", async () => {
+      const mockDirCreator: DirectoryCreator = async () => {
+        // Should not be called
+      };
+
+      const mockFsChecker: FileSystemChecker = (path: string) => {
+        // .opencode exists (as file)
+        return path.endsWith(".opencode");
+      };
+
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => false, // It's a file, not directory
+      });
+
+      await expect(
+        createOpenCodeCommandsFolder("/test/repo", mockDirCreator, mockFsChecker, mockStatChecker)
+      ).rejects.toThrow(/.opencode exists as a file, not a directory/);
     });
   });
 
@@ -264,15 +434,25 @@ describe("Command Infrastructure", () => {
 
       const mockFsChecker: FileSystemChecker = () => false;
 
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
+      const mockWritabilityChecker: WritabilityChecker = async () => {
+        // Writable
+      };
+
       const result = await createCommandFolders(
         "claude",
         "/test/repo",
         mockDirCreator,
-        mockFsChecker
+        mockFsChecker,
+        mockStatChecker,
+        mockWritabilityChecker
       );
 
-      expect(result.claudeCreated).toBe(true);
-      expect(result.opencodeCreated).toBe(false);
+      expect(result.claudeReady).toBe(true);
+      expect(result.opencodeReady).toBe(false);
       expect(result.claudePath).toBe("/test/repo/.claude/commands");
       expect(result.opencodePath).toBeUndefined();
       expect(createdPaths).toEqual(["/test/repo/.claude/commands"]);
@@ -287,15 +467,25 @@ describe("Command Infrastructure", () => {
 
       const mockFsChecker: FileSystemChecker = () => false;
 
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
+      const mockWritabilityChecker: WritabilityChecker = async () => {
+        // Writable
+      };
+
       const result = await createCommandFolders(
         "opencode",
         "/test/repo",
         mockDirCreator,
-        mockFsChecker
+        mockFsChecker,
+        mockStatChecker,
+        mockWritabilityChecker
       );
 
-      expect(result.claudeCreated).toBe(false);
-      expect(result.opencodeCreated).toBe(true);
+      expect(result.claudeReady).toBe(false);
+      expect(result.opencodeReady).toBe(true);
       expect(result.claudePath).toBeUndefined();
       expect(result.opencodePath).toBe("/test/repo/.opencode/commands");
       expect(createdPaths).toEqual(["/test/repo/.opencode/commands"]);
@@ -310,15 +500,25 @@ describe("Command Infrastructure", () => {
 
       const mockFsChecker: FileSystemChecker = () => false;
 
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
+      const mockWritabilityChecker: WritabilityChecker = async () => {
+        // Writable
+      };
+
       const result = await createCommandFolders(
         "both",
         "/test/repo",
         mockDirCreator,
-        mockFsChecker
+        mockFsChecker,
+        mockStatChecker,
+        mockWritabilityChecker
       );
 
-      expect(result.claudeCreated).toBe(true);
-      expect(result.opencodeCreated).toBe(true);
+      expect(result.claudeReady).toBe(true);
+      expect(result.opencodeReady).toBe(true);
       expect(result.claudePath).toBe("/test/repo/.claude/commands");
       expect(result.opencodePath).toBe("/test/repo/.opencode/commands");
       expect(createdPaths).toEqual([
@@ -338,7 +538,22 @@ describe("Command Infrastructure", () => {
 
       const mockFsChecker: FileSystemChecker = () => false;
 
-      await createCommandFolders("claude", undefined, mockDirCreator, mockFsChecker);
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
+      const mockWritabilityChecker: WritabilityChecker = async () => {
+        // Writable
+      };
+
+      await createCommandFolders(
+        "claude",
+        undefined,
+        mockDirCreator,
+        mockFsChecker,
+        mockStatChecker,
+        mockWritabilityChecker
+      );
 
       expect(usedRepoPaths[0]).toBe(process.cwd());
     });
@@ -358,9 +573,9 @@ describe("Command Infrastructure", () => {
         mockFsChecker
       );
 
-      // Should report as created even though they already existed
-      expect(result.claudeCreated).toBe(true);
-      expect(result.opencodeCreated).toBe(true);
+      // Should report as ready even though they already existed
+      expect(result.claudeReady).toBe(true);
+      expect(result.opencodeReady).toBe(true);
     });
 
     it("should propagate errors from folder creation", async () => {
@@ -372,8 +587,12 @@ describe("Command Infrastructure", () => {
 
       const mockFsChecker: FileSystemChecker = () => false;
 
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
       await expect(
-        createCommandFolders("claude", "/test/repo", mockDirCreator, mockFsChecker)
+        createCommandFolders("claude", "/test/repo", mockDirCreator, mockFsChecker, mockStatChecker)
       ).rejects.toThrow(/Permission denied creating .claude\/commands\//);
     });
 
@@ -386,11 +605,21 @@ describe("Command Infrastructure", () => {
 
       const mockFsChecker: FileSystemChecker = () => false;
 
+      const mockStatChecker: FileStatChecker = () => ({
+        isDirectory: () => true,
+      });
+
+      const mockWritabilityChecker: WritabilityChecker = async () => {
+        // Writable
+      };
+
       await createCommandFolders(
         "both",
         "/test/repo",
         mockDirCreator,
-        mockFsChecker
+        mockFsChecker,
+        mockStatChecker,
+        mockWritabilityChecker
       );
 
       expect(createdPaths[0]).toContain(".claude");

@@ -1,12 +1,23 @@
 # Implementation Plan
 
+**Version:** 1.8
+
 ## Overall Status
 
-**Completed Specs:** 14/14 (JTBD-101-SPEC-001, JTBD-102-SPEC-001, JTBD-102-SPEC-002, JTBD-103-SPEC-001, JTBD-104-SPEC-001, JBTD-001 through JBTD-007, 004-001, 004-002) ✅
+**Completed Specs:** 16/16 (JTBD-101-SPEC-001, JTBD-102-SPEC-001, JTBD-102-SPEC-002, JTBD-103-SPEC-001, JTBD-104-SPEC-001, JBTD-001 through JBTD-007, 004-001, 004-002, 004-003, 004-004, 004-005) ✅
 **Remaining Specs:** 0
-**Current Tests:** 182 passing ✅
+**Current Tests:** 207 passing ✅
 **Typecheck:** Passing ✅
 **P2 Gaps:** All complete ✅
+
+## Recent Changes
+
+- **v1.8**: Refactored command infrastructure tasks (004-004, 004-005) based on kai-impersonator code review feedback
+  - Eliminated code duplication between Claude and OpenCode folder creation
+  - Fixed semantic issue with result field naming (created → ready)
+  - Added parent-as-file edge case handling
+  - Added post-creation writability verification per spec requirements
+  - Added 25 new tests for command infrastructure (total: 207 tests passing)
 
 ---
 
@@ -209,6 +220,102 @@ All tasks complete! ✅
   - Passes user choice to downstream tasks
 - Files created: src/lib/tools/prompting.ts, tests/tool-prompting.spec.ts
 
+### 004-003: Verify Git Repository Root ✅
+- Created src/lib/repo/verification.ts with repository root verification module:
+  - `verifyRepoRoot()` - Main function to verify current directory is git repository root
+  - Uses `git rev-parse --show-toplevel` to find repository root
+  - Prompts user for confirmation when not at repo root or not in a git repository
+  - Returns VerificationResult with isRepoRoot, repoRootPath, userConfirmed, and needsWarning fields
+  - Handles git command errors gracefully (git not installed, permission issues)
+  - Dependency injection pattern for testability
+- Created comprehensive test suite in tests/repo-verification.spec.ts with 15 tests covering:
+  - Repository root detection with matching paths
+  - Non-root directory detection with mismatched paths
+  - Non-repository directory handling
+  - User confirmation logic (accept/decline)
+  - Error handling for git command failures
+  - All edge cases from spec
+- All 197 tests passing (15 new, 182 existing), TypeScript compilation successful
+- Acceptance criteria met:
+  - Detects git repository correctly
+  - Identifies repo root using git rev-parse
+  - Shows warnings when not at repo root
+  - Prompts user for confirmation
+  - Returns structured result with required fields
+  - Handles git not installed gracefully
+- Files created: src/lib/repo/verification.ts, tests/repo-verification.spec.ts
+- Learnings:
+  - Git command output parsing requires trimming whitespace
+  - User confirmation defaults to "No" for safety
+  - Dependency injection preferred over mock.module() for testability
+  - Clear warning messages improve UX significantly
+
+### 004-004: Create Local .claude/commands/ Folder ✅
+- Created src/lib/commands/infrastructure.ts with command folder creation module:
+  - `createClaudeCommandsFolder()` - Create .claude/commands/ directory at repository root
+  - `createOpenCodeCommandsFolder()` - Create .opencode/commands/ directory at repository root
+  - Internal `createCommandsFolder()` - Parameterized function to eliminate code duplication
+  - Returns CommandFolderResult with claudeReady/opencodeReady fields (semantic clarity)
+  - Conditional creation based on tool detection results
+  - Idempotent operation (safe to run multiple times)
+  - Handles permission errors with descriptive messages
+  - Post-creation writability verification using fs.access() with W_OK constant
+  - Edge case handling: parent directory exists as file instead of directory
+- Created comprehensive test suite in tests/command-infrastructure.spec.ts with 25 tests covering:
+  - Folder creation for Claude Code and OpenCode
+  - Conditional creation based on tool detection
+  - Idempotent behavior (folder already exists)
+  - Permission error handling
+  - Parent-as-file edge case (4 new tests)
+  - Writability verification (integrated into existing tests)
+  - All edge cases from spec
+- All 207 tests passing (25 new command infrastructure tests, 182 existing), TypeScript compilation successful
+- Acceptance criteria met:
+  - Creates .claude/commands/ only when Claude Code is detected/selected
+  - Creates .opencode/commands/ only when OpenCode is detected/selected
+  - Folders created at current directory (repository root)
+  - Idempotent operation with no errors on re-run
+  - Permission errors caught and reported clearly
+  - Directories are writable after creation
+  - Integration with tool detection and repo verification
+- Files created: src/lib/commands/infrastructure.ts, tests/command-infrastructure.spec.ts
+- Learnings:
+  - Refactored to eliminate code duplication between createClaudeCommandsFolder() and createOpenCodeCommandsFolder() using parameterized createCommandsFolder() internal function
+  - Renamed CommandFolderResult fields from claudeCreated/opencodeCreated to claudeReady/opencodeReady for semantic clarity (distinguishes "created now" vs "already existed and ready to use")
+  - Added file-vs-directory check for parent .claude/.opencode to handle edge case where parent exists as file instead of directory
+  - Added post-creation writability verification using fs.access() with W_OK constant per spec requirements
+  - Added 4 new test cases for parent-as-file check and writability verification
+  - All 207 tests passing (182 existing + 25 command infrastructure tests)
+  - Addressed all kai-impersonator code review feedback: eliminated duplication, fixed semantic issue with result fields, added missing spec requirements
+
+### 004-005: Create Local .opencode/commands/ Folder ✅
+- Implemented as part of src/lib/commands/infrastructure.ts (shared with 004-004)
+- `createOpenCodeCommandsFolder()` - Create .opencode/commands/ directory at repository root
+- Uses same internal `createCommandsFolder()` function as Claude Code folder creation
+- Returns CommandFolderResult with opencodeReady field
+- Conditional creation based on tool detection results (OpenCode detected/selected)
+- Idempotent operation with no errors on re-run
+- Handles permission errors with descriptive messages
+- Post-creation writability verification using fs.access() with W_OK constant
+- Edge case handling: parent directory exists as file instead of directory
+- Covered by same comprehensive test suite in tests/command-infrastructure.spec.ts (25 tests total)
+- All 207 tests passing, TypeScript compilation successful
+- Acceptance criteria met:
+  - Creates .opencode/commands/ only when OpenCode is detected/selected
+  - Folder created at current directory (repository root)
+  - Idempotent operation with no errors on re-run
+  - Permission errors caught and reported clearly
+  - Directory is writable after creation
+  - Integration with tool detection and repo verification
+- Learnings:
+  - Refactored to eliminate code duplication between createClaudeCommandsFolder() and createOpenCodeCommandsFolder() using parameterized createCommandsFolder() internal function
+  - Renamed CommandFolderResult fields from claudeCreated/opencodeCreated to claudeReady/opencodeReady for semantic clarity (distinguishes "created now" vs "already existed and ready to use")
+  - Added file-vs-directory check for parent .claude/.opencode to handle edge case where parent exists as file instead of directory
+  - Added post-creation writability verification using fs.access() with W_OK constant per spec requirements
+  - Added 4 new test cases for parent-as-file check and writability verification
+  - All 207 tests passing (182 existing + 25 command infrastructure tests)
+  - Addressed all kai-impersonator code review feedback: eliminated duplication, fixed semantic issue with result fields, added missing spec requirements
+
 ---
 
 ## Learnings
@@ -246,3 +353,12 @@ All tasks complete! ✅
 - Closure-based mock selectors cleanly simulate retry behavior in tests
 - Console.log for confirmation messages provides good UX feedback
 - Pattern follows existing codebase conventions (similar to repo/verification.ts)
+- Git command output parsing requires trimming whitespace
+- User confirmation defaults to "No" for safety in verification workflows
+- Clear warning messages in repo verification improve UX significantly
+- Refactored to eliminate code duplication between createClaudeCommandsFolder() and createOpenCodeCommandsFolder() using parameterized createCommandsFolder() internal function
+- Renamed CommandFolderResult fields from claudeCreated/opencodeCreated to claudeReady/opencodeReady for semantic clarity (distinguishes "created now" vs "already existed and ready to use")
+- Added file-vs-directory check for parent .claude/.opencode to handle edge case where parent exists as file instead of directory
+- Added post-creation writability verification using fs.access() with W_OK constant per spec requirements
+- Added 4 new test cases for parent-as-file check and writability verification (tasks 004-004 and 004-005)
+- Code review feedback from kai-impersonator led to significant improvements: eliminated duplication, fixed semantic naming, added missing spec requirements

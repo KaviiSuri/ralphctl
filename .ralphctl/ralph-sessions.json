@@ -2290,6 +2290,132 @@
       "prompt": "Mocked prompt",
       "agent": "opencode",
       "printMode": true
+    },
+    {
+      "iteration": 1,
+      "sessionId": "ses_test123",
+      "startedAt": "2026-01-23T13:13:06.605Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt",
+      "agent": "opencode",
+      "printMode": true
+    },
+    {
+      "iteration": 2,
+      "sessionId": "ses_test123",
+      "startedAt": "2026-01-23T13:13:06.606Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt",
+      "agent": "opencode",
+      "printMode": true
+    },
+    {
+      "iteration": 3,
+      "sessionId": "ses_test123",
+      "startedAt": "2026-01-23T13:13:06.606Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt",
+      "agent": "opencode",
+      "printMode": true
+    },
+    {
+      "iteration": 1,
+      "sessionId": "ses_test1",
+      "startedAt": "2026-01-23T13:13:06.607Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt",
+      "agent": "opencode",
+      "printMode": true
+    },
+    {
+      "iteration": 2,
+      "sessionId": "ses_test2",
+      "startedAt": "2026-01-23T13:13:06.607Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt",
+      "agent": "opencode",
+      "printMode": true
+    },
+    {
+      "iteration": 1,
+      "sessionId": "ses_test123",
+      "startedAt": "2026-01-23T13:13:06.608Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt",
+      "agent": "opencode",
+      "printMode": true
+    },
+    {
+      "iteration": 1,
+      "sessionId": "ses_test123",
+      "startedAt": "2026-01-23T13:13:06.609Z",
+      "mode": "plan",
+      "prompt": "Use {smart} for this",
+      "agent": "opencode",
+      "printMode": true
+    },
+    {
+      "iteration": 1,
+      "sessionId": "ses_test123",
+      "startedAt": "2026-01-23T13:13:06.609Z",
+      "mode": "plan",
+      "prompt": "Use {fast} for this",
+      "agent": "opencode",
+      "printMode": true
+    },
+    {
+      "iteration": 1,
+      "sessionId": "ses_test123",
+      "startedAt": "2026-01-23T13:13:06.610Z",
+      "mode": "plan",
+      "prompt": "Use {smart} and {fast}",
+      "agent": "opencode",
+      "printMode": true
+    },
+    {
+      "iteration": 1,
+      "sessionId": "ses_test123",
+      "startedAt": "2026-01-23T13:13:06.610Z",
+      "mode": "plan",
+      "prompt": "Use {smart} and {fast}",
+      "agent": "opencode",
+      "printMode": true
+    },
+    {
+      "iteration": 1,
+      "sessionId": "ses_test123",
+      "startedAt": "2026-01-23T13:13:06.611Z",
+      "mode": "plan",
+      "prompt": "Use {smart} and {fast}",
+      "agent": "opencode",
+      "printMode": true
+    },
+    {
+      "iteration": 1,
+      "sessionId": "ses_test123",
+      "startedAt": "2026-01-23T13:13:06.612Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt",
+      "agent": "claude-code",
+      "printMode": true
+    },
+    {
+      "iteration": 1,
+      "sessionId": "ses_test123",
+      "startedAt": "2026-01-23T13:13:06.612Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt",
+      "agent": "claude-code",
+      "printMode": false
+    },
+    {
+      "iteration": 1,
+      "sessionId": "ses_test123",
+      "startedAt": "2026-01-23T13:13:06.613Z",
+      "mode": "plan",
+      "prompt": "Mocked prompt",
+      "agent": "opencode",
+      "printMode": true
     }
   ],
   "version": "1"
