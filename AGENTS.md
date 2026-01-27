@@ -66,3 +66,10 @@ Keep Learnings up to date as you find new facts about the requirements, the code
 - Bootstrap problem: infrastructure functions (createCommandFolders, installCommandFiles) are not useful without a CLI command to invoke them - always implement the complete end-to-end workflow including CLI integration
 - Command templates in src/lib/templates/commands.ts are deployed via ralphctl setup to .claude/commands/ and .opencode/commands/ - verify installation status before implementing
 - {project} placeholder in prompts resolves to '.' in global mode (no --project flag) and 'projects/<name>' in project mode - this enables single template design for both modes
+- c12 config loader does not natively support ~/.config/{name}/config.json XDG pattern - requires manual implementation
+- c12's configFile option with ".ralphctl" discovers .ralphctl.{json,yaml,yml} in cwd
+- When configFile is undefined or non-existent, c12 treats it as a package name causing module resolution errors
+- Zod v4.3.5 uses simplified error options: { message: "..." } instead of { invalid_type_error: "..." }
+- CLI flag filtering (removing undefined values) is critical to prevent flags from overriding config file values
+- Manual JSON/YAML parsing gives better control over error messages than delegating to c12
+- Config validation should happen after all sources are merged, not per-source
