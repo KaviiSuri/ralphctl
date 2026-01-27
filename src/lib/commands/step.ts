@@ -4,6 +4,7 @@ import { createAgent, AgentUnavailableError } from "../agents/factory.js";
 import { resolvePrompt } from "../prompts/resolver.js";
 import { resolveModelPlaceholders } from "../models/resolver.js";
 import { resolveProjectPaths, validateProject } from "../projects/validation.js";
+import { loadAppConfig } from "../config/loader.js";
 
 export interface StepHandlerOptions {
   mode: Mode;
@@ -14,10 +15,28 @@ export interface StepHandlerOptions {
   fastModel?: string;
   agent?: AgentType;
   noPrint?: boolean;
+  config?: string;
 }
 
 export async function stepHandler(options: StepHandlerOptions): Promise<void> {
-  const { mode, project, customPrompt, permissionPosture = "allow-all", smartModel, fastModel, agent, noPrint = false } = options;
+  const { mode, project, customPrompt, config: configPath, noPrint = false } = options;
+
+  // Load config with CLI overrides
+  const config = await loadAppConfig(
+    {
+      smartModel: options.smartModel,
+      fastModel: options.fastModel,
+      agent: options.agent,
+      permissionPosture: options.permissionPosture,
+    },
+    configPath
+  );
+
+  // Apply config values with fallbacks to hardcoded defaults
+  const permissionPosture = config.permissionPosture ?? "allow-all";
+  const resolvedAgent = (config.agent as AgentType) ?? AgentType.OpenCode;
+  const smartModel = config.smartModel;
+  const fastModel = config.fastModel;
 
   // Validate and resolve project paths
   let projectContext: { projectName?: string };
@@ -47,7 +66,6 @@ export async function stepHandler(options: StepHandlerOptions): Promise<void> {
   // The --project flag is still useful for prompt placeholder resolution.
 
   const headless = !noPrint;
-  const resolvedAgent = agent ?? AgentType.OpenCode;
 
   let adapter: AgentAdapter;
   try {

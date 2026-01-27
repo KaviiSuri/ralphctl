@@ -5,6 +5,7 @@ import { resolvePrompt } from "../prompts/resolver.js";
 import { resolveModelPlaceholders } from "../models/resolver.js";
 import { readSessionsFile, writeSessionsFile } from "../state/index.js";
 import { resolveProjectPaths, validateProject } from "../projects/validation.js";
+import { loadAppConfig } from "../config/loader.js";
 
 export interface RunHandlerOptions {
   mode: Mode;
@@ -15,10 +16,30 @@ export interface RunHandlerOptions {
   fastModel?: string;
   agent?: AgentType;
   noPrint?: boolean;
+  config?: string;
 }
 
 export async function runHandler(options: RunHandlerOptions): Promise<void> {
-  const { mode, project, maxIterations = 10, permissionPosture = "allow-all", smartModel, fastModel, agent, noPrint = false } = options;
+  const { mode, project, config: configPath, noPrint = false } = options;
+
+  // Load config with CLI overrides
+  const config = await loadAppConfig(
+    {
+      smartModel: options.smartModel,
+      fastModel: options.fastModel,
+      agent: options.agent,
+      maxIterations: options.maxIterations,
+      permissionPosture: options.permissionPosture,
+    },
+    configPath
+  );
+
+  // Apply config values with fallbacks to hardcoded defaults
+  const maxIterations = config.maxIterations ?? 10;
+  const permissionPosture = config.permissionPosture ?? "allow-all";
+  const resolvedAgent = (config.agent as AgentType) ?? AgentType.OpenCode;
+  const smartModel = config.smartModel;
+  const fastModel = config.fastModel;
 
   // Validate and resolve project paths
   let projectContext: { projectName?: string };
@@ -44,7 +65,6 @@ export async function runHandler(options: RunHandlerOptions): Promise<void> {
   }
 
   const headless = !noPrint;
-  const resolvedAgent = agent ?? AgentType.OpenCode;
 
   let adapter: AgentAdapter;
   try {
@@ -70,7 +90,7 @@ export async function runHandler(options: RunHandlerOptions): Promise<void> {
   console.log(`Running ${mode} mode${project ? ` (project: ${project})` : ""}`);
   console.log(`Permissions: ${permissionPosture}`);
 
-  if (agent === AgentType.ClaudeCode) {
+  if (resolvedAgent === AgentType.ClaudeCode) {
     console.log(`Print mode: ${headless ? "enabled" : "disabled"}`);
   }
 

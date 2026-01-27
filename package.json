@@ -13,6 +13,7 @@
   "type": "module",
   "dependencies": {
     "@clerc/core": "latest",
+    "c12": "^3.3.3",
     "clerc": "^1.2.1",
     "zod": "latest"
   },

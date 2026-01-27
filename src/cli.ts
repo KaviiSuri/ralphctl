@@ -63,6 +63,10 @@ const cli = Cli()
         description: "Disable Claude Code print mode (shows interactive prompts)",
         default: false,
       },
+      config: {
+        type: String,
+        description: "Path to custom config file (overrides auto-discovered files)",
+      },
     },
   })
   .on("run", async (ctx) => {
@@ -75,6 +79,7 @@ const cli = Cli()
       fastModel: ctx.flags["fast-model"],
       agent: ctx.flags.agent as AgentType,
       noPrint: ctx.flags["no-print"] as boolean,
+      config: ctx.flags.config as string | undefined,
     });
   })
   .command("step", "Run a single interactive iteration", {
@@ -118,6 +123,10 @@ const cli = Cli()
         description: "Disable Claude Code print mode (shows interactive prompts)",
         default: false,
       },
+      config: {
+        type: String,
+        description: "Path to custom config file (overrides auto-discovered files)",
+      },
     },
   })
   .on("step", async (ctx) => {
@@ -130,6 +139,7 @@ const cli = Cli()
       fastModel: ctx.flags["fast-model"],
       agent: ctx.flags.agent as AgentType,
       noPrint: ctx.flags["no-print"] as boolean,
+      config: ctx.flags.config as string | undefined,
     });
   })
   .command("inspect", "Inspect run exports", {
