@@ -73,3 +73,4 @@ Keep Learnings up to date as you find new facts about the requirements, the code
 - CLI flag filtering (removing undefined values) is critical to prevent flags from overriding config file values
 - Manual JSON/YAML parsing gives better control over error messages than delegating to c12
 - Config validation should happen after all sources are merged, not per-source
+- Global config loading requires integration tests with actual filesystem operations - mock-based tests insufficient for XDG Base Directory pattern validation

@@ -2,7 +2,7 @@
 
 ## IMPLEMENTATION COMPLETE
 
-All tasks have been successfully completed and tested. The config file system is now fully functional with all 301 tests passing and released as git tag 0.0.32.
+All tasks have been successfully completed and tested. The config file system is now fully functional with all 301 tests passing and released as git tag 0.0.33.
 
 ## Summary
 
