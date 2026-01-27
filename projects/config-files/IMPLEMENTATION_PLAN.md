@@ -2,11 +2,11 @@
 
 ## IMPLEMENTATION COMPLETE
 
-All tasks have been successfully completed and tested. The config file system is now fully functional with all 298 tests passing and released as git tag 0.0.32.
+All tasks have been successfully completed and tested. The config file system is now fully functional with all 301 tests passing and released as git tag 0.0.32.
 
 ## Summary
 
-The config file system allows users to configure ralphctl behavior through configuration files at both global and project levels. The implementation uses c12@3.3.3 for config loading and Zod for schema validation, with 26 comprehensive tests ensuring reliability.
+The config file system allows users to configure ralphctl behavior through configuration files at both global and project levels. The implementation uses c12@3.3.3 for config loading and Zod for schema validation, with 29 comprehensive tests ensuring reliability.
 
 **Key Features**:
 - Global config at `~/.config/ralphctl/config.{json,yaml}`
@@ -38,6 +38,15 @@ Configuration is merged with the following priority (highest to lowest):
 ## Important Discovery
 
 **c12 does NOT natively support `~/.config/{name}/config.json` pattern**. We implemented manual global and project config loading to avoid package resolution errors. This ensures the config system works reliably across different environments.
+
+### Global Config Loading Tests
+
+Added 3 additional tests to ensure the manual global config implementation is properly tested:
+1. **Global config loading from JSON** - Verifies that `~/.config/ralphctl/config.json` is correctly loaded
+2. **Global config loading from YAML** - Verifies that `~/.config/ralphctl/config.yaml` is correctly loaded
+3. **Priority verification** - Ensures project config properly overrides global config settings
+
+These tests bring the total config test count from 26 to 29, and overall project test count from 298 to 301.
 
 ## Known Edge Cases and Considerations
 

@@ -121,6 +121,134 @@ describe("Config Loading", () => {
 		expect(config.smartModel).toBe("yaml-model");
 		expect(config.agent).toBe("opencode");
 	});
+
+	it("loads global config from ~/.config/ralphctl/config.json", async () => {
+		const globalConfigDir = path.join(os.homedir(), ".config", "ralphctl");
+		const globalConfigPath = path.join(globalConfigDir, "config.json");
+		let globalConfigExisted = false;
+		let originalGlobalConfig: string | undefined;
+
+		try {
+			// Backup existing global config if it exists
+			try {
+				originalGlobalConfig = await fs.readFile(globalConfigPath, "utf-8");
+				globalConfigExisted = true;
+			} catch {
+				// No existing config, ensure directory exists
+				await fs.mkdir(globalConfigDir, { recursive: true });
+			}
+
+			// Write test global config
+			await fs.writeFile(
+				globalConfigPath,
+				JSON.stringify({ smartModel: "global-model", maxIterations: 20 }),
+			);
+
+			// Change to temp directory (no project config)
+			process.chdir(tempDir);
+
+			const config = await loadAppConfig();
+			expect(config.smartModel).toBe("global-model");
+			expect(config.maxIterations).toBe(20);
+		} finally {
+			// Restore original global config
+			if (globalConfigExisted && originalGlobalConfig) {
+				await fs.writeFile(globalConfigPath, originalGlobalConfig);
+			} else {
+				await fs.rm(globalConfigPath, { force: true });
+			}
+		}
+	});
+
+	it("loads global config from ~/.config/ralphctl/config.yaml", async () => {
+		const globalConfigDir = path.join(os.homedir(), ".config", "ralphctl");
+		const globalConfigPath = path.join(globalConfigDir, "config.yaml");
+		let globalConfigExisted = false;
+		let originalGlobalConfig: string | undefined;
+
+		try {
+			// Backup existing global config if it exists
+			try {
+				originalGlobalConfig = await fs.readFile(globalConfigPath, "utf-8");
+				globalConfigExisted = true;
+			} catch {
+				// No existing config, ensure directory exists
+				await fs.mkdir(globalConfigDir, { recursive: true });
+			}
+
+			// Write test global config
+			await fs.writeFile(
+				globalConfigPath,
+				"smartModel: global-yaml-model\npermissionPosture: ask\n",
+			);
+
+			// Change to temp directory (no project config)
+			process.chdir(tempDir);
+
+			const config = await loadAppConfig();
+			expect(config.smartModel).toBe("global-yaml-model");
+			expect(config.permissionPosture).toBe("ask");
+		} finally {
+			// Restore original global config
+			if (globalConfigExisted && originalGlobalConfig) {
+				await fs.writeFile(globalConfigPath, originalGlobalConfig);
+			} else {
+				await fs.rm(globalConfigPath, { force: true });
+			}
+		}
+	});
+
+	it("project config overrides global config", async () => {
+		const globalConfigDir = path.join(os.homedir(), ".config", "ralphctl");
+		const globalConfigPath = path.join(globalConfigDir, "config.json");
+		let globalConfigExisted = false;
+		let originalGlobalConfig: string | undefined;
+
+		try {
+			// Backup existing global config if it exists
+			try {
+				originalGlobalConfig = await fs.readFile(globalConfigPath, "utf-8");
+				globalConfigExisted = true;
+			} catch {
+				// No existing config, ensure directory exists
+				await fs.mkdir(globalConfigDir, { recursive: true });
+			}
+
+			// Write test global config
+			await fs.writeFile(
+				globalConfigPath,
+				JSON.stringify({
+					smartModel: "global-model",
+					maxIterations: 20,
+					agent: "opencode",
+				}),
+			);
+
+			// Write project config
+			const projectConfigPath = path.join(tempDir, ".ralphctl.json");
+			await fs.writeFile(
+				projectConfigPath,
+				JSON.stringify({
+					smartModel: "project-model",
+					agent: "claude-code",
+				}),
+			);
+
+			process.chdir(tempDir);
+
+			const config = await loadAppConfig();
+			expect(config.smartModel).toBe("project-model"); // Project overrides global
+			expect(config.agent).toBe("claude-code"); // Project overrides global
+			expect(config.maxIterations).toBe(20); // From global (not in project)
+		} finally {
+			// Restore original global config
+			if (globalConfigExisted && originalGlobalConfig) {
+				await fs.writeFile(globalConfigPath, originalGlobalConfig);
+			} else {
+				await fs.rm(globalConfigPath, { force: true });
+			}
+		}
+	});
 });
 
 describe("Config Merging", () => {
