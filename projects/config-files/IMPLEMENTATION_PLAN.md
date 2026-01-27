@@ -1,43 +1,43 @@
-# Implementation Plan: Config File System
+# Config File System - Implementation Complete
 
 ## IMPLEMENTATION COMPLETE
 
-All tasks have been successfully completed and tested. The config file system is now fully functional with all 298 tests passing and git tag 0.0.32 created.
+All tasks have been successfully completed and tested. The config file system is now fully functional with all 298 tests passing and released as git tag 0.0.32.
 
-### Summary of Accomplishments
+## Summary
 
-**Status**: ALL 9 TASKS COMPLETE
+The config file system allows users to configure ralphctl behavior through configuration files at both global and project levels. The implementation uses c12@3.3.3 for config loading and Zod for schema validation, with 26 comprehensive tests ensuring reliability.
 
-- ✅ **c12 Integration**: c12@3.3.3 dependency installed and integrated
-- ✅ **Schema Definition**: Zod schema with custom validation messages at `src/lib/config/schema.ts`
-- ✅ **Config Loader**: Manual config loading implemented at `src/lib/config/loader.ts`
-- ✅ **CLI Integration**: `--config` flags added to run and step commands
-- ✅ **Merge Logic**: Field-by-field merging with correct priority order
-- ✅ **Validation**: Custom error messages and source tracking implemented
-- ✅ **Comprehensive Tests**: 26 tests written, all passing (298/298 total tests)
-- ✅ **TypeScript Compilation**: No compilation errors
-- ✅ **Git Tag**: Version 0.0.32 created and released
+**Key Features**:
+- Global config at `~/.config/ralphctl/config.{json,yaml}`
+- Project config at `./.ralphctl.{json,yaml,yml}`
+- Explicit config files via `--config` flag
+- Field-by-field merging with proper priority order
+- Custom validation messages and source tracking
 
-### Bug Fix - Git Tracking Issue (0.0.32)
+**Files Created**:
+- `src/lib/config/schema.ts` - Zod schema with validation
+- `src/lib/config/loader.ts` - Config loading and merging logic
+- `src/lib/config/__tests__/config.test.ts` - Comprehensive test suite
 
-**Problem**: `.ralphctl/ralph-sessions.json` (runtime session data) was being tracked in git despite `.ralphctl/` being in `.gitignore`.
+**Files Modified**:
+- `src/cli.ts` - Added `--config` flags
+- `src/lib/commands/run.ts` - Integrated config loading
+- `src/lib/commands/step.ts` - Integrated config loading
+- `package.json` - Added c12 dependency
 
-**Resolution**: Removed the file from git tracking using `git rm --cached .ralphctl/ralph-sessions.json`. The file remains in the working directory but is no longer tracked by git.
+## Configuration Priority
 
-**Verification**: All 298 tests continue to pass after the fix.
-
-### Key Implementation Details
-
-**Configuration Priority** (highest to lowest):
+Configuration is merged with the following priority (highest to lowest):
 1. CLI flags (direct command-line arguments)
 2. `--config` file (explicit config file path)
 3. `./.ralphctl.{json,yaml,yml}` (project config in cwd)
 4. `~/.config/ralphctl/config.{json,yaml}` (global config)
 5. Hardcoded defaults in application
 
-**Important Discovery**: c12 does NOT natively support `~/.config/{name}/config.json` pattern. We implemented manual global and project config loading to avoid package resolution errors.
+## Important Discovery
 
----
+**c12 does NOT natively support `~/.config/{name}/config.json` pattern**. We implemented manual global and project config loading to avoid package resolution errors. This ensures the config system works reliably across different environments.
 
 ## Known Edge Cases and Considerations
 
@@ -54,60 +54,3 @@ Supported formats:
 
 ### Project Scoping
 Config files are loaded relative to cwd, not project directory. When using `--project <name>`, config is loaded from cwd, not `projects/<name>/`. Consider loading project config from `projects/<name>/.ralphctl.json` in future.
-
----
-
-## File Structure After Implementation
-
-```
-ralphctl/
-├── src/
-│   ├── cli.ts (modified)
-│   ├── domain/
-│   │   └── types.ts (no changes needed)
-│   └── lib/
-│       ├── config/ (NEW)
-│       │   ├── schema.ts (NEW)
-│       │   ├── loader.ts (NEW)
-│       │   └── __tests__/
-│       │       └── config.test.ts (NEW)
-│       └── commands/
-│           ├── run.ts (modified)
-│           └── step.ts (modified)
-├── package.json (modified - c12 added)
-└── .ralphctl.json (optional, user-created)
-
-~/.config/ralphctl/
-└── config.json (optional, user-created)
-```
-
----
-
-## Summary
-
-**IMPLEMENTATION COMPLETE** - This plan has been fully executed and all tasks are complete.
-
-The config file system for ralphctl has been successfully implemented with all 9 tasks completed. The implementation has been tested with 26 comprehensive tests (all passing within the 298/298 total test suite), and released as git tag 0.0.32.
-
-### Implementation Highlights
-
-1. **Manual Config Loading**: c12 does NOT support `~/.config/{name}/config.json` natively, so we implemented manual global and project config loading to avoid package resolution errors.
-
-2. **Test Coverage**: All tests passing - 298/298 total tests (26 new config tests + 272 existing tests).
-
-3. **TypeScript Compilation**: Zero errors, fully type-safe implementation.
-
-4. **Files Created**:
-   - `/Users/kaviisuri/code/KaviiSuri/ralphctl/src/lib/config/schema.ts`
-   - `/Users/kaviisuri/code/KaviiSuri/ralphctl/src/lib/config/loader.ts`
-   - `/Users/kaviisuri/code/KaviiSuri/ralphctl/src/lib/config/__tests__/config.test.ts`
-
-5. **Files Modified**:
-   - `/Users/kaviisuri/code/KaviiSuri/ralphctl/src/cli.ts` (added --config flags)
-   - `/Users/kaviisuri/code/KaviiSuri/ralphctl/src/lib/commands/run.ts` (integrated config loading)
-   - `/Users/kaviisuri/code/KaviiSuri/ralphctl/src/lib/commands/step.ts` (integrated config loading)
-   - `/Users/kaviisuri/code/KaviiSuri/ralphctl/package.json` (c12@3.3.3 dependency)
-
-6. **Version Released**: Git tag 0.0.32 created - ready for production deployment.
-
-**Status**: READY FOR PRODUCTION
