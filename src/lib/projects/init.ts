@@ -7,7 +7,7 @@
  */
 
 import { existsSync, statSync, constants } from "node:fs";
-import { access, writeFile } from "node:fs/promises";
+import { access, writeFile, readFile } from "node:fs/promises";
 import * as path from "node:path";
 
 /**
@@ -608,6 +608,38 @@ This file tracks the implementation progress for this project. Ralph loops will 
 `;
 
 /**
+ * Template content for AGENTS.md
+ *
+ * This is used when no root-level AGENTS.md exists to inherit from.
+ */
+const AGENTS_TEMPLATE = `## Feedback Loops and Verifiabilty
+
+### typesafety
+The bare minimum feedback loop that must be used in almost every change you do is the "typecheck" loop, this is a typescript repository, and we have to aim to write typesafe code that gives feedback on the wrong side. and also use the bun script to actually check if the code is right
+
+### code review
+when finalising a change, pre-commit, get a review from the kai-impersonator agent, and address all changes suggested. By addressing, it doesn't mean to just change code, you are allowed to push back if it doesn't make sense, but think through what is required objectively.
+
+### testing
+
+for writing tests, use bun:test.
+
+## Search and Research
+
+to lookup things in detail like looking up general guidance from docs etc, we should use subagents to explore and find ideas. you can look up direclty in codebase or web if it's a specific lookup that's asking a specific question and not wider.
+
+## future proof maintainable code
+we want our code to be simple, not over-complicated and maintainable. at the same time we do want to ensure that things are specific to external deps like 'opencode' are written in a way where we can swap or extend them to support claude code, amp etc.
+
+to do this, we dont want over-engineering, we just wwant good engineering that writes the main logic code / business logic in the domain that's relecant to the application, and not inline implementation detial logic. the code must read like prose.
+
+keep your business logic decoupled from the entrypoints and specific external libraries, and the main file should use your 'domain' instead
+
+# Learnings
+Keep Learnings up to date as you find new facts about the requirements, the codebase and new learnings. add them in this section after you are done with each step.
+`;
+
+/**
  * Result of template generation operation
  */
 export interface TemplateGenerationResult {
@@ -630,16 +662,46 @@ interface TemplateFile {
 }
 
 /**
- * All template files to generate
+ * Gets AGENTS.md content, preferring repo root version if available
+ *
+ * Strategy:
+ * - If AGENTS.md exists in repo root: read and use it (copy operational guidelines)
+ * - If not: use default AGENTS_TEMPLATE
+ *
+ * @param repoRoot - Repository root directory
+ * @param fsChecker - Optional filesystem checker for testing
+ * @returns Promise resolving to AGENTS.md content
  */
-const TEMPLATE_FILES: readonly TemplateFile[] = [
-  { filename: "01-research.md", content: RESEARCH_TEMPLATE },
-  { filename: "02-prd.md", content: PRD_TEMPLATE },
-  { filename: "03-jtbd.md", content: JTBD_TEMPLATE },
-  { filename: "04-tasks.md", content: TASKS_TEMPLATE },
-  { filename: "05-hld.md", content: HLD_TEMPLATE },
-  { filename: "IMPLEMENTATION_PLAN.md", content: IMPLEMENTATION_PLAN_TEMPLATE },
-] as const;
+async function getAgentsContent(
+  repoRoot: string,
+  fsChecker: FileSystemChecker = defaultFileSystemChecker
+): Promise<string> {
+  const rootAgentsPath = path.join(repoRoot, "AGENTS.md");
+
+  if (fsChecker(rootAgentsPath)) {
+    try {
+      const rootContent = await readFile(rootAgentsPath, "utf-8");
+
+      // Extract everything before the Learnings section
+      const learningsIndex = rootContent.indexOf("# Learnings");
+      if (learningsIndex > 0) {
+        // Keep Core Expectations, clear Learnings
+        const coreContent = rootContent.substring(0, learningsIndex).trim();
+        return coreContent + "\n\n# Learnings\nKeep Learnings up to date as you find new facts about the requirements, the codebase and new learnings. add them in this section after you are done with each step.\n";
+      }
+
+      // If no Learnings section found, use content as-is
+      return rootContent;
+    } catch (error) {
+      // If read fails, fall back to template
+      console.warn(`Warning: Could not read ${rootAgentsPath}, using default template`);
+      return AGENTS_TEMPLATE;
+    }
+  }
+
+  // No root AGENTS.md found, use template
+  return AGENTS_TEMPLATE;
+}
 
 /**
  * Output printer function type for dependency injection in tests
@@ -752,9 +814,9 @@ export function printInitializationSummary(
 /**
  * Generates template files for a project
  *
- * This function creates all planning template files (01-research.md through 05-hld.md
- * and IMPLEMENTATION_PLAN.md) in the project directory. Files that already exist are
- * skipped to prevent data loss.
+ * This function creates IMPLEMENTATION_PLAN.md and AGENTS.md in the project directory.
+ * AGENTS.md inherits from repo root if available, otherwise uses default template.
+ * Files that already exist are skipped to prevent data loss.
  *
  * @param name - Project name (must match existing project folder)
  * @param repoRoot - Repository root directory (defaults to process.cwd())
@@ -793,8 +855,17 @@ export async function generateTemplates(
   const skipped: string[] = [];
   const errors: Array<{ file: string; error: string }> = [];
 
+  // Get AGENTS.md content (from root or template)
+  const agentsContent = await getAgentsContent(repoRoot, fsChecker);
+
+  // Build template files dynamically
+  const templateFiles: TemplateFile[] = [
+    { filename: "IMPLEMENTATION_PLAN.md", content: IMPLEMENTATION_PLAN_TEMPLATE },
+    { filename: "AGENTS.md", content: agentsContent },
+  ];
+
   // Attempt to create each template file
-  for (const template of TEMPLATE_FILES) {
+  for (const template of templateFiles) {
     const filePath = path.join(projectPath, template.filename);
 
     // Skip if file already exists

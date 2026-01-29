@@ -18,7 +18,8 @@
       "WebFetch(domain:blog.sivaramp.com)",
       "WebFetch(domain:opencode.ai)",
       "WebFetch(domain:gist.github.com)",
-      "WebFetch(domain:cobra.dev)"
+      "WebFetch(domain:cobra.dev)",
+      "Bash(find:*)"
     ]
   }
 }
